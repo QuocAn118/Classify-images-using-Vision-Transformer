@@ -18,7 +18,7 @@
   - Số tham số hai mô hình chênh không quá 5%.
   - Có Top-1 và Top-5 trên tập test cho cả hai mô hình.
   - Có hình attention cho ít nhất 12 ảnh test.
-  - Mức tham khảo, không phải điều kiện đạt: ViT >= 40% và CNN >= 50% Top-1.
+  - ViT khoảng 40%, CNN khoảng 50% Top-1: mức dự đoán của nhóm, không phải cam kết và không phải điều kiện đạt; có thể thấp hơn khi chỉ train 50 epoch.
 
 ## When — Khi nào?
 - **Tình huống/kích hoạt:** Người dùng chạy lệnh train, đánh giá hoặc mở demo khi cần kết quả; giảng viên chạy lại theo README khi chấm.
@@ -35,8 +35,8 @@
   - Trực quan hóa attention.
   - Demo.
   - Phân tích lỗi và giới hạn.
-- **Làm thêm nếu còn thời gian:** Grad-CAM, FLOPs, 3 seed, ViT pretrained, ablation, attention theo head và theo layer.
-- **Ngoài phạm vi:** Deepfake (giáo viên đã xóa), train ở độ phân giải cao, API công khai, triển khai production.
+- **Làm thêm nếu còn thời gian:** Grad-CAM, đo FLOPs/MACs, 3 seed, ablation, CNN thứ hai có FLOPs xấp xỉ ViT, attention theo head và theo layer.
+- **Ngoài phạm vi:** Deepfake (giáo viên đã xóa), ViT pretrained (nhóm quyết định bỏ), train ở độ phân giải cao, API công khai, triển khai production.
 - **Công nghệ, công cụ hoặc lựa chọn bắt buộc:** Đề bắt buộc ViT và dữ liệu Tiny ImageNet hoặc CIFAR-100. Nhóm tự chọn PyTorch và tự cài ViT.
 - **Ràng buộc thời gian, chi phí, dữ liệu:** 13 ngày, chỉ có một máy GPU trong nhóm nên các lần train chạy lần lượt, không dùng test để chọn cấu hình, không bịa số liệu.
 - **Lưu ý:** đây là diễn giải đề xuất; đối chiếu nghĩa Which với hướng dẫn của cô.
@@ -67,5 +67,5 @@
 | Giảng viên có quy định khác ngoài phần đã thấy trên sheet | Thiếu sản phẩm phải nộp | TV1 | Chưa xác nhận |
 | Tải được Tiny ImageNet từ Kaggle | Chuyển sang CIFAR-100 | TV4 | Chưa thử |
 | Thành viên có GPU là ai | Chưa gán được TV4 | Cả nhóm | Chưa xác nhận |
-| Batch 128 có vừa 6GB VRAM với cả ViT và CNN | Phải dùng batch 64 cho cả hai mô hình | TV4 | Chưa đo |
-| Thời gian mỗi epoch trên máy GPU | Phải giảm epoch hoặc thí nghiệm | TV4 | Chưa đo |
+| Batch 64 có vừa 6GB VRAM với cả hai mô hình (đặc biệt CNN) | Dùng gradient accumulation hoặc giảm batch còn 32 với cả hai mô hình | TV4 | Chưa đo |
+| Thời gian mỗi epoch trên máy GPU. Dự đoán, ước tính thô, chưa đo: ViT khoảng 1–2 phút/epoch, CNN khoảng 3–6 phút/epoch trên GPU 6GB cỡ phổ thông, nên 50 epoch cho cả hai khoảng 4–6 giờ. Số của CNN tính cho stem cũ chưa downsample, thiết kế mới có thể nhanh hơn. Phải đo thật trước khi chốt số epoch. | Phải cắt thí nghiệm hoặc chuyển phần còn lại sang Kaggle/Colab (50 epoch là mức sàn) | TV4 | Chưa đo |

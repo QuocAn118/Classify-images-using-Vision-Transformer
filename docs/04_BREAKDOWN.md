@@ -21,8 +21,8 @@ Tên thật sẽ thay cho TV1-TV5 khi nhóm chốt. TV4 nên là thành viên c�
 | TASK-000 | Hoàn thiện `docs/` | TV1 | Quy trình `.agents/` | Không | Đã triển khai, chưa xác minh | Chờ nhóm đọc |
 | TASK-014 | Nộp mẫu đăng ký (mục 21 spec) | TV1 | Đề | Không | Chưa bắt đầu | Chưa có |
 | TASK-001 | Khung repo và tiện ích dùng chung | TV1 | AC-013, một phần AC-008 | TASK-000 | Chưa bắt đầu | Chưa có |
-| TASK-002 | Chuẩn bị dữ liệu | TV1 | FR-001 | TASK-001, có file dữ liệu | Chưa bắt đầu | Chưa có |
-| TASK-003 | DataLoader, chia tập, augmentation | TV1 | FR-001 | TASK-002 | Chưa bắt đầu | Chưa có |
+| TASK-002 | Chuẩn bị dữ liệu, chia tập, xuất mảng cache | TV1 | FR-001 | TASK-001, có file dữ liệu | Chưa bắt đầu | Chưa có |
+| TASK-003 | DataLoader đọc mảng cache, augmentation | TV1 | FR-001 | TASK-002 | Chưa bắt đầu | Chưa có |
 | TASK-004 | ViT và test | TV2 | FR-002 | TASK-001 | Chưa bắt đầu | Chưa có |
 | TASK-005 | CNN và `match_param_count` | TV3 | FR-003 | TASK-004 | Chưa bắt đầu | Chưa có |
 | TASK-006 | Vòng lặp train, `--quick`, `--resume` | TV4 | FR-004 | TASK-001, 003, 004, 005 | Chưa bắt đầu | Chưa có |
@@ -35,6 +35,8 @@ Tên thật sẽ thay cho TV1-TV5 khi nhóm chốt. TV4 nên là thành viên c�
 | TASK-013 | Phần làm thêm theo thứ tự mục 20 spec | Theo phần | Không bắt buộc | TASK-011 | Chưa bắt đầu | Chưa có |
 
 **Điều kiện bắt đầu code:** Chỉ bắt đầu TASK-001 và các đầu việc code khác sau khi nhóm duyệt `docs/`. Bản thử đầu của TASK-001 viết sai thứ tự nên đã bị xóa.
+
+**Ghi chú TASK-013:** Thứ tự cắt khi trễ: ablation, rồi 3 seed, rồi Grad-CAM. Giữ nguyên bộ lõi: ViT, CNN, attention, demo, báo cáo.
 
 ## Mốc và lịch
 

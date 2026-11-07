@@ -15,6 +15,8 @@
 
 **Chưa được viết code khi nhóm chưa duyệt `docs/`.** Hiện `docs/` chưa được duyệt.
 
+Với đầu việc nhỏ, một dòng bằng chứng trong `docs/06_VERIFICATION.md` là đủ; không cần điền đủ mẫu dài. Ưu tiên thời gian cho train và báo cáo.
+
 ## Quy tắc bắt buộc
 
 - Mỗi lần chỉ làm một đầu việc trong `docs/04_BREAKDOWN.md`, không tự mở rộng phạm vi.

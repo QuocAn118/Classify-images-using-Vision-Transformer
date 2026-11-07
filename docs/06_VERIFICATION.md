@@ -4,18 +4,20 @@ Kết quả: Đạt / Không đạt / Chưa xác minh / Không áp dụng (nêu 
 
 **Hiện trạng:** Chưa có bản ghi kiểm chứng nào, vì repo chưa có code. Bản thử đầu của TASK-001 đã bị xóa nên kết quả chạy của nó không được tính là bằng chứng.
 
-## Kiểm tra cần làm khi viết lại TASK-001
+## Kiểm tra cần làm khi có code
 
 | Kiểm tra | Mong đợi | Liên quan |
 |---|---|---|
 | Test fail trước khi có code | Fail vì chưa có chức năng | Quy trình TDD |
 | Config thiếu khóa | Báo lỗi nêu tên khóa | AC-013 |
-| Train bị ngắt rồi resume, dùng AdamW + warmup + cosine | Trọng số và lr giống chạy liền mạch, log không trùng dòng | AC-008 |
+| Train bị ngắt rồi resume, dùng AdamW + warmup + cosine | Tiếp tục từ epoch k+1, log không trùng dòng, lr schedule khớp với chạy liền mạch, loss tiếp tục liền mạch trong sai số (không đòi trọng số giống hệt, vì shuffle, augmentation và GPU không tất định) | AC-008 |
 | Phiên bị ngắt lúc đang lưu checkpoint | Checkpoint cũ không hỏng | AC-008, DEC-005 |
+| Nạp checkpoint bằng `weights_only=True` | Nạp được; checkpoint chỉ chứa tensor, dict, list, số và chuỗi | Hợp đồng checkpoint |
+| Hai nhánh attention ở `model.eval()` | Cùng đầu ra, sai số nhỏ | AC-005 |
 | Cố tình làm hỏng code | Có test fail | Đánh giá chất lượng test |
 | `.gitignore` | Chặn dữ liệu, checkpoint, `kaggle.json`; không chặn `outputs/logs`, `src/`, `.agents/`. Kiểm tra từng đường dẫn | Bảo vệ dữ liệu |
 | Môi trường train | `--quick` chạy được trên máy GPU của thành viên, xác nhận đang dùng CUDA | FR-004 |
-| VRAM đỉnh (đo khi làm TASK-006) | ViT và CNN ở batch 128 đều không lỗi hết bộ nhớ trên 6GB; nếu lỗi thì chuyển batch 64 theo DEC-003 | FR-004 |
+| VRAM đỉnh (đo khi làm TASK-006) | ViT và CNN ở batch 64 đều không lỗi hết bộ nhớ trên 6GB; nếu lỗi thì dùng gradient accumulation hoặc giảm batch còn 32 với cả hai mô hình | FR-004 |
 
 ## Mẫu bản ghi
 - Mã: VERIFY-001

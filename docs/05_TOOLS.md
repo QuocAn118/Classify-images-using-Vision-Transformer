@@ -9,7 +9,7 @@ Chỉ ghi những gì đã có thật trong dự án. Không ghi API key, mật 
 | Hệ điều hành | Windows 10 |
 | Python | 3.13.9 |
 | PyTorch | 2.9.1+cpu, không có GPU (máy viết tài liệu) |
-| Chưa cài trên máy này | `timm`, `gradio`, `thop`, `fvcore` |
+| Chưa cài trên máy này | `gradio`, `thop`, `fvcore` |
 | GPU để train | Máy của một thành viên, 6GB VRAM, máy rảnh (theo thông tin nhóm, chưa kiểm tra trực tiếp); Kaggle hoặc Colab dự phòng, chưa kiểm tra |
 
 ## Công cụ
@@ -52,5 +52,6 @@ Các lệnh "Chưa có code" lấy từ spec, sẽ cập nhật sau khi chạy t
 - Đọc phần liên quan trước; mở rộng khi phát hiện phụ thuộc.
 - Giao đầu việc đủ nhỏ để xem lại và kiểm tra.
 - Chạy `--quick` trên CPU trước khi tốn giờ GPU.
+- Lưu ý, chưa kiểm chứng: nếu máy GPU chạy Windows thì dùng `if __name__ == "__main__":`, kiểm tra `num_workers` trên Windows, không dùng `torch.compile`.
 - Lưu checkpoint thường xuyên và sao lưu ra ngoài máy GPU, vì cả nhóm phụ thuộc vào một máy.
 - Chưa biết công cụ hoặc lệnh có hoạt động thì ghi là chưa xác minh.
