@@ -52,7 +52,7 @@ Các con số mục tiêu chỉ là ước lượng; không được gian lận 
 ## 4. Cấu trúc thư mục dự án
 
 ```
-vit-tiny-imagenet/
+Classify-images-using-Vision-Transformer/   # thư mục gốc repo là gốc project
 ├── README.md                  # hướng dẫn cài đặt/chạy (tiếng Việt)
 ├── requirements.txt
 ├── .gitignore                 # bỏ qua data/ và outputs/checkpoints/
@@ -77,6 +77,8 @@ vit-tiny-imagenet/
 │   ├── prepare_data.py
 │   ├── run_all.sh
 │   └── error_analysis.py
+├── tests/
+│   └── test_models.py
 ├── app/
 │   └── demo.py                # Gradio demo
 ├── notebooks/
@@ -116,6 +118,7 @@ tiny-imagenet-200/
    - Tập `test` gốc không có nhãn -> bỏ qua.
 3. Chuẩn hóa ảnh với mean/std của Tiny ImageNet (tính từ tập train) hoặc ImageNet (0.485, 0.456, 0.406 / 0.229, 0.224, 0.225).
 4. Xuất `outputs/results/dataset_stats.json` (số ảnh mỗi tập, số lớp) và lưu 1 hình lưới 5x5 ảnh mẫu kèm tên lớp (`outputs/figures/samples.png`).
+5. `img_size`, `patch_size`, `num_classes` và tên dataset phải nằm trong config, không hardcode, để đổi sang CIFAR-100 (ảnh 32x32, patch 4, 100 lớp, tải qua `torchvision`) mà không phải sửa code. Với CIFAR-100: chia train 90/10 như trên và dùng tập test có sẵn làm TEST.
 
 ### 5.3 Augmentation
 
@@ -160,23 +163,23 @@ Tự cài đặt bằng PyTorch thuần, gồm các module:
 ### Kiểm thử đơn vị (viết `tests/test_models.py`)
 
 - Forward shape: input (2,3,64,64) -> output (2,200).
-- `return_attn=True` trả về list attention shape (B, heads, N+1, N+1) mỗi layer, mỗi hàng tổng = 1 (sai số 1e-4).
+- `return_attn=True` trả về list attention shape (B, heads, N+1, N+1) mỗi layer, mỗi hàng tổng = 1 (sai số 1e-4). Test chạy ở `model.eval()`, và attention trả về phải lấy **trước** dropout.
 - Đếm tham số khớp với tính tay.
 
 ## 7. Giai đoạn 3: Baseline CNN cùng số tham số (`src/models/cnn.py`)
 
 - Tự cài **ResNet nhỏ** (BasicBlock, BatchNorm, ReLU, global average pooling, FC 200 lớp), phù hợp ảnh 64x64 (conv đầu 3x3 stride 1, không maxpool lớn).
 - **Điều chỉnh độ rộng/độ sâu (width multiplier, số block) sao cho tổng số tham số chênh lệch <= 5% so với ViT.** Viết hàm `match_param_count(target_params)` tự tìm cấu hình phù hợp, in kết quả.
-- Dùng cùng pipeline dữ liệu, cùng số epoch, cùng optimizer family, cùng augmentation (để so sánh công bằng). Có thể tinh chỉnh learning rate riêng cho CNN (SGD momentum 0.9, lr 0.1, wd 5e-4, hoặc AdamW) và ghi rõ trong báo cáo.
-- Ghi bảng: params, FLOPs, thời gian/epoch, VRAM đỉnh, tốc độ inference (ảnh/giây).
+- Dùng cùng pipeline dữ liệu, cùng số epoch, cùng augmentation (để so sánh công bằng). **Kết quả so sánh chính dùng AdamW cho cả hai mô hình**; có thể tinh chỉnh learning rate riêng cho CNN và ghi rõ trong báo cáo. SGD (momentum 0.9, lr 0.1, wd 5e-4) chỉ là thí nghiệm tham khảo nếu còn thời gian.
+- Ghi bảng: params, thời gian/epoch, VRAM đỉnh, tốc độ inference (ảnh/giây), và FLOPs nếu còn thời gian. Báo cáo phải nêu rõ cùng số tham số không có nghĩa là cùng chi phí tính toán.
 
 ## 8. Giai đoạn 4: Huấn luyện (`src/train.py`)
 
 ### Công thức huấn luyện ViT (from scratch)
 
-- Optimizer: **AdamW**, lr đỉnh 1e-3 (batch 256; scale tuyến tính theo batch), betas (0.9, 0.999), weight decay 0.05 (không áp dụng cho bias, LayerNorm, pos_embed, cls_token).
+- Optimizer: **AdamW**, lr đỉnh 1e-3 cho batch 256, scale tuyến tính theo batch (**batch mặc định 128 thì lr = 5e-4**), betas (0.9, 0.999), weight decay 0.05 (không áp dụng cho bias, LayerNorm, pos_embed, cls_token).
 - Scheduler: **warmup 10 epoch** tuyến tính, sau đó **cosine decay** về 1e-5.
-- Epoch: 100 (tối thiểu 50; cho phép giảm xuống 20-30 để chạy thử nhanh với cờ `--quick`).
+- Epoch: 100 (tối thiểu 50). Muốn chạy ngắn thì dùng `--epochs N`; `--quick` chỉ dùng cho smoke test vài batch.
 - Loss: CrossEntropy với label smoothing 0.1 (tự chuyển sang SoftTargetCE khi bật Mixup/CutMix).
 - Gradient clipping: max_norm = 1.0.
 - Mixed precision (AMP) khi có GPU.
@@ -184,8 +187,8 @@ Tự cài đặt bằng PyTorch thuần, gồm các module:
 
 ### Yêu cầu chức năng
 
-- CLI: `python -m src.train --config configs/vit_small.yaml [--quick] [--resume path]`.
-- Mỗi epoch ghi log: train loss/acc, val loss/Top-1/Top-5, lr, thời gian. Lưu CSV `outputs/logs/<run_name>.csv` và (tùy chọn) TensorBoard.
+- CLI: `python -m src.train --config configs/vit_small.yaml [--quick] [--epochs N] [--seed S] [--resume path]`.
+- Mỗi epoch ghi log: train loss/acc, val loss/Top-1/Top-5, lr, thời gian. Lưu CSV `outputs/logs/<run_name>.csv` và (tùy chọn) TensorBoard. Khi bật Mixup/CutMix, train acc không còn ý nghĩa; nhận xét và chọn checkpoint dựa trên validation.
 - Lưu checkpoint tốt nhất theo val Top-1 và checkpoint cuối; hỗ trợ `--resume`.
 - Early stopping (patience 15) tùy chọn.
 - Vẽ đường cong loss/accuracy -> `outputs/figures/<run_name>_curves.png`.
@@ -198,9 +201,9 @@ Tự cài đặt bằng PyTorch thuần, gồm các module:
 3. Độ sâu: 4 vs 8 vs 12 layer.
 4. Có/không RandAugment.
 
-Ghi mọi kết quả vào `outputs/results/ablation.csv`.
+Ghi mọi kết quả vào `outputs/results/ablation.csv`. Chỉ so sánh ablation trên **validation**, mỗi lần chạy 50 epoch, làm lần lượt theo thứ tự trên.
 
-## 9. Giai đoạn 5: Mốc tham chiếu pretrained (`src/models/pretrained.py`)
+## 9. Giai đoạn 5: Mốc tham chiếu pretrained (`src/models/pretrained.py`) - làm nếu còn thời gian
 
 - Fine-tune **ViT/DeiT-Small pretrained trên ImageNet-1k** (qua `timm`), resize ảnh lên 224x224 (hoặc nội suy positional embedding cho kích thước nhỏ hơn như 112) và thay head thành 200 lớp.
 - Fine-tune 5-10 epoch, lr thấp (1e-4 cho backbone, 1e-3 cho head), layer-wise lr decay (tùy chọn).
@@ -220,12 +223,12 @@ Chạy trên tập **test** (val gốc) với checkpoint tốt nhất, cho ViT v
 
 ## 11. Giai đoạn 7: Trực quan hóa attention (`src/attention.py`)
 
-1. **CLS-attention map:** lấy attention từ CLS token tới 64 patch ở layer cuối, trung bình các head, reshape (8x8), upsample bilinear lên 64x64, phủ lên ảnh gốc (heatmap alpha 0.5).
+1. **CLS-attention map:** lấy attention từ CLS token tới các patch ở layer cuối, trung bình các head, reshape theo lưới `img_size // patch_size` (không hardcode; patch 8 trên ảnh 64 cho lưới 8x8), upsample bilinear lên kích thước ảnh, phủ lên ảnh gốc (heatmap alpha 0.5).
 2. **Attention rollout** (Abnar & Zuidema, 2020): với mỗi layer, `A' = 0.5*A_mean + 0.5*I`, chuẩn hóa hàng, nhân dồn các layer, lấy hàng CLS. Vẽ heatmap tương tự.
-3. **Theo head:** lưới các head của layer cuối cho cùng một ảnh.
-4. **Theo layer:** attention của CLS qua các layer từ nông tới sâu.
+3. **Theo head (nếu còn thời gian):** lưới các head của layer cuối cho cùng một ảnh.
+4. **Theo layer (nếu còn thời gian):** attention của CLS qua các layer từ nông tới sâu.
 5. Chọn tối thiểu 12 ảnh test (gồm cả dự đoán đúng và sai, nhiều lớp khác nhau); mỗi ảnh hiển thị: ảnh gốc | rollout | CLS-attn layer cuối.
-6. **So sánh với CNN:** Grad-CAM cho CNN (layer conv cuối) trên cùng các ảnh -> hình ghép ViT-rollout vs CNN Grad-CAM (`outputs/figures/attn_vs_gradcam.png`). Bình luận ngắn xem mô hình nhìn vào vùng nào.
+6. **So sánh với CNN (nếu còn thời gian, đề gốc không yêu cầu):** Grad-CAM cho CNN (layer conv cuối) trên cùng các ảnh -> hình ghép ViT-rollout vs CNN Grad-CAM (`outputs/figures/attn_vs_gradcam.png`). Bình luận ngắn xem mô hình nhìn vào vùng nào.
 7. Lưu tất cả hình vào `outputs/figures/attention/`.
 
 ## 12. Giai đoạn 8: So sánh ViT vs CNN (`src/compare.py`)
@@ -252,9 +255,11 @@ Kèm biểu đồ cột Top-1 và đường cong val accuracy chồng nhau của
 - [ ] Mã nguồn đầy đủ theo cấu trúc mục 4.
 - [ ] `README.md` (tiếng Việt): giới thiệu, cài đặt, tải dữ liệu, lệnh train/eval/demo, cấu trúc thư mục, kết quả tóm tắt.
 - [ ] `requirements.txt` (ghim phiên bản chính).
-- [ ] Checkpoint ViT, CNN (và pretrained nếu có).
+- [ ] Mẫu đăng ký đề tài đã nộp (mục 21).
+- [ ] Checkpoint ViT, CNN (và pretrained nếu có), lưu ngoài git (Google Drive hoặc Kaggle Dataset) và ghi link trong README.
 - [ ] Bảng so sánh và biểu đồ (mục 12).
-- [ ] Hình attention và Grad-CAM (mục 11).
+- [ ] Hình attention (mục 11), và Grad-CAM nếu có làm.
+- [ ] Dữ liệu mẫu: hình lưới `samples.png` và 5-10 ảnh thật trong `app/examples/`.
 - [ ] Phân tích lỗi (mục 10).
 - [ ] Demo chạy được (mục 13).
 - [ ] `report/report.md` đủ các mục ở phần 15.
@@ -275,16 +280,16 @@ Kèm biểu đồ cột Top-1 và đường cong val accuracy chồng nhau của
 9. **Kết luận và hướng phát triển.**
 10. **Tài liệu tham khảo:** ViT (Dosovitskiy et al., 2020), DeiT (Touvron et al., 2021), Tiny ImageNet (Stanford CS231n), Attention Rollout (Abnar & Zuidema, 2020), Grad-CAM (Selvaraju et al., 2017), Mixup, CutMix.
 
-## 16. Kế hoạch thực hiện cho agent (thứ tự ưu tiên)
+## 16. Kế hoạch thực hiện cho agent (thứ tự ưu tiên; phân công và lịch ở mục 19-20)
 
-1. Dựng khung thư mục, `requirements.txt`, `utils.py`.
+1. Dựng khung thư mục, `requirements.txt`, `.gitignore`, `utils.py`.
 2. `prepare_data.py` + `data.py`, kiểm tra thống kê và ảnh mẫu.
 3. `vit.py` + test đơn vị; chạy smoke test `--quick` trên vài batch.
 4. `cnn.py` + `match_param_count`; xác nhận chênh lệch tham số <= 5%.
 5. `train.py`; train CNN rồi ViT (chạy nền, ghi log).
 6. `evaluate.py`, `error_analysis.py`.
-7. `attention.py`, `gradcam.py`.
-8. `compare.py`, ablation (nếu còn thời gian), pretrained (nếu có mạng).
+7. `attention.py`.
+8. `compare.py`. Nếu còn thời gian, làm thêm theo thứ tự: `gradcam.py`, FLOPs, 3 seed, pretrained, ablation.
 9. `demo.py`.
 10. `README.md` và `report/report.md`.
 
@@ -303,8 +308,54 @@ Kèm biểu đồ cột Top-1 và đường cong val accuracy chồng nhau của
 2. `python -m src.train --config configs/vit_small.yaml` train xong, sinh checkpoint và log.
 3. `python -m src.train --config configs/cnn_baseline.yaml` train xong; số tham số chênh <= 5% so với ViT.
 4. `python -m src.evaluate` sinh Top-1/Top-5, per-class accuracy, confusion matrix cho cả hai mô hình.
-5. `python -m src.attention` sinh hình attention rollout (>= 12 ảnh) và so sánh Grad-CAM.
+5. `python -m src.attention` sinh hình attention rollout (>= 12 ảnh). Grad-CAM không nằm trong tiêu chí bắt buộc.
 6. `python -m src.compare` sinh bảng so sánh.
 7. `python app/demo.py` mở được demo.
 8. `pytest` pass.
 9. Báo cáo `report/report.md` đầy đủ, số liệu khớp với file kết quả.
+10. Mẫu đăng ký đề tài đã nộp.
+
+## 19. Phân công 5 người
+
+| Thành viên | Vai trò | Phụ trách | Phần báo cáo (mục 15) |
+|---|---|---|---|
+| TV1 | Trưởng nhóm, dữ liệu | Mẫu đăng ký, khung repo, `utils.py`, `prepare_data.py`, `data.py`, `README.md`, duyệt PR | 1, 2, 8, 9 |
+| TV2 | ViT và attention | `vit.py`, `tests/test_models.py`, `attention.py` | 3 (ViT), 6 |
+| TV3 | CNN | `cnn.py`, `match_param_count`, đo thời gian/VRAM/tốc độ, `gradcam.py` nếu làm | 3 (CNN), 6 (Grad-CAM nếu có) |
+| TV4 | Huấn luyện | `train.py`, `run_all.sh`, chạy thí nghiệm, quản lý checkpoint, `pretrained.py` nếu làm | 4 |
+| TV5 | Đánh giá và demo | `evaluate.py`, `error_analysis.py`, `compare.py`, `demo.py`, ghép báo cáo | 5, 7, 10 |
+
+Mỗi người dùng tài khoản Kaggle/Colab của mình để chạy song song. Mỗi PR có một người khác review trước khi merge.
+
+## 20. Lịch và quy tắc cắt việc
+
+| Ngày | Việc | Phụ trách chính |
+|---|---|---|
+| 7-8/11 | Nộp mẫu đăng ký, dựng repo, thống nhất giao diện (chữ ký `forward`, định dạng checkpoint, cột log CSV, cấu trúc JSON kết quả), tải dữ liệu | TV1, cả nhóm |
+| 9-10/11 | Xong ViT, CNN, `train.py`; chạy thông `--quick` và sinh checkpoint thử | TV2, TV3, TV4 |
+| 11/11 | Đo thời gian mỗi epoch, chốt số thí nghiệm, bắt đầu train thật | TV4 |
+| 11-14/11 | Train ViT và CNN; song song làm đánh giá, attention, demo bằng checkpoint thử | TV4, rồi TV2, TV3, TV5 |
+| 14-16/11 | Làm thêm nếu kịp; chốt checkpoint rồi đánh giá trên test một lần | TV4, TV5 |
+| 16/11 | **Dừng mọi thí nghiệm** | Cả nhóm |
+| 17-18/11 | Điền số liệu thật vào báo cáo, phân tích lỗi, hoàn thiện demo | TV5, cả nhóm |
+| 19/11 | Dò số liệu, chạy lại trên máy sạch, nộp bài | Cả nhóm |
+| 20/11 | Dự phòng | |
+
+Quy tắc cắt việc:
+
+- **Thứ tự cắt khi trễ:** ablation, pretrained, 3 seed, FLOPs, Grad-CAM.
+- **Chậm train:** nếu đến 13/11 ViT chưa train xong, giảm xuống 50 epoch và ghi rõ trong báo cáo.
+- **Kẹt dữ liệu hoặc GPU:** nếu đến 10/11 chưa chạy được Tiny ImageNet, chuyển sang CIFAR-100.
+
+## 21. Bản nháp mẫu đăng ký đề tài
+
+1. **Tên đề tài:** Phân loại ảnh 200 lớp trên Tiny ImageNet bằng Vision Transformer, so sánh với CNN cùng số tham số và trực quan hóa attention.
+2. **Hướng chính:** AI dự đoán.
+3. **Người sử dụng và vấn đề:** Sinh viên và người nghiên cứu thị giác máy tính cần chọn giữa ViT và CNN khi dữ liệu ít, ảnh độ phân giải thấp và số tham số bị giới hạn. Khó khăn hiện tại: ViT thường cần nhiều dữ liệu, các so sánh hay dùng mô hình khác cỡ nên khó công bằng, và khó biết mô hình đang nhìn vào vùng nào của ảnh.
+4. **Mục tiêu:** Có mô hình ViT tự cài đặt và CNN baseline chênh không quá 5% số tham số. Đo Top-1 và Top-5 trên tập test, với mức tham khảo ViT >= 40% và CNN >= 50% Top-1. Có hình attention cho ít nhất 12 ảnh.
+5. **Dữ liệu:** Tiny ImageNet trên Kaggle; trường dữ liệu gồm ảnh RGB 64x64 và nhãn lớp; quy mô 200 lớp, 100.000 ảnh train, 10.000 ảnh val có nhãn. Quyền sử dụng: [nhóm kiểm tra điều khoản trên trang Kaggle trước khi nộp]. Phương án thay thế: CIFAR-100.
+6. **Phạm vi:** Bắt buộc gồm ViT tự cài, CNN cùng số tham số, trực quan hóa attention, demo. Mở rộng nếu còn thời gian gồm Grad-CAM, FLOPs, 3 seed, ViT pretrained, ablation.
+7. **Phương pháp:** Baseline là ResNet nhỏ tự cài, khớp số tham số với ViT. Giải pháp là ViT (patch embedding + Transformer encoder) dùng AdamW, warmup + cosine, Mixup/CutMix, trực quan hóa bằng CLS attention và attention rollout.
+8. **Sản phẩm:** Mô hình đã huấn luyện, demo Gradio, ảnh mẫu, mã nguồn, README, báo cáo.
+9. **Đánh giá:** Chỉ số gồm Top-1, Top-5, per-class accuracy, top 20 cặp lớp nhầm nhiều nhất, số tham số, thời gian/epoch, tốc độ inference. Cách chia: train gốc 90/10 thành train/validation, val gốc làm test. Bộ tình huống: tối thiểu 12 ảnh test gồm cả dự đoán đúng và sai để xem attention, cùng 5-10 ảnh mẫu cho demo.
+10. **Kế hoạch và rủi ro:** Phân công và mốc theo mục 19-20, hoàn thành trước 20/11/2026. Phụ thuộc và cách xử lý: thiếu GPU thì chạy song song trên tài khoản từng thành viên và giảm xuống 50 epoch; phiên miễn phí bị ngắt thì lưu checkpoint thường xuyên và `--resume`; không kịp thì cắt phần mở rộng theo mục 20; không tải được dữ liệu thì chuyển sang CIFAR-100.
