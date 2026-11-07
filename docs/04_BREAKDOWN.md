@@ -12,7 +12,7 @@ Chia theo kết quả có thể hiểu và kiểm tra. Trạng thái: Chưa bắ
 | TV4 | Huấn luyện | 4 |
 | TV5 | Đánh giá, demo, ghép báo cáo | 5, 7, 10 |
 
-Tên thật sẽ thay cho TV1-TV5 khi nhóm chốt.
+Tên thật sẽ thay cho TV1-TV5 khi nhóm chốt. TV4 nên là thành viên có máy GPU, vì phụ trách train và quản lý checkpoint.
 
 ## Danh sách
 
@@ -30,7 +30,7 @@ Tên thật sẽ thay cho TV1-TV5 khi nhóm chốt.
 | TASK-008 | Trực quan hóa attention | TV2 | FR-006 | TASK-006 | Chưa bắt đầu | Chưa có |
 | TASK-009 | Bảng so sánh | TV5 | FR-007 | TASK-007 | Chưa bắt đầu | Chưa có |
 | TASK-010 | Demo | TV5 | FR-008 | TASK-006 | Chưa bắt đầu | Chưa có |
-| TASK-011 | Train thật ViT và CNN | TV4 | FR-004 | TASK-006, có GPU | Chưa bắt đầu | Chưa có |
+| TASK-011 | Train thật ViT và CNN | TV4 | FR-004 | TASK-006, máy GPU của thành viên sẵn sàng | Chưa bắt đầu | Chưa có |
 | TASK-012 | Đánh giá test cuối và báo cáo | TV5, cả nhóm | FR-005, 007, 009 | TASK-011 | Chưa bắt đầu | Chưa có |
 | TASK-013 | Phần làm thêm theo thứ tự mục 20 spec | Theo phần | Không bắt buộc | TASK-011 | Chưa bắt đầu | Chưa có |
 

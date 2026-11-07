@@ -4,7 +4,7 @@
 - **Cấu trúc và luồng xử lý liên quan:** Repo mới, chưa có code, dữ liệu hay mô hình.
 - **File có thể tái sử dụng:**
   - `torchvision`: transform, RandAugment, CIFAR-100.
-- **Ràng buộc và điểm cần chú ý:** Máy hiện tại chỉ có CPU (Python 3.13.9, PyTorch 2.9.1+cpu); GPU miễn phí có thể bị ngắt phiên; cấu trúc thư mục lấy từ mục 4 của spec.
+- **Ràng buộc và điểm cần chú ý:** Máy viết tài liệu chỉ có CPU (Python 3.13.9, PyTorch 2.9.1+cpu); train trên máy GPU 6GB VRAM của một thành viên, máy rảnh; cấu trúc thư mục lấy từ mục 4 của spec.
 
 ## Thiết kế đề xuất
 
@@ -99,7 +99,7 @@ logits, attns = vit(x, return_attn=True)  # chỉ ViT; attns: list[(B,heads,N+1,
 |---|---|
 | Thiếu dữ liệu, sai số lượng | `prepare_data` dừng và báo rõ |
 | Config thiếu khóa | `load_config` báo lỗi nêu tên khóa |
-| Phiên GPU bị ngắt | Ghi file tạm rồi đổi tên, chạy lại bằng `--resume` |
+| Train bị ngắt (máy GPU tắt, mất điện, phiên Kaggle/Colab hết giờ) | Ghi file tạm rồi đổi tên, chạy lại bằng `--resume` |
 | Resume từ checkpoint cũ hơn log | Các dòng log từ epoch đó trở đi được ghi đè |
 | Checkpoint từ người khác | Nạp với `weights_only=True` |
 
@@ -111,7 +111,7 @@ Dự án không có phân quyền người dùng.
 |---|---|---|---|---|
 | DEC-001 | Tiny ImageNet là dữ liệu chính, CIFAR-100 dự phòng | Có sẵn link trong đề, ảnh lớn hơn | CIFAR-100 nhẹ hơn nhưng ảnh 32x32 | Đề xuất |
 | DEC-002 | AdamW cho cả hai mô hình trong so sánh chính | So sánh công bằng | SGD có thể tốt hơn cho CNN, chỉ làm tham khảo | Đề xuất |
-| DEC-003 | Batch 128, lr ViT 5e-4 | Scale tuyến tính từ 1e-3 ở batch 256 | Batch 256 cần nhiều VRAM hơn | Đề xuất |
+| DEC-003 | Batch 128, lr ViT 5e-4; không vừa 6GB VRAM thì batch 64, lr 2,5e-4; ViT và CNN dùng cùng batch | Scale tuyến tính từ 1e-3 ở batch 256; cùng batch để so sánh công bằng | Batch nhỏ hơn thì mỗi epoch chậm hơn; batch 256 khó vừa 6GB | Đề xuất |
 | DEC-004 | Thư mục gốc repo là gốc project | Tránh lồng thêm `vit-tiny-imagenet/` | Thư mục con như spec cũ, đường dẫn dài hơn | Đề xuất |
 | DEC-005 | Ghi checkpoint và log qua file tạm | Phiên bị ngắt lúc ghi không hỏng file cũ | Ghi trực tiếp đơn giản hơn nhưng có thể mất checkpoint | Đề xuất |
 | DEC-006 | Tự cài ViT thay vì dùng `timm` | Dễ chỉnh số tham số và lấy attention | `timm` nhanh hơn; đề không bắt buộc tự cài | Đề xuất |
@@ -120,7 +120,9 @@ Dự án không có phân quyền người dùng.
 
 | Rủi ro | Ảnh hưởng | Cách kiểm chứng hoặc xử lý |
 |---|---|---|
-| Thiếu giờ GPU | Không đủ epoch hoặc thí nghiệm | Đo thời gian ngày 11/11; cắt việc theo mục 20 spec |
+| Chỉ một máy GPU, các lần train phải chạy lần lượt | Không đủ epoch hoặc thí nghiệm | Đo thời gian ngày 11/11; cắt việc theo mục 20 spec; Kaggle hoặc Colab dự phòng |
+| 6GB VRAM không đủ, nhất là CNN (feature map lớn), ablation patch 4 và pretrained 224x224 | Lỗi hết bộ nhớ | Đo VRAM đỉnh bằng `--quick` trên máy GPU trước khi train thật; giảm batch theo DEC-003; phần làm thêm có thể dùng batch riêng hoặc Kaggle/Colab |
+| Máy GPU hỏng hoặc chủ máy bận | Trễ toàn bộ train | Sao lưu checkpoint ra ngoài máy; chuyển sang Kaggle hoặc Colab và `--resume` |
 | Tải dữ liệu Kaggle bị vướng | Trễ toàn bộ | TV4 tải thử sớm; đến 10/11 chưa được thì chuyển CIFAR-100 |
 | ViT thua xa CNN | Kết quả kém nhưng vẫn hợp lệ | Báo cáo trung thực, phân tích nguyên nhân |
 | Rò rỉ dữ liệu test | Kết quả mất giá trị | Chỉ `evaluate.py` đọc test, chạy sau khi chốt cấu hình |

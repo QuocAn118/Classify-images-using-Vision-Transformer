@@ -106,7 +106,7 @@ Các ngưỡng số lấy từ [AGENT_SPEC_ViT_TinyImageNet.md](../AGENT_SPEC_Vi
 
 ## Yêu cầu chất lượng phù hợp dự án
 - **Phân quyền, bảo vệ dữ liệu:** Không commit `kaggle.json`, dữ liệu hoặc checkpoint. Nạp checkpoint với `weights_only=True`.
-- **Hiệu năng:** Chạy được trên GPU 12-16GB với batch 128. Chưa đặt ngưỡng tốc độ; đo và báo cáo thời gian mỗi epoch và số ảnh/giây.
+- **Hiệu năng:** Máy train có 6GB VRAM. Mặc định batch 128; nếu không vừa thì dùng batch 64 và lr ViT 2,5e-4. ViT và CNN luôn dùng cùng batch. Chưa đặt ngưỡng tốc độ; đo và báo cáo thời gian mỗi epoch và số ảnh/giây.
 - **Khả năng tái lập:** Seed cố định, siêu tham số nằm trong YAML, không hardcode đường dẫn.
 - **Khả năng bảo trì:** Type hint, docstring ngắn, thay đổi qua PR có người review.
 - **Thiết bị và trình duyệt hỗ trợ:** Python 3.10+; demo chạy trên trình duyệt bằng CPU.

@@ -43,7 +43,7 @@ Các con số mục tiêu chỉ là ước lượng; không được gian lận 
 
 - Python 3.10+, PyTorch >= 2.0, torchvision. Thư viện khác cho phép: numpy, pandas, matplotlib, scikit-learn, tqdm, pyyaml, Pillow, gradio (demo), `thop` hoặc `fvcore` (FLOPs, tùy chọn), `timm` (CHỈ dùng cho bản pretrained tham chiếu và RandAugment/Mixup nếu cần).
 - Hỗ trợ GPU (CUDA) và tự động fallback CPU. Dùng mixed precision (`torch.autocast`) khi có GPU.
-- Phải chạy được trên GPU miễn phí (Colab/Kaggle, ~12-16GB VRAM). Batch size mặc định 128.
+- Train trên máy có GPU 6GB VRAM của một thành viên nhóm; Colab/Kaggle là phương án dự phòng. Batch size mặc định 128; đo VRAM đỉnh trước khi train thật, nếu không vừa thì dùng batch 64 và lr ViT 2,5e-4. ViT và CNN luôn dùng cùng batch.
 - Đặt `seed` cố định (mặc định 42) cho random, numpy, torch để tái lập kết quả.
 - **ViT chính phải tự cài đặt** (không gọi `timm.create_model` cho mô hình chính). `timm` chỉ dùng cho mốc pretrained.
 - Mã sạch, có type hint và docstring ngắn, cấu hình qua file YAML, không hardcode đường dẫn.
@@ -325,7 +325,7 @@ Kèm biểu đồ cột Top-1 và đường cong val accuracy chồng nhau của
 | TV4 | Huấn luyện | `train.py`, `run_all.sh`, chạy thí nghiệm, quản lý checkpoint, `pretrained.py` nếu làm | 4 |
 | TV5 | Đánh giá và demo | `evaluate.py`, `error_analysis.py`, `compare.py`, `demo.py`, ghép báo cáo | 5, 7, 10 |
 
-Mỗi người dùng tài khoản Kaggle/Colab của mình để chạy song song. Mỗi PR có một người khác review trước khi merge.
+Train chính chạy lần lượt trên máy GPU của một thành viên (nên là TV4); các thành viên khác dùng tài khoản Kaggle/Colab của mình nếu cần chạy thêm song song. Mỗi PR có một người khác review trước khi merge.
 
 ## 20. Lịch và quy tắc cắt việc
 
@@ -358,4 +358,4 @@ Quy tắc cắt việc:
 7. **Phương pháp:** Baseline là ResNet nhỏ tự cài, khớp số tham số với ViT. Giải pháp là ViT (patch embedding + Transformer encoder) dùng AdamW, warmup + cosine, Mixup/CutMix, trực quan hóa bằng CLS attention và attention rollout.
 8. **Sản phẩm:** Mô hình đã huấn luyện, demo Gradio, ảnh mẫu, mã nguồn, README, báo cáo.
 9. **Đánh giá:** Chỉ số gồm Top-1, Top-5, per-class accuracy, top 20 cặp lớp nhầm nhiều nhất, số tham số, thời gian/epoch, tốc độ inference. Cách chia: train gốc 90/10 thành train/validation, val gốc làm test. Bộ tình huống: tối thiểu 12 ảnh test gồm cả dự đoán đúng và sai để xem attention, cùng 5-10 ảnh mẫu cho demo.
-10. **Kế hoạch và rủi ro:** Phân công và mốc theo mục 19-20, hoàn thành trước 20/11/2026. Phụ thuộc và cách xử lý: thiếu GPU thì chạy song song trên tài khoản từng thành viên và giảm xuống 50 epoch; phiên miễn phí bị ngắt thì lưu checkpoint thường xuyên và `--resume`; không kịp thì cắt phần mở rộng theo mục 20; không tải được dữ liệu thì chuyển sang CIFAR-100.
+10. **Kế hoạch và rủi ro:** Phân công và mốc theo mục 19-20, hoàn thành trước 20/11/2026. Phụ thuộc và cách xử lý: train phụ thuộc vào máy GPU của một thành viên, nên máy bận hoặc hỏng thì chuyển sang Kaggle/Colab và giảm xuống 50 epoch; train bị ngắt thì lưu checkpoint thường xuyên, sao lưu ra ngoài máy và `--resume`; không kịp thì cắt phần mở rộng theo mục 20; không tải được dữ liệu thì chuyển sang CIFAR-100.

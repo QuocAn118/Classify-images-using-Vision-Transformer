@@ -25,7 +25,7 @@
 - **Thời hạn và mốc:** Hạn nộp 2026-11-20, nhóm đặt mục tiêu nộp 2026-11-19. Các mốc ở [04_BREAKDOWN.md](04_BREAKDOWN.md).
 
 ## Where — Ở đâu?
-- **Nơi dùng, thiết bị, môi trường:** Phát triển trên máy cá nhân (máy hiện tại chỉ có CPU); train trên GPU miễn phí của Kaggle hoặc Colab.
+- **Nơi dùng, thiết bị, môi trường:** Phát triển trên máy cá nhân (máy của TV viết tài liệu chỉ có CPU); train trên máy có GPU 6GB VRAM của một thành viên khác trong nhóm, máy rảnh trong thời gian train; Kaggle hoặc Colab là phương án dự phòng.
 - **Môi trường demo / triển khai:** Demo Gradio chạy cục bộ trên CPU. Không triển khai production.
 
 ## Which — Chọn gì, giới hạn gì?
@@ -38,7 +38,7 @@
 - **Làm thêm nếu còn thời gian:** Grad-CAM, FLOPs, 3 seed, ViT pretrained, ablation, attention theo head và theo layer.
 - **Ngoài phạm vi:** Deepfake (giáo viên đã xóa), train ở độ phân giải cao, API công khai, triển khai production.
 - **Công nghệ, công cụ hoặc lựa chọn bắt buộc:** Đề bắt buộc ViT và dữ liệu Tiny ImageNet hoặc CIFAR-100. Nhóm tự chọn PyTorch và tự cài ViT.
-- **Ràng buộc thời gian, chi phí, dữ liệu:** 13 ngày, GPU miễn phí có thể bị ngắt phiên, không dùng test để chọn cấu hình, không bịa số liệu.
+- **Ràng buộc thời gian, chi phí, dữ liệu:** 13 ngày, chỉ có một máy GPU trong nhóm nên các lần train chạy lần lượt, không dùng test để chọn cấu hình, không bịa số liệu.
 - **Lưu ý:** đây là diễn giải đề xuất; đối chiếu nghĩa Which với hướng dẫn của cô.
 
 ## How — Hướng thực hiện
@@ -66,4 +66,6 @@
 | Nơi nộp mẫu đăng ký, có cần duyệt không | Ảnh hưởng lịch | TV1 | Chưa xác nhận |
 | Giảng viên có quy định khác ngoài phần đã thấy trên sheet | Thiếu sản phẩm phải nộp | TV1 | Chưa xác nhận |
 | Tải được Tiny ImageNet từ Kaggle | Chuyển sang CIFAR-100 | TV4 | Chưa thử |
-| Thời gian mỗi epoch trên GPU miễn phí | Phải giảm epoch hoặc thí nghiệm | TV4 | Chưa đo |
+| Thành viên có GPU là ai | Chưa gán được TV4 | Cả nhóm | Chưa xác nhận |
+| Batch 128 có vừa 6GB VRAM với cả ViT và CNN | Phải dùng batch 64 cho cả hai mô hình | TV4 | Chưa đo |
+| Thời gian mỗi epoch trên máy GPU | Phải giảm epoch hoặc thí nghiệm | TV4 | Chưa đo |

@@ -8,6 +8,7 @@ Ghi ngắn sau mỗi buổi hoặc mốc đáng kể.
 - **Kết quả / thay đổi chính:**
   - Phân tích đề và sửa `AGENT_SPEC_ViT_TinyImageNet.md` theo đề gốc, thêm phân công, lịch, nháp mẫu đăng ký.
   - Điền `docs/`, viết `README.md`, `AGENTS.md`, `AI_Usage.md`.
+  - Chốt train trên máy GPU của một thành viên, Kaggle hoặc Colab là dự phòng.
   - AI đã viết thử TASK-001 trước khi `docs/` hoàn thành, sai thứ tự quy trình. Nhóm quyết định xóa và làm lại sau khi `docs/` được duyệt.
 - **Bằng chứng kiểm tra:** Tài liệu chưa được nhóm đọc. Repo chưa có code nên chưa có kết quả chạy.
 - **Điều tôi giải thích được về code:** Chưa có code.

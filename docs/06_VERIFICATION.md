@@ -14,7 +14,8 @@ Kết quả: Đạt / Không đạt / Chưa xác minh / Không áp dụng (nêu 
 | Phiên bị ngắt lúc đang lưu checkpoint | Checkpoint cũ không hỏng | AC-008, DEC-005 |
 | Cố tình làm hỏng code | Có test fail | Đánh giá chất lượng test |
 | `.gitignore` | Chặn dữ liệu, checkpoint, `kaggle.json`; không chặn `outputs/logs`, `src/`, `.agents/`. Kiểm tra từng đường dẫn | Bảo vệ dữ liệu |
-| Môi trường train | Chạy được trên Kaggle hoặc Colab | FR-004 |
+| Môi trường train | `--quick` chạy được trên máy GPU của thành viên, xác nhận đang dùng CUDA | FR-004 |
+| VRAM đỉnh (đo khi làm TASK-006) | ViT và CNN ở batch 128 đều không lỗi hết bộ nhớ trên 6GB; nếu lỗi thì chuyển batch 64 theo DEC-003 | FR-004 |
 
 ## Mẫu bản ghi
 - Mã: VERIFY-001

@@ -8,9 +8,9 @@ Chỉ ghi những gì đã có thật trong dự án. Không ghi API key, mật 
 |---|---|
 | Hệ điều hành | Windows 10 |
 | Python | 3.13.9 |
-| PyTorch | 2.9.1+cpu, không có GPU |
+| PyTorch | 2.9.1+cpu, không có GPU (máy viết tài liệu) |
 | Chưa cài trên máy này | `timm`, `gradio`, `thop`, `fvcore` |
-| GPU để train | Kaggle hoặc Colab, chưa kiểm tra |
+| GPU để train | Máy của một thành viên, 6GB VRAM, máy rảnh (theo thông tin nhóm, chưa kiểm tra trực tiếp); Kaggle hoặc Colab dự phòng, chưa kiểm tra |
 
 ## Công cụ
 
@@ -21,7 +21,7 @@ Chỉ ghi những gì đã có thật trong dự án. Không ghi API key, mật 
 | Kiểm tra logic | `pytest` | Khi thay đổi hành vi hoặc sửa lỗi | Kết quả và trường hợp được bao phủ |
 | Kiểm tra UI | Trình duyệt mở demo Gradio | Khi sửa demo | Tải ảnh, đối chiếu Top-5 và ảnh attention (chưa có demo) |
 | Kiểm thử app thật (E2E) | Không áp dụng | Demo nhỏ, kiểm tra thủ công là đủ | Không áp dụng |
-| Train bằng GPU | Kaggle hoặc Colab | Khi đã qua `--quick` | Log CSV, checkpoint |
+| Train bằng GPU | Máy GPU của thành viên; Kaggle hoặc Colab dự phòng | Khi đã qua `--quick` | Log CSV, checkpoint |
 | Tra tài liệu | Tài liệu chính thức của PyTorch, torchvision, Gradio | Khi chưa chắc API hoặc phiên bản | Đối chiếu phiên bản đang dùng |
 | Lưu phiên bản | Git, GitHub | Khi phần việc đã được kiểm tra | Xem diff và trạng thái trước commit |
 
@@ -52,5 +52,5 @@ Các lệnh "Chưa có code" lấy từ spec, sẽ cập nhật sau khi chạy t
 - Đọc phần liên quan trước; mở rộng khi phát hiện phụ thuộc.
 - Giao đầu việc đủ nhỏ để xem lại và kiểm tra.
 - Chạy `--quick` trên CPU trước khi tốn giờ GPU.
-- Lưu checkpoint thường xuyên vì phiên GPU có thể bị ngắt.
+- Lưu checkpoint thường xuyên và sao lưu ra ngoài máy GPU, vì cả nhóm phụ thuộc vào một máy.
 - Chưa biết công cụ hoặc lệnh có hoạt động thì ghi là chưa xác minh.
