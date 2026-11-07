@@ -35,6 +35,7 @@ Chỉ ghi những gì đã có thật trong dự án. Không ghi API key, mật 
 | Test liên quan | `pytest` | Gốc repo | Đã cài dependency | Chưa có code |
 | Test E2E | Không áp dụng | | | |
 | Chuẩn bị dữ liệu | `python scripts/prepare_data.py` | Gốc repo | Có file dữ liệu | Chưa có code |
+| Smoke test | `python -m src.train --config configs/vit_small.yaml --quick` | Gốc repo | Không cần dữ liệu thật | Chưa có code |
 | Train | `python -m src.train --config configs/vit_small.yaml` | Gốc repo | Dữ liệu đã chuẩn bị, nên có GPU | Chưa có code |
 | Đánh giá | `python -m src.evaluate` | Gốc repo | Có checkpoint | Chưa có code |
 | Attention | `python -m src.attention` | Gốc repo | Có checkpoint ViT | Chưa có code |

@@ -12,7 +12,7 @@ Phân loại ảnh 64x64 vào 200 lớp. Dự án trả lời hai câu hỏi: v�
 
 - ViT tự cài bằng PyTorch (patch embedding + Transformer encoder).
 - ResNet nhỏ có số tham số chênh không quá 5% so với ViT.
-- Bảng so sánh Top-1, Top-5, số tham số, thời gian train và tốc độ inference.
+- Bảng so sánh Top-1, Top-5, số tham số, FLOPs/MACs, thời gian train và tốc độ inference.
 - Hình CLS attention và attention rollout.
 - Demo Gradio: tải ảnh lên, xem Top-5 và ảnh attention.
 

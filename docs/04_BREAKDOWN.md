@@ -8,7 +8,7 @@ Chia theo kết quả có thể hiểu và kiểm tra. Trạng thái: Chưa bắ
 |---|---|---|
 | TV1 | Trưởng nhóm, dữ liệu, tài liệu | 1, 2, 8, 9 |
 | TV2 | ViT và attention | 3 (ViT), 6 |
-| TV3 | CNN | 3 (CNN), 6 (Grad-CAM nếu có) |
+| TV3 | CNN, đo FLOPs/MACs | 3 (CNN), 6 (Grad-CAM nếu có) |
 | TV4 | Huấn luyện | 4 |
 | TV5 | Đánh giá, demo, ghép báo cáo | 5, 7, 10 |
 
@@ -19,7 +19,7 @@ Tên thật sẽ thay cho TV1-TV5 khi nhóm chốt. TV4 nên là thành viên c�
 | Mã | Đầu việc | Phụ trách | Yêu cầu | Phụ thuộc | Trạng thái | Bằng chứng |
 |---|---|---|---|---|---|---|
 | TASK-000 | Hoàn thiện `docs/` | TV1 | Quy trình `.agents/` | Không | Đã triển khai, chưa xác minh | Chờ nhóm đọc |
-| TASK-014 | Nộp mẫu đăng ký (mục 21 spec) | TV1 | Đề | Không | Chưa bắt đầu | Chưa có |
+| TASK-014 | Nộp mẫu đăng ký (mục 21 spec) | TV1 | Đề | Nhóm chốt TV | Chưa bắt đầu | Chưa có |
 | TASK-001 | Khung repo và tiện ích dùng chung | TV1 | AC-013, một phần AC-008 | TASK-000 | Chưa bắt đầu | Chưa có |
 | TASK-002 | Chuẩn bị dữ liệu, chia tập, xuất mảng cache | TV1 | FR-001 | TASK-001, có file dữ liệu | Chưa bắt đầu | Chưa có |
 | TASK-003 | DataLoader đọc mảng cache, augmentation | TV1 | FR-001 | TASK-002 | Chưa bắt đầu | Chưa có |
@@ -36,7 +36,7 @@ Tên thật sẽ thay cho TV1-TV5 khi nhóm chốt. TV4 nên là thành viên c�
 
 **Điều kiện bắt đầu code:** Chỉ bắt đầu TASK-001 và các đầu việc code khác sau khi nhóm duyệt `docs/`. Bản thử đầu của TASK-001 viết sai thứ tự nên đã bị xóa.
 
-**Ghi chú TASK-013:** Thứ tự cắt khi trễ: ablation, rồi 3 seed, rồi Grad-CAM. Giữ nguyên bộ lõi: ViT, CNN, attention, demo, báo cáo.
+**Ghi chú TASK-013:** Thứ tự cắt khi trễ: CNN thứ hai có FLOPs xấp xỉ ViT, rồi ablation, rồi 3 seed, rồi Grad-CAM, cuối cùng mới đến đo FLOPs/MACs (TV3 phụ trách). Thí nghiệm SGD được cắt cùng lúc với CNN thứ hai; attention theo head và layer được cắt cùng lúc với Grad-CAM. Giữ nguyên bộ lõi: ViT, CNN, attention, demo, báo cáo.
 
 ## Mốc và lịch
 

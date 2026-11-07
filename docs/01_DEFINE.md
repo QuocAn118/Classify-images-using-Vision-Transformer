@@ -18,7 +18,7 @@
   - Số tham số hai mô hình chênh không quá 5%.
   - Có Top-1 và Top-5 trên tập test cho cả hai mô hình.
   - Có hình attention cho ít nhất 12 ảnh test.
-  - ViT khoảng 40%, CNN khoảng 50% Top-1: mức dự đoán của nhóm, không phải cam kết và không phải điều kiện đạt; có thể thấp hơn khi chỉ train 50 epoch.
+- **Mức Top-1 dự đoán (không phải chỉ số thành công):** ViT khoảng 40%, CNN khoảng 50%; không phải cam kết và không phải điều kiện đạt, có thể thấp hơn khi chỉ train 50 epoch.
 
 ## When — Khi nào?
 - **Tình huống/kích hoạt:** Người dùng chạy lệnh train, đánh giá hoặc mở demo khi cần kết quả; giảng viên chạy lại theo README khi chấm.
@@ -68,4 +68,4 @@
 | Tải được Tiny ImageNet từ Kaggle | Chuyển sang CIFAR-100 | TV4 | Chưa thử |
 | Thành viên có GPU là ai | Chưa gán được TV4 | Cả nhóm | Chưa xác nhận |
 | Batch 64 có vừa 6GB VRAM với cả hai mô hình (đặc biệt CNN) | Dùng gradient accumulation hoặc giảm batch còn 32 với cả hai mô hình | TV4 | Chưa đo |
-| Thời gian mỗi epoch trên máy GPU. Dự đoán, ước tính thô, chưa đo: ViT khoảng 1–2 phút/epoch, CNN khoảng 3–6 phút/epoch trên GPU 6GB cỡ phổ thông, nên 50 epoch cho cả hai khoảng 4–6 giờ. Số của CNN tính cho stem cũ chưa downsample, thiết kế mới có thể nhanh hơn. Phải đo thật trước khi chốt số epoch. | Phải cắt thí nghiệm hoặc chuyển phần còn lại sang Kaggle/Colab (50 epoch là mức sàn) | TV4 | Chưa đo |
+| Thời gian mỗi epoch trên máy GPU. Dự đoán, ước tính thô, chưa đo: ViT khoảng 1–2 phút/epoch, CNN khoảng 3–6 phút/epoch trên GPU 6GB cỡ phổ thông, nên 50 epoch cho cả hai khoảng 4–6 giờ. Số của CNN tính cho stem cũ chưa downsample, thiết kế mới có thể nhanh hơn. Phải đo thật trước khi chốt số thí nghiệm. | Phải cắt thí nghiệm hoặc chuyển phần còn lại sang Kaggle/Colab (50 epoch là mức sàn) | TV4 | Chưa đo |

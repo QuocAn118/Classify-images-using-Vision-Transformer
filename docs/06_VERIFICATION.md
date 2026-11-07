@@ -10,10 +10,14 @@ Kết quả: Đạt / Không đạt / Chưa xác minh / Không áp dụng (nêu 
 |---|---|---|
 | Test fail trước khi có code | Fail vì chưa có chức năng | Quy trình TDD |
 | Config thiếu khóa | Báo lỗi nêu tên khóa | AC-013 |
-| Train bị ngắt rồi resume, dùng AdamW + warmup + cosine | Tiếp tục từ epoch k+1, log không trùng dòng, lr schedule khớp với chạy liền mạch, loss tiếp tục liền mạch trong sai số (không đòi trọng số giống hệt, vì shuffle, augmentation và GPU không tất định) | AC-008 |
+| Train bị ngắt rồi resume, dùng AdamW + warmup + cosine | Tiếp tục từ epoch k+1, log không trùng dòng, lr schedule khớp với chạy liền mạch (chênh không quá 1e-8), `val_loss` ở epoch k+1 chênh không quá 10% so với epoch k (không đòi trọng số giống hệt, vì shuffle, augmentation và GPU không tất định) | AC-008 |
 | Phiên bị ngắt lúc đang lưu checkpoint | Checkpoint cũ không hỏng | AC-008, DEC-005 |
-| Nạp checkpoint bằng `weights_only=True` | Nạp được; checkpoint chỉ chứa tensor, dict, list, số và chuỗi | Hợp đồng checkpoint |
-| Hai nhánh attention ở `model.eval()` | Cùng đầu ra, sai số nhỏ | AC-005 |
+| Nạp checkpoint bằng `weights_only=True` | Nạp được, có đủ `scaler` và `class_names`; checkpoint chỉ chứa tensor, dict, list, số, chuỗi và `None` | Hợp đồng checkpoint |
+| Chạy hai seed khác nhau | Log, checkpoint và kết quả nằm ở hai tên khác nhau, không ghi đè | Tên lần chạy |
+| `--quick` khi chưa có cache; train thật khi chưa có cache | `--quick` dùng dữ liệu giả và cảnh báo; train thật báo lỗi | AC-007 |
+| Demo trên máy không có bộ dữ liệu | Hiện đúng tên lớp, dùng đúng mean/std từ checkpoint | AC-012 |
+| JSON kết quả | Có đủ khóa kể cả `macs`, `peak_vram_mb`; bảng so sánh lấy được cột FLOPs/MACs | AC-011 |
+| Hai nhánh attention ở `model.eval()` | Logits hai nhánh chênh tuyệt đối tối đa 1e-4 | AC-005 |
 | Cố tình làm hỏng code | Có test fail | Đánh giá chất lượng test |
 | `.gitignore` | Chặn dữ liệu, checkpoint, `kaggle.json`; không chặn `outputs/logs`, `src/`, `.agents/`. Kiểm tra từng đường dẫn | Bảo vệ dữ liệu |
 | Môi trường train | `--quick` chạy được trên máy GPU của thành viên, xác nhận đang dùng CUDA | FR-004 |

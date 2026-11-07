@@ -28,11 +28,11 @@ flowchart LR
 
 | Thành phần | Trách nhiệm | Đáp ứng |
 |---|---|---|
-| `scripts/prepare_data.py` | Giải nén, sắp xếp `val/`, kiểm tra số lượng, chia train/validation, xuất mảng cache `.npy`, xuất thống kê | FR-001 |
+| `scripts/prepare_data.py` | Giải nén, sắp xếp `val/`, kiểm tra số lượng, chia train/validation, xuất mảng cache `.npy`, `class_names.json`, xuất thống kê | FR-001 |
 | `src/data.py` | Đọc mảng cache, augmentation, DataLoader | FR-001 |
 | `src/models/vit.py` | ViT tự cài, attention hai nhánh (train dùng `scaled_dot_product_attention`, `return_attn=True` tính tường minh) | FR-002 |
 | `src/models/cnn.py` | ResNet nhỏ, `match_param_count` | FR-003 |
-| `src/train.py` | Vòng lặp train, resume, log | FR-004 |
+| `src/train.py` | Vòng lặp train, resume, log, dữ liệu giả cho `--quick` | FR-004 |
 | `src/evaluate.py`, `scripts/error_analysis.py` | Chỉ số trên test, phân tích lỗi | FR-005 |
 | `src/attention.py` | CLS attention, attention rollout | FR-006 |
 | `src/compare.py` | Bảng và biểu đồ | FR-007 |
@@ -69,7 +69,7 @@ flowchart LR
 
 Cùng cỡ tham số nhưng chi phí tính toán có thể chênh nhiều. **Dự đoán, chưa đo bằng code:** ViT khoảng 0,43 GMACs (khoảng 0,86 GFLOPs), CNN khoảng 1–1,5 GMACs. Số của CNN tính cho stem cũ chưa downsample; thiết kế downsample sớm (DEC-007) có thể thấp hơn, phải đo. Khi đo, ghi rõ đơn vị (MACs hay FLOPs) và dùng cùng một đơn vị cho cả hai mô hình.
 
-**Huấn luyện:** AdamW, batch 64, lr ViT 2,5e-4, ViT và CNN cùng batch, warmup 5 epoch rồi cosine về 1e-5 (cập nhật theo từng iteration, cosine tính trên tổng 50 epoch), weight decay 0,05, label smoothing 0,1, gradient clipping 1,0, Mixup/CutMix với xác suất 0,5 mỗi batch (bật/tắt và xác suất trong config), RandomErasing mặc định tắt, AMP khi có GPU, 50 epoch. Chọn checkpoint tốt nhất theo validation Top-1.
+**Huấn luyện:** AdamW, batch 64, lr 2,5e-4 cho cả ViT và CNN (CNN chỉ đổi nếu chỉnh trên validation), ViT và CNN cùng batch, warmup 5 epoch rồi cosine về 1e-5 (cập nhật theo từng iteration, cosine tính trên tổng 50 epoch), weight decay 0,05, label smoothing 0,1, gradient clipping 1,0, Mixup/CutMix với xác suất 0,5 mỗi batch (bật/tắt và xác suất trong config), RandomCrop padding 4, lật ngang, RandAugment, RandomErasing mặc định tắt, dropout 0, `nn.CrossEntropyLoss` nhận cả nhãn mềm, AMP khi có GPU, 50 epoch. Chọn checkpoint tốt nhất theo validation Top-1.
 
 **Đánh giá:** Top-1, Top-5 trên test; per-class accuracy; top 20 cặp lớp nhầm. Train accuracy không dùng để nhận xét khi bật Mixup/CutMix. Ablation chỉ báo kết quả trên validation. Test chỉ dùng cho các mô hình chính cuối cùng (ViT và CNN).
 
@@ -83,15 +83,17 @@ logits = model(x)                         # x: (B,3,H,W), logits: (B,num_classes
 logits, attns = vit(x, return_attn=True)  # chỉ ViT; attns: list[(B,heads,N+1,N+1)], mỗi layer một phần tử
 ```
 
-**Checkpoint** (`.pt`): `model`, `optimizer`, `scheduler`, `epoch`, `best_val_top1`, `config`, `seed`. Checkpoint chỉ chứa tensor, dict, list, số và chuỗi; không lưu đối tượng Python hay trạng thái RNG của numpy, để `weights_only=True` nạp được; trạng thái RNG nếu cần lưu thành tensor.
+**Checkpoint** (`.pt`): `model`, `optimizer`, `scheduler`, `scaler` (trạng thái `GradScaler`, `None` khi không dùng AMP), `epoch`, `best_val_top1`, `config`, `seed`, `class_names`. Demo lấy tên lớp từ `class_names` và mean/std từ `config`. Checkpoint chỉ chứa tensor, dict, list, số và chuỗi; không lưu đối tượng Python hay trạng thái RNG của numpy, để `weights_only=True` nạp được; trạng thái RNG nếu cần lưu thành tensor.
+
+**Tên lần chạy:** `<run_name>` trong các đường dẫn là `<run_name trong YAML>_seed<seed>`, do `train.py` tự sinh để các seed không ghi đè nhau.
 
 **Log CSV** (`outputs/logs/<run_name>.csv`): `epoch, train_loss, train_acc, val_loss, val_top1, val_top5, lr, epoch_time_s`.
 
-**Kết quả JSON** (`outputs/results/<run_name>.json`): `run_name, model, seed, params, top1, top5, epoch_time_s, inference_img_per_s`. Chưa có số thì để `null`.
+**Kết quả JSON** (`outputs/results/<run_name>.json`): `run_name, model, seed, params, macs, top1, top5, epoch_time_s, inference_img_per_s, peak_vram_mb`. Chưa có số thì để `null`.
 
 **Config YAML**, các khóa bắt buộc:
 - `run_name`, `seed`
-- `data`: `name, root, img_size, num_classes, batch_size, num_workers, val_ratio`
+- `data`: `name, root, img_size, num_classes, batch_size, num_workers, val_ratio, mean, std`
 - `model`: `name`
 - `train`: `epochs, optimizer, lr, weight_decay`
 
@@ -100,6 +102,7 @@ logits, attns = vit(x, return_attn=True)  # chỉ ViT; attns: list[(B,heads,N+1,
 | Tình huống | Cách xử lý |
 |---|---|
 | Thiếu dữ liệu, sai số lượng | `prepare_data` dừng và báo rõ |
+| Chưa có mảng cache | `--quick` dùng dữ liệu giả và in cảnh báo; train thật báo lỗi |
 | Config thiếu khóa | `load_config` báo lỗi nêu tên khóa |
 | Train bị ngắt (máy GPU tắt, mất điện, phiên Kaggle/Colab hết giờ) | Ghi file tạm rồi đổi tên, chạy lại bằng `--resume` |
 | Resume từ checkpoint cũ hơn log | Các dòng log từ epoch đó trở đi được ghi đè |
@@ -113,17 +116,22 @@ Dự án không có phân quyền người dùng.
 |---|---|---|---|---|
 | DEC-001 | Tiny ImageNet là dữ liệu chính, CIFAR-100 dự phòng | Có sẵn link trong đề, ảnh lớn hơn | CIFAR-100 nhẹ hơn nhưng ảnh 32x32 | Đề xuất |
 | DEC-002 | AdamW cho cả hai mô hình trong so sánh chính | So sánh công bằng | SGD có thể tốt hơn cho CNN, chỉ làm tham khảo | Đề xuất |
-| DEC-003 | Batch 64, lr ViT 2,5e-4, ViT và CNN cùng batch | Dự đoán vừa 6GB VRAM, chưa đo; scale tuyến tính từ 1e-3 ở batch 256 | Batch 128 qua gradient accumulation 2 bước (giữ lr 5e-4, không tốn thêm VRAM, nhưng epoch không nhanh hơn và BatchNorm của CNN chỉ gần tương đương) | Đề xuất |
+| DEC-003 | Batch 64, lr 2,5e-4 mặc định cho cả ViT và CNN, cùng batch | Dự đoán vừa 6GB VRAM, chưa đo; scale tuyến tính từ 1e-3 ở batch 256 | Batch 128 qua gradient accumulation 2 bước (giữ lr 5e-4, không tốn thêm VRAM, nhưng epoch không nhanh hơn và BatchNorm của CNN chỉ gần tương đương) | Đề xuất |
 | DEC-004 | Thư mục gốc repo là gốc project | Tránh lồng thêm `vit-tiny-imagenet/` | Thư mục con như spec cũ, đường dẫn dài hơn | Đề xuất |
 | DEC-005 | Ghi checkpoint và log qua file tạm | Phiên bị ngắt lúc ghi không hỏng file cũ | Ghi trực tiếp đơn giản hơn nhưng có thể mất checkpoint | Đề xuất |
 | DEC-006 | Tự cài ViT thay vì dùng `timm` | Dễ chỉnh số tham số và lấy attention | `timm` nhanh hơn; đề không bắt buộc tự cài | Đề xuất |
 | DEC-007 | CNN dùng stem 3x3 stride 1 nhưng tầng đầu tiên downsample sớm, hoặc stem stride 2 (tránh feature map 64x64 ở nhiều tầng, vì tốn VRAM và thời gian) | Giảm VRAM và thời gian, vẫn khớp tham số trong 5% qua `match_param_count` | Stem stride 1 không downsample sớm giữ chi tiết hơn nhưng nặng; chọn cách nào sẽ ghi lại ở đây | Đề xuất |
+| DEC-008 | Train 50 epoch, đây là mức sàn | Vừa ngân sách một máy GPU | 100 epoch có thể tốt hơn cho ViT nhưng tốn gấp đôi thời gian; train chậm thì cắt phần làm thêm và chuyển Kaggle/Colab, không giảm epoch | Đã chốt |
+| DEC-009 | Bỏ ViT pretrained | Nhóm quyết định tập trung vào so sánh chính | Giữ làm mốc tham chiếu nhưng tốn VRAM và thời gian | Đã chốt |
+| DEC-010 | Giai đoạn tài liệu làm thẳng trên `main`; từ TASK-001 mỗi người làm nhánh riêng và mở PR, TV1 duyệt, PR của TV1 do TV4 duyệt | Tránh đụng độ khi code song song và vẫn có người review | Làm thẳng trên `main` nhanh hơn nhưng dễ ghi đè nhau | Đã chốt |
+| DEC-011 | Chuẩn hóa bằng mean/std của ImageNet, khai báo trong config | Có sẵn, không phải tính lại, dùng được cả khi chuyển CIFAR-100 | Mean/std tính từ tập train sát dữ liệu hơn nhưng thêm một bước và phải lưu kèm | Đề xuất |
+| DEC-012 | Augmentation: RandomCrop padding 4, lật ngang, RandAugment; dropout 0 | Nhẹ hơn RandomResizedCrop, hợp với 50 epoch; đã có drop path 0,1 | RandomResizedCrop hoặc TrivialAugment, dropout 0,1 có thể thử trong ablation | Đề xuất |
 
 ## Rủi ro kỹ thuật
 
 | Rủi ro | Ảnh hưởng | Cách kiểm chứng hoặc xử lý |
 |---|---|---|
-| Chỉ một máy GPU, các lần train phải chạy lần lượt | Không đủ thí nghiệm | Dự đoán, ước tính thô, chưa đo: ViT khoảng 1–2 phút/epoch, CNN khoảng 3–6 phút/epoch trên GPU 6GB cỡ phổ thông, nên 50 epoch cho cả hai khoảng 4–6 giờ. Số của CNN tính cho stem cũ chưa downsample, thiết kế mới có thể nhanh hơn. Phải đo thật trước khi chốt số epoch. Đo thời gian ngày 11/11; cắt việc theo mục 20 spec; Kaggle hoặc Colab dự phòng |
+| Chỉ một máy GPU, các lần train phải chạy lần lượt | Không đủ thí nghiệm | Dự đoán, ước tính thô, chưa đo: ViT khoảng 1–2 phút/epoch, CNN khoảng 3–6 phút/epoch trên GPU 6GB cỡ phổ thông, nên 50 epoch cho cả hai khoảng 4–6 giờ. Số của CNN tính cho stem cũ chưa downsample, thiết kế mới có thể nhanh hơn. Phải đo thật trước khi chốt số thí nghiệm. Đo thời gian ngày 11/11; cắt việc theo mục 20 spec; Kaggle hoặc Colab dự phòng |
 | 6GB VRAM không đủ, nhất là CNN và ablation patch 4 | Lỗi hết bộ nhớ | Đo VRAM đỉnh bằng `--quick` trên máy GPU trước khi train thật; nếu lỗi thì dùng gradient accumulation hoặc giảm batch còn 32 với cả hai mô hình; phần làm thêm có thể dùng batch riêng hoặc Kaggle/Colab |
 | Máy GPU hỏng hoặc chủ máy bận | Trễ toàn bộ train | Sao lưu checkpoint ra ngoài máy; chuyển sang Kaggle hoặc Colab và `--resume` |
 | Tải dữ liệu Kaggle bị vướng | Trễ toàn bộ | TV4 tải thử sớm; đến 10/11 chưa được thì chuyển CIFAR-100 |

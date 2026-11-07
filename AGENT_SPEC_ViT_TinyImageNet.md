@@ -116,17 +116,17 @@ tiny-imagenet-200/
    - `train` gốc -> **90% train / 10% validation** (chia có phân tầng theo lớp, seed cố định). Validation dùng để chọn siêu tham số và checkpoint.
    - `val` gốc (10.000 ảnh, có nhãn) -> dùng làm **tập TEST cuối cùng**. Chỉ đánh giá trên test một lần sau khi chốt cấu hình.
    - Tập `test` gốc không có nhãn -> bỏ qua.
-3. Chuẩn hóa ảnh với mean/std của Tiny ImageNet (tính từ tập train) hoặc ImageNet (0.485, 0.456, 0.406 / 0.229, 0.224, 0.225).
-4. Xuất `outputs/results/dataset_stats.json` (số ảnh mỗi tập, số lớp, đường dẫn và kích thước các mảng cache) và lưu 1 hình lưới 5x5 ảnh mẫu kèm tên lớp (`outputs/figures/samples.png`).
+3. Chuẩn hóa ảnh với mean/std của ImageNet (0.485, 0.456, 0.406 / 0.229, 0.224, 0.225), khai báo trong config (`data.mean`, `data.std`) để train, đánh giá và demo dùng cùng một bộ.
+4. Xuất `outputs/results/dataset_stats.json` (số ảnh mỗi tập, số lớp, đường dẫn và kích thước các mảng cache), xuất `class_names.json` (tên lớp theo đúng thứ tự nhãn, lấy từ `words.txt`) và lưu 1 hình lưới 5x5 ảnh mẫu kèm tên lớp (`outputs/figures/samples.png`).
 5. `img_size`, `patch_size`, `num_classes` và tên dataset phải nằm trong config, không hardcode, để đổi sang CIFAR-100 (ảnh 32x32, patch 4, 100 lớp, tải qua `torchvision`) mà không phải sửa code. Với CIFAR-100: chia train 90/10 như trên, dùng tập test có sẵn làm TEST và xuất cùng định dạng cache.
 
 ### 5.3 Augmentation
 
-- **Train:** RandomCrop(64, padding=4) hoặc RandomResizedCrop(64, scale=(0.6,1.0)), RandomHorizontalFlip, RandAugment (hoặc TrivialAugment). RandomErasing là tùy chọn, mặc định **tắt** vì regularization mạnh làm hội tụ chậm trong 50 epoch.
+- **Train:** RandomCrop(`img_size`, padding=4), RandomHorizontalFlip, RandAugment (tham số mặc định của `torchvision`). RandomErasing là tùy chọn, mặc định **tắt** vì regularization mạnh làm hội tụ chậm trong 50 epoch.
 - **Mixup (alpha=0.8) và CutMix (alpha=1.0)** áp dụng ở mức batch với **xác suất 0,5 mỗi batch**; bật/tắt và xác suất nằm trong config. Lý do: regularization mạnh làm hội tụ chậm, 50 epoch ngắn.
 - **Label smoothing:** 0.1.
 - **Val/Test:** chỉ ToTensor + Normalize.
-- DataLoader: đọc từ mảng cache, `num_workers` theo CPU, `pin_memory=True`, `persistent_workers=True`.
+- DataLoader: đọc từ mảng cache, `num_workers` theo CPU, `pin_memory=True`; `persistent_workers=True` chỉ bật khi `num_workers > 0`.
 
 ## 6. Giai đoạn 2: Cài đặt ViT (`src/models/vit.py`)
 
@@ -154,7 +154,7 @@ Tự cài đặt bằng PyTorch thuần, gồm các module:
 | depth | 8 |
 | num_heads | 8 |
 | mlp_ratio | 4 |
-| dropout | 0.0 - 0.1 |
+| dropout | 0.0 |
 | drop_path_rate | 0.1 |
 | num_classes | 200 |
 
@@ -165,13 +165,13 @@ Tính tay được 6.436.296 tham số (chưa xác minh bằng code); in số th
 - Forward shape: input (2,3,64,64) -> output (2,200).
 - `return_attn=True` trả về list attention shape (B, heads, N+1, N+1) mỗi layer, mỗi hàng tổng = 1 (sai số 1e-4). Test chạy ở `model.eval()`, và attention trả về phải lấy **trước** dropout.
 - Đếm tham số khớp với tính tay.
-- Hai nhánh attention cho cùng đầu ra (sai số nhỏ) ở `model.eval()`.
+- Hai nhánh attention cho cùng đầu ra ở `model.eval()`: logits hai nhánh chênh tuyệt đối tối đa 1e-4.
 
 ## 7. Giai đoạn 3: Baseline CNN cùng số tham số (`src/models/cnn.py`)
 
 - Tự cài **ResNet nhỏ** (BasicBlock, BatchNorm, ReLU, global average pooling, FC 200 lớp), phù hợp ảnh 64x64: stem 3x3 stride 1 nhưng tầng đầu tiên downsample sớm, hoặc stem stride 2 (tránh feature map 64x64 ở nhiều tầng, vì tốn VRAM và thời gian). Cấu hình cuối do `match_param_count` chọn, vẫn khớp tham số trong 5%; ghi lại cách chọn stem trong DEC-007.
 - **Điều chỉnh độ rộng/độ sâu (width multiplier, số block) sao cho tổng số tham số chênh lệch <= 5% so với ViT.** Viết hàm `match_param_count(target_params)` tự tìm cấu hình phù hợp, in kết quả.
-- Dùng cùng pipeline dữ liệu, cùng số epoch, cùng augmentation (để so sánh công bằng). **Kết quả so sánh chính dùng AdamW cho cả hai mô hình**; có thể tinh chỉnh learning rate riêng cho CNN và ghi rõ trong báo cáo. SGD (momentum 0.9, lr 0.1, wd 5e-4) chỉ là thí nghiệm tham khảo nếu còn thời gian.
+- Dùng cùng pipeline dữ liệu, cùng số epoch, cùng augmentation (để so sánh công bằng). **Kết quả so sánh chính dùng AdamW cho cả hai mô hình**; lr của CNN mặc định 2,5e-4 như ViT; nếu tinh chỉnh thì chỉ dựa trên validation và ghi rõ trong báo cáo. SGD (momentum 0.9, lr 0.1, wd 5e-4) chỉ là thí nghiệm tham khảo nếu còn thời gian.
 - Ghi bảng: params, FLOPs/MACs (đo nếu làm được, ghi "chưa có" nếu chưa), thời gian/epoch, VRAM đỉnh, tốc độ inference (ảnh/giây). Báo cáo phải nêu rõ cùng số tham số không có nghĩa là cùng chi phí tính toán.
 - Làm thêm nếu còn thời gian: CNN thứ hai có FLOPs xấp xỉ ViT.
 
@@ -182,18 +182,18 @@ Tính tay được 6.436.296 tham số (chưa xác minh bằng code); in số th
 - Optimizer: **AdamW**, lr đỉnh 1e-3 cho batch 256, scale tuyến tính theo batch (**batch mặc định 64 thì lr = 2,5e-4**), betas (0.9, 0.999), weight decay 0.05 (không áp dụng cho bias, LayerNorm, pos_embed, cls_token).
 - Scheduler: **warmup 5 epoch** tuyến tính, sau đó **cosine decay** về 1e-5; cả hai cập nhật **theo từng iteration**, cosine tính trên tổng 50 epoch.
 - Epoch: **50**. `--epochs N` cho phép đổi số epoch; `--quick` chỉ dùng cho smoke test vài batch.
-- Loss: CrossEntropy với label smoothing 0.1 (tự chuyển sang SoftTargetCE khi bật Mixup/CutMix).
+- Loss: `nn.CrossEntropyLoss` với label smoothing 0.1; hàm này nhận được cả nhãn mềm khi bật Mixup/CutMix.
 - Gradient clipping: max_norm = 1.0.
 - Mixed precision (AMP) khi có GPU.
 - EMA của trọng số (tùy chọn, decay 0.999).
 
 ### Yêu cầu chức năng
 
-- CLI: `python -m src.train --config configs/vit_small.yaml [--quick] [--epochs N] [--seed S] [--resume path]`.
+- CLI: `python -m src.train --config configs/vit_small.yaml [--quick] [--epochs N] [--seed S] [--resume path]`. Tên lần chạy thực tế là `<run_name trong YAML>_seed<seed>` để các seed không ghi đè log, checkpoint và kết quả của nhau; mọi `<run_name>` bên dưới dùng tên này.
 - Mỗi epoch ghi log: train loss/acc, val loss/Top-1/Top-5, lr, thời gian. Lưu CSV `outputs/logs/<run_name>.csv` và (tùy chọn) TensorBoard. Khi bật Mixup/CutMix, train acc không còn ý nghĩa; nhận xét và chọn checkpoint dựa trên validation.
 - Lưu checkpoint tốt nhất theo val Top-1 và checkpoint cuối; hỗ trợ `--resume`.
 - Vẽ đường cong loss/accuracy -> `outputs/figures/<run_name>_curves.png`.
-- Chạy được trên cả CPU với `--quick` (vài batch) để kiểm tra pipeline (smoke test).
+- Chạy được trên cả CPU với `--quick` (vài batch) để kiểm tra pipeline (smoke test). Khi chưa có mảng cache, `--quick` dùng dữ liệu giả sinh ngẫu nhiên đúng `img_size` và `num_classes`, và in cảnh báo; chế độ này chỉ có trong `--quick`, train thật thiếu cache thì báo lỗi.
 
 ### Ablation (chạy nếu còn thời gian, mỗi lần 1 thay đổi)
 
@@ -243,8 +243,8 @@ Cột FLOPs/MACs bắt buộc có: đo nếu làm được, ghi "chưa có" nế
 
 ## 13. Giai đoạn 9: Demo (`app/demo.py`)
 
-- Gradio (hoặc Streamlit): người dùng upload ảnh -> hiển thị **Top-5 dự đoán (tên lớp + xác suất)** của ViT và CNN, kèm **ảnh attention rollout** của ViT.
-- Tự resize ảnh về 64x64. Nạp checkpoint từ `outputs/checkpoints/`.
+- Gradio: người dùng upload ảnh -> hiển thị **Top-5 dự đoán (tên lớp + xác suất)** của ViT và CNN, kèm **ảnh attention rollout** của ViT.
+- Tự resize ảnh về 64x64. Nạp checkpoint từ `outputs/checkpoints/`; lấy tên lớp và mean/std từ checkpoint nên không cần có bộ dữ liệu trên máy chạy demo.
 - Chạy bằng `python app/demo.py`; ghi cách chạy trong README. Phải chạy được trên CPU.
 - Chuẩn bị 5-10 ảnh mẫu trong `app/examples/` (lấy từ tập test; dùng ảnh có giấy phép phù hợp).
 
@@ -287,7 +287,7 @@ Cột FLOPs/MACs bắt buộc có: đo nếu làm được, ghi "chưa có" nế
 5. `train.py`; train CNN rồi ViT (chạy nền, ghi log).
 6. `evaluate.py`, `error_analysis.py`.
 7. `attention.py`.
-8. `compare.py`. Nếu còn thời gian, làm thêm theo thứ tự: `gradcam.py`, đo FLOPs/MACs, 3 seed, ablation, CNN thứ hai có FLOPs xấp xỉ ViT.
+8. `compare.py`. Nếu còn thời gian, làm thêm theo thứ tự (ngược với thứ tự cắt ở mục 20): đo FLOPs/MACs, `gradcam.py`, 3 seed, ablation, CNN thứ hai có FLOPs xấp xỉ ViT.
 9. `demo.py`.
 10. `README.md` và `report/report.md`.
 
@@ -319,11 +319,11 @@ Cột FLOPs/MACs bắt buộc có: đo nếu làm được, ghi "chưa có" nế
 |---|---|---|---|
 | TV1 | Trưởng nhóm, dữ liệu | Mẫu đăng ký, khung repo, `utils.py`, `prepare_data.py`, `data.py`, `README.md`, duyệt PR | 1, 2, 8, 9 |
 | TV2 | ViT và attention | `vit.py`, `tests/test_models.py`, `attention.py` | 3 (ViT), 6 |
-| TV3 | CNN | `cnn.py`, `match_param_count`, đo thời gian/VRAM/tốc độ, `gradcam.py` nếu làm | 3 (CNN), 6 (Grad-CAM nếu có) |
+| TV3 | CNN | `cnn.py`, `match_param_count`, đo FLOPs/MACs, thời gian/VRAM/tốc độ, `gradcam.py` nếu làm | 3 (CNN), 6 (Grad-CAM nếu có) |
 | TV4 | Huấn luyện | `train.py`, `run_all.sh`, chạy thí nghiệm, quản lý checkpoint | 4 |
 | TV5 | Đánh giá và demo | `evaluate.py`, `error_analysis.py`, `compare.py`, `demo.py`, ghép báo cáo | 5, 7, 10 |
 
-Train chính chạy lần lượt trên máy GPU của một thành viên (nên là TV4); các thành viên khác dùng tài khoản Kaggle/Colab của mình nếu cần chạy thêm song song. Mỗi PR có một người khác review trước khi merge.
+Train chính chạy lần lượt trên máy GPU của một thành viên (nên là TV4); các thành viên khác dùng tài khoản Kaggle/Colab của mình nếu cần chạy thêm song song. Giai đoạn tài liệu làm thẳng trên `main`; từ TASK-001 trở đi, mỗi người làm trên nhánh riêng rồi mở PR gộp vào `main`, TV1 là người duyệt; PR của chính TV1 do TV4 duyệt.
 
 ## 20. Lịch và quy tắc cắt việc
 
@@ -341,7 +341,7 @@ Train chính chạy lần lượt trên máy GPU của một thành viên (nên 
 
 Quy tắc cắt việc:
 
-- **Thứ tự cắt khi trễ:** ablation, rồi 3 seed, rồi Grad-CAM. Giữ nguyên bộ lõi: ViT, CNN, attention, demo, báo cáo.
+- **Thứ tự cắt khi trễ:** CNN thứ hai có FLOPs xấp xỉ ViT, rồi ablation, rồi 3 seed, rồi Grad-CAM, cuối cùng mới đến đo FLOPs/MACs (căn cứ cho lập luận "cùng tham số không cùng chi phí"). Thí nghiệm SGD được cắt cùng lúc với CNN thứ hai; attention theo head và layer được cắt cùng lúc với Grad-CAM. Giữ nguyên bộ lõi: ViT, CNN, attention, demo, báo cáo.
 - **Chậm train:** 50 epoch là mức sàn, không giảm thêm. Nếu đến 13/11 ViT chưa train xong, cắt phần làm thêm và chuyển phần còn lại sang Kaggle/Colab, ghi rõ trong báo cáo.
 - **Kẹt dữ liệu hoặc GPU:** nếu đến 10/11 chưa chạy được Tiny ImageNet, chuyển sang CIFAR-100.
 
@@ -350,7 +350,7 @@ Quy tắc cắt việc:
 1. **Tên đề tài:** Phân loại ảnh 200 lớp trên Tiny ImageNet bằng Vision Transformer, so sánh với CNN cùng số tham số và trực quan hóa attention.
 2. **Hướng chính:** AI dự đoán.
 3. **Người sử dụng và vấn đề:** Sinh viên và người nghiên cứu thị giác máy tính cần chọn giữa ViT và CNN khi dữ liệu ít, ảnh độ phân giải thấp và số tham số bị giới hạn. Khó khăn hiện tại: ViT thường cần nhiều dữ liệu, các so sánh hay dùng mô hình khác cỡ nên khó công bằng, và khó biết mô hình đang nhìn vào vùng nào của ảnh.
-4. **Mục tiêu:** Có mô hình ViT tự cài đặt và CNN baseline chênh không quá 5% số tham số. Đo Top-1 và Top-5 trên tập test. Mức Top-1: ViT khoảng 40%, CNN khoảng 50% Top-1: mức dự đoán của nhóm, không phải cam kết và không phải điều kiện đạt; có thể thấp hơn khi chỉ train 50 epoch. Có hình attention cho ít nhất 12 ảnh.
+4. **Mục tiêu:** Có mô hình ViT tự cài đặt và CNN baseline chênh không quá 5% số tham số. Đo Top-1 và Top-5 trên tập test. Mức Top-1 dự đoán của nhóm là ViT khoảng 40%, CNN khoảng 50%; đây không phải cam kết và không phải điều kiện đạt, có thể thấp hơn khi chỉ train 50 epoch. Có hình attention cho ít nhất 12 ảnh.
 5. **Dữ liệu:** Tiny ImageNet trên Kaggle; trường dữ liệu gồm ảnh RGB 64x64 và nhãn lớp; quy mô 200 lớp, 100.000 ảnh train, 10.000 ảnh val có nhãn. Quyền sử dụng: [nhóm kiểm tra điều khoản trên trang Kaggle trước khi nộp]. Phương án thay thế: CIFAR-100.
 6. **Phạm vi:** Bắt buộc gồm ViT tự cài, CNN cùng số tham số, trực quan hóa attention, demo. Mở rộng nếu còn thời gian gồm Grad-CAM, đo FLOPs/MACs, 3 seed, ablation, CNN thứ hai có FLOPs xấp xỉ ViT.
 7. **Phương pháp:** Baseline là ResNet nhỏ tự cài, khớp số tham số với ViT. Giải pháp là ViT (patch embedding + Transformer encoder) dùng AdamW, warmup + cosine, Mixup/CutMix, trực quan hóa bằng CLS attention và attention rollout.

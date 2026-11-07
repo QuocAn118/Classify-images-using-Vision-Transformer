@@ -28,6 +28,8 @@ Với đầu việc nhỏ, một dòng bằng chứng trong `docs/06_VERIFICATIO
 
 ## Git
 
+- Giai đoạn tài liệu: làm thẳng trên `main`.
+- Từ TASK-001 trở đi, khi 5 người code song song: mỗi người làm trên nhánh riêng rồi mở PR gộp vào `main`, TV1 là người duyệt; PR của chính TV1 do TV4 duyệt.
 - Không dùng `git push --force` lên nhánh chung.
 - Commit message mô tả kết quả cụ thể, không thêm dòng `Co-Authored-By`.
 - AI chỉ commit hoặc push khi được yêu cầu.

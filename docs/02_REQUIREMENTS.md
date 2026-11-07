@@ -11,7 +11,7 @@ Các ngưỡng số lấy từ [AGENT_SPEC_ViT_TinyImageNet.md](../AGENT_SPEC_Vi
 - **Luồng bình thường:** Giải nén, sắp xếp `val/` theo lớp, kiểm tra số lượng, xuất train/val/test thành mảng `uint8` (.npy) đã resize về `img_size`, in và lưu thống kê.
 - **Quy tắc nghiệp vụ:** Train gốc chia 90/10 có phân tầng, seed cố định; val gốc là test; test gốc không nhãn bị bỏ qua.
 - **Lỗi và biên:** Thiếu file hoặc sai số lượng thì dừng và báo rõ; chạy lại lần hai không làm hỏng dữ liệu.
-- **Kết quả:** Mảng cache, `dataset_stats.json` (gồm thông tin cache), `samples.png`.
+- **Kết quả:** Mảng cache, `class_names.json`, `dataset_stats.json` (gồm thông tin cache), `samples.png`.
 
 ### FR-002: ViT tự cài
 - **Người sử dụng:** TV4 (train), TV2 (attention), TV5 (demo).
@@ -36,7 +36,7 @@ Các ngưỡng số lấy từ [AGENT_SPEC_ViT_TinyImageNet.md](../AGENT_SPEC_Vi
 - **Mục đích:** Train được từ một lệnh và chịu được ngắt phiên.
 - **Điều kiện trước / đầu vào:** Config, dữ liệu đã chuẩn bị.
 - **Luồng bình thường:** Mỗi epoch train, đánh giá validation, ghi log, lưu checkpoint tốt nhất và cuối.
-- **Quy tắc nghiệp vụ:** Chọn checkpoint theo validation Top-1, không đọc test; AdamW cho kết quả so sánh chính.
+- **Quy tắc nghiệp vụ:** Chọn checkpoint theo validation Top-1, không đọc test; AdamW cho kết quả so sánh chính; lr của CNN mặc định 2,5e-4, nếu chỉnh thì chỉ dựa trên validation; tên lần chạy gồm cả seed.
 - **Lỗi và biên:** `--resume` tiếp tục không trùng dòng log; phiên bị ngắt lúc lưu không hỏng checkpoint cũ; không có GPU thì dùng CPU.
 - **Kết quả:** Checkpoint, log CSV, hình đường cong học.
 
@@ -70,7 +70,7 @@ Các ngưỡng số lấy từ [AGENT_SPEC_ViT_TinyImageNet.md](../AGENT_SPEC_Vi
 ### FR-008: Demo
 - **Người sử dụng:** Người xem demo, giảng viên.
 - **Mục đích:** Thử mô hình trên một ảnh.
-- **Điều kiện trước / đầu vào:** Checkpoint ViT và CNN, ảnh tải lên.
+- **Điều kiện trước / đầu vào:** Checkpoint ViT và CNN (chứa tên lớp và mean/std, không cần bộ dữ liệu), ảnh tải lên.
 - **Luồng bình thường:** Tải ảnh, tự resize, hiển thị Top-5 của hai mô hình và ảnh attention rollout.
 - **Quy tắc nghiệp vụ:** Chạy được trên CPU; có ảnh mẫu trong `app/examples/`.
 - **Lỗi và biên:** Thiếu checkpoint hoặc file không phải ảnh thì báo lỗi dễ hiểu; ảnh xám hoặc có kênh alpha được chuyển về RGB.
@@ -93,10 +93,10 @@ Các ngưỡng số lấy từ [AGENT_SPEC_ViT_TinyImageNet.md](../AGENT_SPEC_Vi
 | AC-002 | Dữ liệu đã chuẩn bị | Tạo các tập | 90.000 train, 10.000 validation, 10.000 test; train và validation không trùng ảnh; mỗi lớp 450/50; có mảng cache khoảng 1,35 GB (tính tay); chạy lại không làm hỏng |
 | AC-003 | Thiếu thư mục dữ liệu | Chạy `scripts/prepare_data.py` | Dừng, báo lỗi kèm hướng dẫn tải |
 | AC-004 | ViT cấu hình mặc định | Forward input (2,3,64,64) | Output (2,200) |
-| AC-005 | ViT ở `eval()` | Gọi `return_attn=True` | Mỗi layer có attention (B,heads,N+1,N+1), mỗi hàng tổng bằng 1 (sai số 1e-4); hai nhánh attention cho cùng đầu ra (sai số nhỏ) |
+| AC-005 | ViT ở `eval()` | Gọi `return_attn=True` | Mỗi layer có attention (B,heads,N+1,N+1), mỗi hàng tổng bằng 1 (sai số 1e-4); logits hai nhánh chênh tuyệt đối tối đa 1e-4 |
 | AC-006 | ViT và CNN mặc định | Đếm tham số | Chênh không quá 5% |
-| AC-007 | Dữ liệu mẫu nhỏ, CPU | Chạy train với `--quick` | Kết thúc không lỗi, có checkpoint và log CSV |
-| AC-008 | Train bị ngắt sau epoch k | Chạy `--resume` | Tiếp tục từ epoch k+1, log không trùng dòng, lr schedule khớp với chạy liền mạch, loss tiếp tục liền mạch trong sai số (không đòi trọng số giống hệt, vì shuffle, augmentation và GPU không tất định) |
+| AC-007 | Không có dữ liệu thật, CPU | Chạy train với `--quick` | Dùng dữ liệu giả và in cảnh báo; kết thúc không lỗi, có checkpoint và log CSV |
+| AC-008 | Train bị ngắt sau epoch k | Chạy `--resume` | Tiếp tục từ epoch k+1, log không trùng dòng, lr schedule khớp với chạy liền mạch (chênh không quá 1e-8), `val_loss` ở epoch k+1 chênh không quá 10% so với epoch k (không đòi trọng số giống hệt, vì shuffle, augmentation và GPU không tất định) |
 | AC-009 | Có checkpoint | Chạy `src.evaluate` | Có Top-1, Top-5, per-class CSV, top 20 cặp nhầm, hình ảnh sai cho cả hai mô hình |
 | AC-010 | Có checkpoint ViT | Chạy `src.attention` | Có hình cho ít nhất 12 ảnh, gồm cả đúng và sai |
 | AC-011 | Có JSON kết quả | Chạy `src.compare` | Bảng khớp với JSON; số thiếu hiện "chưa có" |
@@ -107,9 +107,9 @@ Các ngưỡng số lấy từ [AGENT_SPEC_ViT_TinyImageNet.md](../AGENT_SPEC_Vi
 ## Yêu cầu chất lượng phù hợp dự án
 - **Phân quyền, bảo vệ dữ liệu:** Không commit `kaggle.json`, dữ liệu hoặc checkpoint. Nạp checkpoint với `weights_only=True`.
 - **Hiệu năng:** Máy train có 6GB VRAM. Mặc định batch 64, lr ViT 2,5e-4, ViT và CNN cùng batch. Đo VRAM đỉnh bằng `--quick` trước khi train thật. Chưa đặt ngưỡng tốc độ; đo và báo cáo thời gian mỗi epoch và số ảnh/giây.
-- **Độ tin cậy kết quả:** Tập test 10.000 ảnh cho sai số khoảng ±0,5 điểm phần trăm, và chỉ có 1 seed. Chênh lệch giữa ViT và CNN dưới khoảng 1–1,5 điểm không đủ để kết luận mô hình nào tốt hơn.
+- **Độ tin cậy kết quả:** Tập test 10.000 ảnh cho sai số khoảng ±0,5 điểm phần trăm, và chỉ có 1 seed. Chênh lệch giữa ViT và CNN dưới khoảng 1–1,5 điểm không đủ để kết luận mô hình nào tốt hơn. Nếu chạy 3 seed thì cập nhật câu này.
 - **Khả năng tái lập:** Seed cố định, siêu tham số nằm trong YAML, không hardcode đường dẫn.
-- **Khả năng bảo trì:** Type hint, docstring ngắn, thay đổi qua PR có người review.
+- **Khả năng bảo trì:** Type hint, docstring ngắn. Từ TASK-001 trở đi, thay đổi đi qua nhánh riêng và PR có người review (TV1 duyệt; PR của chính TV1 do TV4 duyệt); giai đoạn tài liệu làm thẳng trên `main`.
 - **Thiết bị và trình duyệt hỗ trợ:** Python 3.10+; demo chạy trên trình duyệt bằng CPU.
 
 ## Theo dõi liên kết
