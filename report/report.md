@@ -235,8 +235,14 @@ Hai mô hình được đánh giá trên cùng 10.000 ảnh test của Tiny Imag
 | FLOPs cho một ảnh 64 × 64 | 824.283.136 | 809.050.112 |
 | Thời gian trung bình mỗi epoch (train + validation) | 31,94 giây | 22,36 giây |
 | Tổng thời gian 50 epoch (train + validation) | 26,61 phút | 18,64 phút |
-| Tốc độ suy luận (ảnh/giây) | Chưa đo | Chưa đo |
+| Tốc độ suy luận trên CPU (ảnh/giây, batch 64) | 124,40 | 159,23 |
 | VRAM đỉnh khi huấn luyện | 498,97 MiB | 320,47 MiB |
+
+![Top-1 của ViT-small và CNN trên tập test](../outputs/figures/comparison_test_top1.png)
+
+![Top-1 trên tập validation của hai mô hình qua 50 epoch](../outputs/figures/comparison_val_top1.png)
+
+Bảng kết quả do `src.compare` tạo: [Markdown](../outputs/results/comparison.md) · [CSV](../outputs/results/comparison.csv).
 
 Trong lần chạy với seed 42, CNN đạt Top-1 cao hơn ViT **_10,57 điểm phần trăm_**, tương ứng với **_1.057 ảnh_** được phân loại đúng nhiều hơn. Ở Top-5, khoảng cách là **_8,98 điểm phần trăm_**. Hai mô hình chỉ chênh khoảng 0,63% về số tham số, nhưng CNN hoàn thành mỗi epoch nhanh hơn khoảng 9,57 giây trên cùng GPU NVIDIA GeForce RTX 5060 Laptop và sử dụng ít VRAM hơn.
 

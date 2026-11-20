@@ -4,6 +4,7 @@ import csv
 import json
 from pathlib import Path
 from src.data import build_loader
+from time import perf_counter
 
 def load_model_for_evaluation(checkpoint_path, device):
     checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=True)
@@ -109,6 +110,46 @@ def save_results(run_name, metrics, per_class, predictions):
                                                "pred_label", "confidence"],)
         writer.writeheader()
         writer.writerows(predictions)
+
+def measure_inference_speed(model, images, repeats=10):
+    model.eval()
+    with torch.inference_mode():
+        for _ in range(3):
+            model(images)
+
+        start = perf_counter()
+        for _ in range(repeats):
+            model(images)
+        elapsed = perf_counter() - start
+
+    return images.size(0) * repeats / elapsed
+
+def update_inference_speeds():
+    from src.data import build_loader
+
+    results_dir = Path("outputs/results")
+    checkpoint_dir = Path("outputs/checkpoints")
+    images = None
+
+    for run_name in ("vit_small_seed42", "cnn_baseline_seed42"):
+        result_path = results_dir / f"{run_name}.json"
+        result = json.loads(result_path.read_text(encoding="utf-8"))
+
+        checkpoint_path = checkpoint_dir / f"{run_name}_best.pt"
+        model, cfg = load_model_for_evaluation(checkpoint_path, device="cpu")
+
+        if images is None:
+            cfg["data"].update(batch_size=64, num_workers=0)
+            images, _ = next(iter(build_loader(cfg, "val")))
+
+        speed = measure_inference_speed(model, images)
+        result["inference_img_per_s"] = speed
+        result_path.write_text(
+            json.dumps(result, indent=2, ensure_ascii=False),
+            encoding="utf-8",
+        )
+
+        print(f"{run_name}: {speed:.2f} ảnh/giây (CPU, batch {images.size(0)})")
 
 def main():
     device = "cpu"

@@ -1,0 +1,6 @@
+# So sánh ViT và CNN
+
+| run_name | model | seed | params | flops_per_image | macs | top1 | top5 | epoch_time_s | inference_img_per_s | peak_vram_mb |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| vit_small_seed42 | vit | 42 | 6436296 | 824283136 | chưa có | 48.46 | 72.76 | 31.935390919999918 | 124.40271631779203 | 498.97412109375 |
+| cnn_baseline_seed42 | resnet_small | 42 | 6476808 | 809050112 | chưa có | 59.03 | 81.74 | 22.364304888001936 | 159.2307601783467 | 320.47216796875 |

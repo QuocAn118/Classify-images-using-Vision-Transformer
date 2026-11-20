@@ -7,6 +7,6 @@
   "top1": 48.46,
   "top5": 72.76,
   "epoch_time_s": null,
-  "inference_img_per_s": null,
+  "inference_img_per_s": 124.40271631779203,
   "peak_vram_mb": null
 }

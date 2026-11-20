@@ -1,6 +1,6 @@
 # Đánh giá, attention và so sánh
 
-**Người giữ:** TV5 (đánh giá, so sánh), TV2 (attention). **Đầu việc:** TASK-007, TASK-008, TASK-009, TASK-012. **Code:** đã có `src/attention.py` (TASK-008, TV1 review và gộp qua [PR #6](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/6) ngày 2026-11-20). Đã triển khai `src/evaluate.py` và `scripts/error_analysis.py` cho TASK-007 trên nhánh `vananh`. `src/compare.py` thuộc TASK-009, chưa triển khai.
+**Người giữ:** TV5 (đánh giá, so sánh), TV2 (attention). **Đầu việc:** TASK-007, TASK-008, TASK-009, TASK-012. **Code:** đã có `src/attention.py` (TASK-008, TV1 review và gộp qua [PR #6](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/6) ngày 2026-11-20). Đã triển khai `src/evaluate.py` và `scripts/error_analysis.py` cho TASK-007 trên nhánh `vananh`. Đã triển khai `src/compare.py` cho TASK-009. Chạy `python -m src.compare` từ thư mục gốc để tạo bảng so sánh ViT–CNN và hai biểu đồ.
 
 ## Thành phần làm gì
 Đo kết quả cuối trên test, phân tích lỗi, trực quan hóa attention của ViT và sinh bảng so sánh ViT với CNN. Mọi số đều lấy từ file.
@@ -83,7 +83,7 @@ python -m src.attention --checkpoint outputs/checkpoints/vit_small_seed42_best.p
 | Đánh giá | `python -m src.evaluate` | Hai checkpoint ViT/CNN, cache test và `class_names.json` | Đã đánh giá 10.000 ảnh cho mỗi mô hình và lưu kết quả JSON, CSV trong `outputs/results/`. |
 | Phân tích lỗi | `python -m scripts.error_analysis` | CSV dự đoán, CSV kết quả từng lớp, `class_names.json` và `test_x.npy` | Đã thống kê các cặp lớp hay nhầm, xếp hạng lớp và lưu confusion matrix cùng lưới ảnh sai trong `outputs/figures/`. |
 | Attention | `python -m src.attention --checkpoint outputs/checkpoints/vit_small_seed42_best.pt --split test` | Checkpoint ViT đã chốt, cache test và class_names khớp | Đã chạy CPU 2026-11-20; 12 ảnh, TV1 chạy lại khớp review |
-| So sánh | `python -m src.compare` | Có JSON kết quả | Chưa có code |
+| So sánh | `python -m src.compare` | Hai JSON kết quả test, số liệu FLOPs của TASK-005, số liệu huấn luyện của TASK-011 và hai log theo epoch | Lưu `comparison.csv` và `comparison.md` vào `outputs/results/`. Lưu `comparison_test_top1.png` và `comparison_val_top1.png` vào `outputs/figures/`. |
 
 ## Rủi ro
 - Rò rỉ dữ liệu test: đánh giá số cuối và vẽ attention chỉ sau khi chốt cấu hình/checkpoint. Không dùng nhóm ảnh đã chọn cân bằng đúng/sai để báo accuracy hoặc chọn mô hình.
