@@ -7,7 +7,7 @@
 | Mục | Người viết | Viết khi có |
 |---|---|---|
 | 1, 2, 8, 9 | TV1 | 2 đã có; 1 viết ngay; 8, 9 sau khi có train, đánh giá, demo |
-| 3.1, 6 | TV2 | Đã có kiến trúc và hình attention thật; TASK-008 chờ TV1 review |
+| 3.1, 6 | TV2 | Đã có kiến trúc và hình attention thật; TASK-008 xong (PR #6) |
 | 3.2, 6.4 (Grad-CAM, nếu làm) | TV3 | Sau TASK-005 |
 | 3.3, 4 | TV4 | Sau TASK-006, TASK-011 |
 | 5, 7, 10 | TV5 | Sau TASK-007, TASK-009 |
@@ -266,7 +266,7 @@ TV5 và các thành viên bổ sung phân tích lỗi, giới hạn ngân sách 
 | `src/models/cnn.py` | ResNet nhỏ, `match_param_count` | TV3 | Chưa có |
 | `src/train.py` | Vòng lặp train | TV4 | Chưa có |
 | `src/evaluate.py`, `scripts/error_analysis.py`, `src/compare.py` | Đánh giá, phân tích lỗi, so sánh | TV5 | Chưa có |
-| `src/attention.py` | CLS attention, rollout và CLI từ checkpoint | TV2 | Có code, 12 ảnh thật; chờ review TASK-008 |
+| `src/attention.py` | CLS attention, rollout và CLI từ checkpoint | TV2 | Có code, 12 ảnh thật |
 | `app/demo.py` | Demo Gradio | TV5 | Chưa có |
 
 **Cài đặt và chạy.**

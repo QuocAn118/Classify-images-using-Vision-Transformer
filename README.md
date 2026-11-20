@@ -2,7 +2,7 @@
 
 Đồ án môn Học sâu, đề số 9. Nhóm tự cài ViT, so sánh với một CNN có cùng số tham số và trực quan hóa attention.
 
-> **Trạng thái:** đã có khung repo (TASK-001), chuẩn bị dữ liệu (TASK-002) và DataLoader (TASK-003). ViT và test (TASK-004, TV2) đã gộp vào `main` qua [PR #2](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/2). CNN baseline (TASK-005, TV3) gộp qua [PR #3](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/3). TASK-008 (TV2) có code và hình attention từ checkpoint thật trên `thanhbinh`, chờ TV1 review tại [PR #6](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/6). Code train của TV4 chưa gộp vào `main`; checkpoint TV4 được bàn giao riêng để chạy attention.
+> **Trạng thái:** đã có khung repo (TASK-001), chuẩn bị dữ liệu (TASK-002) và DataLoader (TASK-003). ViT và test (TASK-004, TV2) đã gộp vào `main` qua [PR #2](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/2). CNN baseline (TASK-005, TV3) gộp qua [PR #3](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/3). Trực quan hóa attention (TASK-008, TV2) gộp qua [PR #6](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/6), có hình 12 ảnh từ checkpoint thật. Code train của TV4 chưa gộp vào `main`; checkpoint TV4 được bàn giao riêng để chạy attention.
 
 ## Bài toán
 

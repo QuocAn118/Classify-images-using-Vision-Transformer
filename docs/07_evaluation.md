@@ -1,6 +1,6 @@
 # Đánh giá, attention và so sánh
 
-**Người giữ:** TV5 (đánh giá, so sánh), TV2 (attention). **Đầu việc:** TASK-007, TASK-008, TASK-009, TASK-012. **Code:** đã có `src/attention.py` (TASK-008 trên `thanhbinh`, chờ TV1 review tại [PR #6](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/6)); `src/evaluate.py`, `scripts/error_analysis.py`, `src/compare.py` chưa có.
+**Người giữ:** TV5 (đánh giá, so sánh), TV2 (attention). **Đầu việc:** TASK-007, TASK-008, TASK-009, TASK-012. **Code:** đã có `src/attention.py` (TASK-008, TV1 review và gộp qua [PR #6](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/6) ngày 2026-11-20); `src/evaluate.py`, `scripts/error_analysis.py`, `src/compare.py` chưa có.
 
 ## Thành phần làm gì
 Đo kết quả cuối trên test, phân tích lỗi, trực quan hóa attention của ViT và sinh bảng so sánh ViT với CNN. Mọi số đều lấy từ file.
@@ -51,7 +51,7 @@ Thông báo trước triển khai tại [Issue #4](https://github.com/QuocAn118/
 - Chạy CPU trên cache test (val gốc Tiny ImageNet), seed chọn ảnh 42; scan 512 ảnh, chọn 12 ảnh thuộc 12 lớp, 6 đúng và 6 sai. Đây là chọn mẫu minh họa, không phải phép đo Top-1/Top-5.
 - [Gallery](../outputs/figures/attention/vit_small_seed42_test/gallery.png), [manifest](../outputs/figures/attention/vit_small_seed42_test/manifest.json) và [bằng chứng kiểm tra](../outputs/results/task008_attention_checks.json). Mỗi ảnh ghép có ảnh gốc, CLS layer cuối và rollout; `maps.npz` lưu hai loại map float32 `(12,64,64)`, hữu hạn trong `[0,1]`.
 - `python -m pytest -q -W error` → **73 passed**, gồm 21 ca attention. Có ma trận tính tay kiểm thứ tự rollout, head average, resize, map hằng, checkpoint, chọn mẫu và pipeline vẽ; regression cho lỗi CLI `--help` trên Windows cp1258 ([Issue #5](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/issues/5)).
-- Môi trường: Python 3.12.10, torch 2.15.0+cpu; chưa kiểm tra attention trên CUDA/AMP. Code và hình chờ TV1 review, chưa tự đánh dấu Hoàn thành.
+- Môi trường: Python 3.12.10, torch 2.15.0+cpu; chưa kiểm tra attention trên CUDA/AMP. TV1 review: chạy lại lệnh dưới với cùng checkpoint, chọn đúng 12 ảnh như manifest, map lệch tối đa 1,3e-6; gộp PR #6 ngày 2026-11-20.
 
 Lệnh đã chạy (chạy tại gốc repo, cần checkpoint và cache):
 
@@ -81,7 +81,7 @@ python -m src.attention --checkpoint outputs/checkpoints/vit_small_seed42_best.p
 | Mục đích | Lệnh | Điều kiện | Trạng thái |
 |---|---|---|---|
 | Đánh giá | `python -m src.evaluate` | Có checkpoint | Chưa có code |
-| Attention | `python -m src.attention --checkpoint outputs/checkpoints/vit_small_seed42_best.pt --split test` | Checkpoint ViT đã chốt, cache test và class_names khớp | Đã chạy CPU 2026-11-20; 12 ảnh, chờ TV1 review |
+| Attention | `python -m src.attention --checkpoint outputs/checkpoints/vit_small_seed42_best.pt --split test` | Checkpoint ViT đã chốt, cache test và class_names khớp | Đã chạy CPU 2026-11-20; 12 ảnh, TV1 chạy lại khớp review |
 | So sánh | `python -m src.compare` | Có JSON kết quả | Chưa có code |
 
 ## Rủi ro

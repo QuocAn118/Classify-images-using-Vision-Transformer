@@ -237,6 +237,14 @@ Ghi ngắn sau mỗi buổi hoặc mốc đáng kể.
 - **Explain / Documentation:** Hợp đồng và lệnh chạy ở `docs/07_evaluation.md`, README; mục 6 báo cáo có công thức, gallery, nguồn checkpoint và nhận xét định tính của ảnh đúng/sai. Sửa giới hạn phần TV2 và dòng mã nguồn attention, giữ phần TV1/TV3/TV4/TV5. Ghi nhận công cụ trong AI_Usage.
 - **Giới hạn / bước tiếp theo:** Chưa kiểm tra attention CUDA/AMP, chưa làm can thiệp/định vị hoặc accuracy toàn test. Hình chọn cân bằng không đại diện accuracy. Đã commit code/hình/báo cáo `8db4115`, push riêng `fork/thanhbinh` và mở [PR #6](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/6) để TV1 review; PR đang mở, chưa merge, chưa tự đánh dấu TASK-008 hoặc bug Hoàn thành. Local `main` vẫn ở `b29de54`, main repo nhóm ở `59f57c8` do TV1 cập nhật trước buổi này. Đã thử đọc GitHub Projects nhưng API trả `INSUFFICIENT_SCOPES`, chưa cập nhật được bảng; trạng thái/bằng chứng ghi trong Issue và PR.
 
+## 2026-11-20 (review và gộp PR #6)
+
+- **Đầu việc:** TV1 review TASK-008 (TV2), gộp PR #6 vào `main`.
+- **Kết quả / thay đổi chính:** gộp bằng merge commit để giữ commit của TV2. Dùng test để vẽ attention là đúng spec mục 229 (12 ảnh test, có đúng và sai), TV2 đã báo đổi hợp đồng ở Issue #4; code không tính accuracy test hay chọn checkpoint.
+- **Bằng chứng kiểm tra:** máy TV1 (CPU): `python -m pytest -q -W error` → 73 passed; SHA-256 checkpoint `vit_small_seed42_best.pt` khớp `97fbd0da…` (epoch 50); chạy lại `python -m src.attention` cùng tham số → cùng 12 ảnh, map CLS/rollout lệch tối đa 1,3e-6 so với `maps.npz`.
+- **Điều chưa xác minh:** code train của TV4 (nhánh `hoangdang`) chưa review, nên checkpoint dùng vẽ hình chưa được xác nhận quy trình; thứ tự ô hình (gốc, CLS, rollout) khác spec (gốc, rollout, CLS); chưa chạy CUDA.
+- **Bước tiếp theo:** TV4 mở PR cho TASK-006/011; nếu phải train lại thì TV2 chạy lại `src.attention`.
+
 ## Mẫu buổi làm
 - Ngày: [YYYY-MM-DD]
 - Đầu việc: [TASK-xxx — tên]
