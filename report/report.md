@@ -224,9 +224,31 @@ Ngân sách 50 epoch có thể làm ViT thiệt hơn CNN, nên kết luận ViT 
 
 ## 5. So sánh ViT với CNN
 
-*Người viết: TV5.* Chưa có.
+*Người viết: TV5.* 
+Hai mô hình được đánh giá trên cùng 10.000 ảnh test của Tiny ImageNet, mỗi ảnh có kích thước 64 × 64 pixel. Cả hai sử dụng checkpoint tốt nhất đã chọn theo Top-1 trên tập validation, với seed 42
 
-Cần có: bảng so sánh theo mục 12 spec (Top-1, Top-5 trên test, số tham số, FLOPs/MACs, thời gian train, tốc độ inference, VRAM đỉnh), dẫn về file kết quả thực tế; nhận xét ViT thiếu inductive bias nên cần nhiều dữ liệu và augmentation; nêu rõ cùng số tham số không đồng nghĩa cùng chi phí tính toán. Chưa có cơ sở kết luận ViT tốt hơn hoặc kém hơn CNN; FLOPs/MACs chưa đo thì ghi "chưa có".
+| Chỉ số | ViT-small | CNN baseline (ResNet-small) |
+|---|:---:|:---:|
+| Top-1 trên test | 48,46% | 59,03% |
+| Top-5 trên test | 72,76% | 81,74% |
+| Số tham số | 6.436.296 | 6.476.808 |
+| FLOPs cho một ảnh 64 × 64 | 824.283.136 | 809.050.112 |
+| Thời gian trung bình mỗi epoch (train + validation) | 31,94 giây | 22,36 giây |
+| Tổng thời gian 50 epoch (train + validation) | 26,61 phút | 18,64 phút |
+| Tốc độ suy luận (ảnh/giây) | Chưa đo | Chưa đo |
+| VRAM đỉnh khi huấn luyện | 498,97 MiB | 320,47 MiB |
+
+Trong lần chạy với seed 42, CNN đạt Top-1 cao hơn ViT **_10,57 điểm phần trăm_**, tương ứng với **_1.057 ảnh_** được phân loại đúng nhiều hơn. Ở Top-5, khoảng cách là **_8,98 điểm phần trăm_**. Hai mô hình chỉ chênh khoảng 0,63% về số tham số, nhưng CNN hoàn thành mỗi epoch nhanh hơn khoảng 9,57 giây trên cùng GPU NVIDIA GeForce RTX 5060 Laptop và sử dụng ít VRAM hơn.
+
+Một cách lý giải có thể liên quan đến đặc điểm kiến trúc. Các lớp tích chập của CNN khai thác trực tiếp quan hệ giữa những pixel lân cận và dùng chung bộ lọc ở nhiều vị trí. ViT có ít ràng buộc cục bộ hơn, nên lượng dữ liệu và cách tăng cường dữ liệu có thể ảnh hưởng đến việc học các đặc trưng này<br>
+Thí nghiệm hiện tại dùng một seed và chưa khảo sát riêng ảnh hưởng của từng yếu tố, nên kết luận chỉ áp dụng cho hai cấu hình đã thử.
+
+**Nguồn**
+
+- Kết quả test: [ViT-small](../outputs/results/vit_small_seed42.json) và [CNN baseline](../outputs/results/cnn_baseline_seed42.json).
+- Số tham số và FLOPs: [kết quả đo TASK-005](../outputs/results/task005_cnn_checks.json).
+- Thời gian huấn luyện, thiết bị và VRAM: [kết quả TASK-011](../outputs/results/task011_training_checks.json).
+
 
 ## 6. Trực quan hóa attention (TV2)
 
@@ -277,11 +299,62 @@ Một số ví dụ trong gallery (confidence là softmax của lớp dự đoá
 Chưa có. Phần mở rộng, chỉ làm nếu còn thời gian theo thứ tự cắt việc trong [docs/03_plan.md](../docs/03_plan.md).
 
 ## 7. Phân tích lỗi và giới hạn
+### 7.1. Dấu hiệu overfitting
 
-*Người viết: TV5; mỗi người bổ sung giới hạn của phần mình.*
+Đường cong huấn luyện và validation của hai mô hình được trình bày ở mục 4.2. Với ViT-small, validation loss đạt mức thấp nhất là 2,816 ở epoch 36. Từ epoch 36 đến epoch 50, train loss giảm từ 2,870 xuống 2,584, trong khi
+validation loss tăng nhẹ lên 2,836. Diễn biến này gợi ý ViT bắt đầu có dấu hiệu overfitting nhẹ ở cuối quá trình huấn luyện<br>
 
-Cần có: overfit (so sánh đường cong train và validation); lớp hay bị nhầm và ví dụ ảnh sai; ảnh 64 × 64 mất chi tiết; giới hạn tính toán. Bắt buộc có đoạn về độ tin cậy: tập test 10.000 ảnh cho sai số khoảng ±0,5 điểm phần trăm và chỉ chạy 1 seed, nên chênh lệch giữa ViT và CNN dưới khoảng 1–1,5 điểm không đủ để kết luận mô hình nào tốt hơn (nếu chạy 3 seed thì cập nhật câu này).
+Với CNN, từ epoch 25 đến epoch 50, train loss giảm từ 3,049 xuống 2,584 và validation loss giảm từ 2,593 xuống 2,391. Validation loss đạt mức thấp
+nhất ở epoch cuối, nên chưa thấy dấu hiệu overfitting rõ rệt trong phạm vi 50 epoch. Do quá trình train sử dụng augmentation và nhãn trộn, nhận xét trên dựa vào xu hướng của từng đường loss qua các epoch<br>
 
+**Nguồn số liệu:** [log ViT-small](../outputs/logs/vit_small_seed42.csv) và [log CNN baseline](../outputs/logs/cnn_baseline_seed42.csv).
+
+### 7.2. Các cặp lớp thường bị nhầm và độ chính xác theo lớp
+
+Trên 10.000 ảnh test, ViT-small dự đoán sai 5.154 ảnh và CNN baseline dự đoán sai 4.097 ảnh. Bảng dưới liệt kê ba cặp nhầm thường gặp nhất của mỗi mô hình. Mũi tên đi từ nhãn thật sang nhãn dự đoán.
+
+| Hạng | ViT-small | Số ảnh | CNN baseline | Số ảnh |
+|---:|---|---:|---|---:|
+| 1 | convertible → beach wagon | 16 | tabby → Egyptian cat | 13 |
+| 2 | tabby → Egyptian cat | 13 | Egyptian cat → tabby | 11 |
+| 3 | standard poodle → Labrador retriever | 10 | pop bottle → beer bottle | 10 |
+
+ViT thường nhầm nhất ở cặp `convertible` → `beach wagon`, với 16 trong 50 ảnh `convertible` bị phân loại nhầm theo chiều này (32%). Với CNN, hai cặp đứng đầu là hai chiều nhầm giữa `tabby` và `Egyptian cat`, tổng cộng 24 ảnh.
+
+Xét độ chính xác trên từng lớp, CNN cao hơn ViT ở 168 trong 200 lớp, ViT cao hơn CNN ở 13 lớp và hai mô hình bằng nhau ở 19 lớp. Bảng dưới đưa ra ba ví dụ, mỗi lớp gồm 50 ảnh test.
+
+| Lớp | ViT-small | CNN baseline | Chênh lệch |
+|---|---:|---:|---|
+| teddy | 12/50 (24%) | 31/50 (62%) | CNN cao hơn 38 điểm phần trăm |
+| tabby | 13/50 (26%) | 26/50 (52%) | CNN cao hơn 26 điểm phần trăm |
+| punching bag | 21/50 (42%) | 16/50 (32%) | ViT cao hơn 10 điểm phần trăm |
+
+`teddy` là lớp CNN có lợi thế lớn nhất so với ViT, còn `punching bag` là lớp ViT có lợi thế lớn nhất so với CNN. Riêng với `tabby`, cả hai mô hình đều nhầm 13 ảnh thành `Egyptian cat`. Điểm khác biệt nằm ở các ảnh bị nhầm sang những lớp khác: ViT nhầm thêm 24 ảnh, còn CNN nhầm thêm 11 ảnh. Vì vậy, CNN nhận diện đúng 26 ảnh `tabby`, gấp đôi con số 13 ảnh của ViT.
+
+**Nguồn số liệu**
+
+- Các cặp lớp hay nhầm của [ViT-small](../outputs/results/vit_small_seed42_top20_confusions.csv) và [CNN baseline](../outputs/results/cnn_baseline_seed42_top20_confusions.csv).
+- Độ chính xác theo lớp của [ViT-small](../outputs/results/vit_small_seed42_per_class.csv) và [CNN baseline](../outputs/results/cnn_baseline_seed42_per_class.csv).
+
+### 7.3. Ví dụ ảnh dự đoán sai và ảnh hưởng của độ phân giải
+
+Mỗi hình dưới đây gồm 20 ảnh được chọn ngẫu nhiên từ những ảnh mà mô hình tương ứng dự đoán sai, với seed 42. Dưới mỗi ảnh, `True` là nhãn thật, `Pred` là nhãn dự đoán và tỷ lệ phần trăm là độ tin cậy mô hình gán cho
+nhãn đã chọn
+
+![20 ảnh test ViT-small dự đoán sai](../outputs/figures/errors_vit_small_seed42.png)
+
+![20 ảnh test CNN baseline dự đoán sai](../outputs/figures/errors_cnn_baseline_seed42.png)
+
+Ở độ phân giải 64 × 64 pixel, các chi tiết nhỏ như hoa văn lông mèo hoặc đường nét thân xe có thể khó nhận biết, đặc biệt khi đối tượng chỉ chiếm một phần nhỏ của ảnh. Đây là một giả thuyết cho những cặp nhầm quan sát
+được ở mục 7.2. Để kiểm chứng ảnh hưởng riêng của độ phân giải, cần so sánh thêm với ảnh có độ phân giải cao hơn.
+
+### 7.4. Giới hạn tính toán và độ tin cậy
+
+Hai mô hình được huấn luyện 50 epoch trên GPU NVIDIA GeForce RTX 5060 Laptop, với một seed duy nhất là 42. Vì vậy, kết quả ở mục 5 phản ánh hiệu năng trong ngân sách huấn luyện đã thử. Nhóm chưa đo được mức dao động của kết quả khi thay đổi seed hoặc tăng số epoch.
+
+Với 10.000 ảnh test và Top-1 trong khoảng 48–59%, sai số chuẩn ước tính của từng giá trị Top-1 là khoảng 0,5 điểm phần trăm. Do chỉ chạy một seed, chênh lệch dưới khoảng 1–1,5 điểm phần trăm cần được diễn giải thận trọng và chưa đủ để kết luận mô hình nào tốt hơn. Trong lần chạy này, CNN đạt Top-1 cao hơn ViT 10,57 điểm phần trăm trên cùng tập test. Cần lặp lại với nhiều seed để đánh giá mức độ ổn định của chênh lệch này.
+
+---
 Giới hạn phần TV2: kiểm chứng chức năng và sinh hình attention được chạy trên CPU; chưa chạy attention trên CUDA/AMP hoặc benchmark tốc độ/VRAM. Đã có hình thật từ checkpoint được bàn giao, nhưng nhóm ảnh chọn cân bằng đúng/sai không đại diện cho accuracy toàn bộ test. Bản đồ có lưới patch thô, được nội suy và chuẩn hóa riêng; chưa có kiểm chứng định vị hoặc quan hệ nhân quả. Các test truyền gradient và khớp hai nhánh không thay thế đánh giá accuracy hoặc phân tích overfit của các phần thực nghiệm còn lại.
 
 TV5 và các thành viên bổ sung phân tích lỗi, giới hạn ngân sách huấn luyện và độ tin cậy của kết quả sau khi hoàn thành thí nghiệm. Không kết luận ưu thế giữa hai mô hình khi chưa có số liệu.
