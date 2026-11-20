@@ -1,6 +1,6 @@
 # Demo
 
-**Người giữ:** TV5. **Đầu việc:** TASK-010. **Code:** `app/demo.py` (chưa có).
+**Người giữ:** TV5<br> **Đầu việc:** TASK-010. **Code:** `app/demo.py`
 
 ## Thành phần làm gì
 Giao diện Gradio chạy cục bộ trên CPU: tải một ảnh lên, xem Top-5 của ViT và CNN cùng ảnh attention rollout. Không cần bộ dữ liệu, chỉ cần checkpoint.
@@ -28,6 +28,6 @@ Giao diện Gradio chạy cục bộ trên CPU: tải một ảnh lên, xem Top-
 
 | Lệnh | Điều kiện | Trạng thái |
 |---|---|---|
-| `python app/demo.py` | Có checkpoint, đã cài `gradio` | Chưa có code |
+| `python app/demo.py` | Có checkpoint, đã cài `gradio` | Đã có code |
 
 Kiểm tra bằng trình duyệt: tải ảnh, đối chiếu Top-5 và ảnh attention.

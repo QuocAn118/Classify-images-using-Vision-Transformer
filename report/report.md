@@ -363,6 +363,7 @@ Với 10.000 ảnh test và Top-1 trong khoảng 48–59%, sai số chuẩn ư�
 ---
 Giới hạn phần TV2: kiểm chứng chức năng và sinh hình attention được chạy trên CPU; chưa chạy attention trên CUDA/AMP hoặc benchmark tốc độ/VRAM. Đã có hình thật từ checkpoint được bàn giao, nhưng nhóm ảnh chọn cân bằng đúng/sai không đại diện cho accuracy toàn bộ test. Bản đồ có lưới patch thô, được nội suy và chuẩn hóa riêng; chưa có kiểm chứng định vị hoặc quan hệ nhân quả. Các test truyền gradient và khớp hai nhánh không thay thế đánh giá accuracy hoặc phân tích overfit của các phần thực nghiệm còn lại.
 
+---
 TV5 và các thành viên bổ sung phân tích lỗi, giới hạn ngân sách huấn luyện và độ tin cậy của kết quả sau khi hoàn thành thí nghiệm. Không kết luận ưu thế giữa hai mô hình khi chưa có số liệu.
 
 ## 8. Mã nguồn, hướng dẫn cài đặt, chạy và demo
@@ -379,9 +380,9 @@ TV5 và các thành viên bổ sung phân tích lỗi, giới hạn ngân sách 
 | `src/models/vit.py`, `src/models/__init__.py` | ViT tự cài, `build_model` | TV2 | Có |
 | `src/models/cnn.py` | ResNet nhỏ, `match_param_count` | TV3 | Có |
 | `src/train.py` | Vòng lặp train, quick, resume | TV4 | Có code, đã train 50 epoch |
-| `src/evaluate.py`, `scripts/error_analysis.py`, `src/compare.py` | Đánh giá, phân tích lỗi, so sánh | TV5 | Chưa có |
+| `src/evaluate.py`, `scripts/error_analysis.py`, `src/compare.py` | Đánh giá, phân tích lỗi, so sánh | TV5 | Có |
 | `src/attention.py` | CLS attention, rollout và CLI từ checkpoint | TV2 | Có code, 12 ảnh thật |
-| `app/demo.py` | Demo Gradio | TV5 | Chưa có |
+| `app/demo.py` | Demo Gradio | TV5 | Có |
 
 **Cài đặt và chạy.**
 
