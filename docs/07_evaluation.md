@@ -1,6 +1,6 @@
 # Đánh giá, attention và so sánh
 
-**Người giữ:** TV5 (đánh giá, so sánh), TV2 (attention). **Đầu việc:** TASK-007, TASK-008, TASK-009, TASK-012. **Code:** đã có `src/attention.py` (TASK-008, TV1 review và gộp qua [PR #6](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/6) ngày 2026-11-20); `src/evaluate.py`, `scripts/error_analysis.py`, `src/compare.py` chưa có.
+**Người giữ:** TV5 (đánh giá, so sánh), TV2 (attention). **Đầu việc:** TASK-007, TASK-008, TASK-009, TASK-012. **Code:** đã có `src/attention.py` (TASK-008, TV1 review và gộp qua [PR #6](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/6) ngày 2026-11-20). Đã triển khai `src/evaluate.py` và `scripts/error_analysis.py` cho TASK-007 trên nhánh `vananh`. `src/compare.py` thuộc TASK-009, chưa triển khai.
 
 ## Thành phần làm gì
 Đo kết quả cuối trên test, phân tích lỗi, trực quan hóa attention của ViT và sinh bảng so sánh ViT với CNN. Mọi số đều lấy từ file.
@@ -80,7 +80,8 @@ python -m src.attention --checkpoint outputs/checkpoints/vit_small_seed42_best.p
 
 | Mục đích | Lệnh | Điều kiện | Trạng thái |
 |---|---|---|---|
-| Đánh giá | `python -m src.evaluate` | Có checkpoint | Chưa có code |
+| Đánh giá | `python -m src.evaluate` | Hai checkpoint ViT/CNN, cache test và `class_names.json` | Đã đánh giá 10.000 ảnh cho mỗi mô hình và lưu kết quả JSON, CSV trong `outputs/results/`. |
+| Phân tích lỗi | `python -m scripts.error_analysis` | CSV dự đoán, CSV kết quả từng lớp, `class_names.json` và `test_x.npy` | Đã thống kê các cặp lớp hay nhầm, xếp hạng lớp và lưu confusion matrix cùng lưới ảnh sai trong `outputs/figures/`. |
 | Attention | `python -m src.attention --checkpoint outputs/checkpoints/vit_small_seed42_best.pt --split test` | Checkpoint ViT đã chốt, cache test và class_names khớp | Đã chạy CPU 2026-11-20; 12 ảnh, TV1 chạy lại khớp review |
 | So sánh | `python -m src.compare` | Có JSON kết quả | Chưa có code |
 
