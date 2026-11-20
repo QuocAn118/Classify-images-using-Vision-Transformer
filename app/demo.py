@@ -1,13 +1,17 @@
+import sys
 from pathlib import Path
-import torch
 import gradio as gr
-from src.data import build_transform
-from PIL import Image
-from src.models import build_model
+import torch
 from torchvision.transforms.v2 import functional as TF
-from src.attention import explain_image, overlay_heatmap
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from src.attention import explain_image, overlay_heatmap
+from src.data import build_transform
+from src.models import build_model
+
 CHECKPOINT_DIR = PROJECT_ROOT / "outputs" / "checkpoints"
 
 def check_checkpoint(filename):
@@ -89,6 +93,6 @@ if __name__ == "__main__":
                                  gr.Label(num_top_classes=5, label="CNN baseline"),
                                  gr.Image(type="pil", label="Attention rollout của ViT"),], 
                         examples=examples,
-                        flagging_mode="never",
+                        flagging_mode = "never",
                         title="Phân loại ảnh Tiny ImageNet",)
     demo.launch()
