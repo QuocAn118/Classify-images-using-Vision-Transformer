@@ -1,0 +1,75 @@
+{
+  "task": "TASK-008",
+  "verified_date": "2026-11-20",
+  "branch": "thanhbinh",
+  "base_main_commit": "59f57c8c11fe590f4c57926134ede9ebf6add183",
+  "environment": {
+    "python": "3.12.10",
+    "torch": "2.15.0+cpu",
+    "device": "cpu"
+  },
+  "checkpoint": {
+    "path": "outputs/checkpoints/vit_small_seed42_best.pt",
+    "sha256": "97fbd0daa0e088b4b7d8a9c9adca4f61ba858986f00daa9669c83196a5a7b66b",
+    "epoch": 50,
+    "class_names_count": 200,
+    "matches_tv4_handoff": true,
+    "handoff_branch": "origin/hoangdang",
+    "handoff_commit": "80ff9c1"
+  },
+  "data": {
+    "source": "https://cs231n.stanford.edu/tiny-imagenet-200.zip",
+    "project_split": "test",
+    "original_split": "official validation",
+    "images": 10000,
+    "classes": 200,
+    "per_class": 50,
+    "shape": [
+      10000,
+      64,
+      64,
+      3
+    ],
+    "image_dtype": "uint8",
+    "label_dtype": "int64",
+    "class_names_match_repo": true,
+    "note": "Prepared only test for attention, no training cache or model selection."
+  },
+  "tests": {
+    "command": "python -m pytest -q -W error",
+    "passed": 73,
+    "attention_cases": 21,
+    "cli_cp1258_regression_passed": true,
+    "cli_help_exit_code": 0
+  },
+  "command": "python -m src.attention --checkpoint outputs/checkpoints/vit_small_seed42_best.pt --split test --num-images 12 --scan-limit 512 --seed 42 --device cpu --expected-sha256 97fbd0daa0e088b4b7d8a9c9adca4f61ba858986f00daa9669c83196a5a7b66b",
+  "selection_seed": 42,
+  "scanned_images": 512,
+  "num_images": 12,
+  "unique_classes": 12,
+  "correct_examples": 6,
+  "incorrect_examples": 6,
+  "maps_shape": [
+    12,
+    64,
+    64
+  ],
+  "maps_dtype": "float32",
+  "maps_finite_in_unit_interval": true,
+  "manifest": "outputs/figures/attention/vit_small_seed42_test/manifest.json",
+  "gallery": "outputs/figures/attention/vit_small_seed42_test/gallery.png",
+  "maps": "outputs/figures/attention/vit_small_seed42_test/maps.npz",
+  "all_pngs_verified": true,
+  "maps_sha256": "6d27e3a77753053283f4b1bbf5287b14a32a10cce1ef1436b1db8ed0e09abf86",
+  "test_top1": null,
+  "test_top5": null,
+  "review_status": "Awaiting TV1 review",
+  "limitations": [
+    "Balanced selection is for visualization, not an accuracy estimate.",
+    "CPU only; no new GPU, AMP, VRAM or inference benchmark.",
+    "No training rerun or checkpoint/hyperparameter selection using test.",
+    "TV4 training code/evidence is on hoangdang, not merged by this task."
+  ],
+  "implementation_commit": "8db4115",
+  "pull_request": "https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/6"
+}

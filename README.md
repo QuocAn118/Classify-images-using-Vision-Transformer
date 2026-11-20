@@ -2,7 +2,7 @@
 
 Đồ án môn Học sâu, đề số 9. Nhóm tự cài ViT, so sánh với một CNN có cùng số tham số và trực quan hóa attention.
 
-> **Trạng thái:** đã có khung repo (TASK-001), chuẩn bị dữ liệu (TASK-002) và DataLoader (TASK-003). ViT và test (TASK-004, TV2) đã gộp vào `main` qua [PR #2](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/2). CNN baseline (TASK-005, TV3) gộp qua [PR #3](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/3). Chưa có vòng lặp train hay kết quả huấn luyện.
+> **Trạng thái:** đã có khung repo (TASK-001), chuẩn bị dữ liệu (TASK-002) và DataLoader (TASK-003). ViT và test (TASK-004, TV2) đã gộp vào `main` qua [PR #2](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/2). CNN baseline (TASK-005, TV3) gộp qua [PR #3](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/3). TASK-008 (TV2) có code và hình attention từ checkpoint thật trên `thanhbinh`, chờ TV1 review tại [PR #6](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/6). Code train của TV4 chưa gộp vào `main`; checkpoint TV4 được bàn giao riêng để chạy attention.
 
 ## Bài toán
 
@@ -31,7 +31,7 @@ python -m pytest
 ```
 
 - `prepare_data.py --download` tải Tiny ImageNet từ Stanford (248 MB) vào `data/`, chia train/validation/test và tạo cache khoảng 1,35 GB ở `data/cache/tiny_imagenet_64/`. Trên máy TV1 (CPU, Windows) mất 64 phút.
-- Lệnh train, đánh giá, demo sẽ thêm vào đây sau khi đã chạy thử thật.
+- Lệnh train, đánh giá accuracy và demo sẽ được người phụ trách bổ sung sau khi triển khai và kiểm chứng; lệnh attention đã chạy ở phần dưới.
 
 ### Kiểm tra ViT (TASK-004)
 
@@ -42,6 +42,18 @@ python -m pytest tests/test_models.py -q -W error
 ```
 
 Đã chạy trên CPU ngày 2026-11-17: 23 test mô hình pass; toàn bộ repo 48 test pass. ViT mặc định có **6.436.296 tham số**, forward ảnh `(2,3,64,64)` cho logits `(2,200)`; `return_attn=True` trả thêm 8 tensor attention `(2,8,65,65)`. Bằng chứng forward/backward bằng dữ liệu giả: [task004_vit_checks.json](outputs/results/task004_vit_checks.json). Cách tạo mô hình và giải thích luồng xử lý: [docs/05_model.md](docs/05_model.md).
+
+### Trực quan hóa attention (TASK-008)
+
+Đặt checkpoint ViT đã chốt tại `outputs/checkpoints/vit_small_seed42_best.pt` (không commit). Sau khi chuẩn bị cache bằng `prepare_data.py`, chạy:
+
+```bash
+python -m src.attention --checkpoint outputs/checkpoints/vit_small_seed42_best.pt --split test --num-images 12 --scan-limit 512 --seed 42 --device cpu
+```
+
+CLI lấy kiến trúc, mean/std và tên lớp từ checkpoint, đối chiếu thứ tự nhãn với `outputs/results/class_names.json`; `--expected-sha256` cho phép xác minh file bàn giao, `--cache-dir` đổi nơi đọc cache. Mặc định dùng validation; test chỉ đọc khi chỉ định `--split test` và checkpoint đã chốt.
+
+Đã chạy ngày 2026-11-20: **12 ảnh, 12 lớp, 6 đúng và 6 sai**. Xem [gallery](outputs/figures/attention/vit_small_seed42_test/gallery.png), [manifest từng ảnh](outputs/figures/attention/vit_small_seed42_test/manifest.json) và [bằng chứng](outputs/results/task008_attention_checks.json). Toàn repo **73 test pass**; không đo accuracy từ tập ảnh được chọn cân bằng này. API dùng lại cho demo ở [docs/07_evaluation.md](docs/07_evaluation.md). Chưa kiểm tra CUDA/AMP; TASK-008 chờ TV1 review.
 
 ## Tài liệu
 

@@ -2,7 +2,8 @@
 
     loader = build_loader(cfg, "train")   # "train" | "val" | "test"
 
-train.py chỉ gọi "train" và "val"; chỉ evaluate.py gọi "test" (không dùng test để chọn cấu hình).
+train.py chỉ gọi "train" và "val"; evaluate.py dùng "test" lấy số cuối.
+attention.py chỉ đọc "test" tường minh để vẽ với checkpoint đã chốt (docs/04_data.md).
 Mixup/CutMix áp ở vòng lặp train, không ở đây.
 """
 from pathlib import Path

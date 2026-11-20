@@ -24,7 +24,7 @@ Chuẩn bị Tiny ImageNet thành ba tập train, validation, test không rò r�
 
 **Hợp đồng `src/data.py`** (bên dùng: train, đánh giá, attention):
 - `build_loader(cfg, split)` với `split` là `"train"`, `"val"` hoặc `"test"`; trả về `DataLoader` cho batch `(x, y)`: `x` float32 `(B, 3, img_size, img_size)` đã chuẩn hóa, `y` int64.
-- `train.py` chỉ gọi `"train"` và `"val"`; chỉ `evaluate.py` gọi `"test"`.
+- `train.py` chỉ gọi `"train"` và `"val"`. `evaluate.py` gọi `"test"` để lấy số cuối; `attention.py` được gọi `"test"` tường minh chỉ để trực quan hóa bằng checkpoint đã chốt, không chọn siêu tham số/checkpoint hoặc tính accuracy test (TASK-008, thông báo trước triển khai tại [Issue #4](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/issues/4)).
 - Train: xáo trộn, bỏ batch lẻ cuối (`drop_last`). Val/test: giữ thứ tự, đủ mọi ảnh.
 - Đọc config: `data.cache_dir`, `img_size`, `batch_size`, `num_workers`, `mean`, `std`, `randaugment`, `random_erasing`. `pin_memory` chỉ bật khi có CUDA; `persistent_workers` chỉ bật khi `num_workers > 0`.
 - Chưa có cache thì báo `FileNotFoundError` kèm lệnh `prepare_data`. Dữ liệu giả cho `--quick` do vòng lặp train tự tạo (TASK-006).

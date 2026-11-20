@@ -1,13 +1,13 @@
 # Báo cáo: Phân loại ảnh Tiny ImageNet bằng Vision Transformer
 
-> **Bản nháp, cập nhật ngày 2026-11-17.** Khung theo mục 15 của [spec](../SPEC_ViT.md). Đã có: mục 2 (dữ liệu), 3.1 và 4.1 (ViT). Chưa có kết quả huấn luyện hoặc đánh giá.
+> **Bản nháp, phần TV2 cập nhật ngày 2026-11-20.** Khung theo mục 15 của [spec](../SPEC_ViT.md). Đã có mục 2 (dữ liệu), 3.1 và 4.1 (ViT), 3.2 (CNN), mục 6 (attention trên checkpoint thật). Tổng hợp huấn luyện, đánh giá accuracy và các phần còn thiếu chờ thành viên phụ trách bổ sung; phần TASK-008 chờ TV1 review.
 
 **Phân công viết** (theo mục 19 spec; TV5 ghép bản cuối):
 
 | Mục | Người viết | Viết khi có |
 |---|---|---|
 | 1, 2, 8, 9 | TV1 | 2 đã có; 1 viết ngay; 8, 9 sau khi có train, đánh giá, demo |
-| 3.1, 6 | TV2 | 3.1 đã có; 6 sau TASK-008 và checkpoint |
+| 3.1, 6 | TV2 | Đã có kiến trúc và hình attention thật; TASK-008 chờ TV1 review |
 | 3.2, 6.4 (Grad-CAM, nếu làm) | TV3 | Sau TASK-005 |
 | 3.3, 4 | TV4 | Sau TASK-006, TASK-011 |
 | 5, 7, 10 | TV5 | Sau TASK-007, TASK-009 |
@@ -195,13 +195,15 @@ Cần có: bảng so sánh theo mục 12 spec (Top-1, Top-5 trên test, số tha
 
 ## 6. Trực quan hóa attention (TV2)
 
-### 6.1. Phần đã có
+### 6.1. Mô hình và checkpoint dùng để trực quan hóa
 
-ViT đã hỗ trợ `return_attn=True` để trả attention theo từng head và layer, trước dropout. Ở cấu hình mặc định, danh sách có 8 tensor `(B,8,65,65)`, trong đó token đầu tiên là CLS. Shape, tổng hàng và độ khớp logits giữa hai nhánh đã được kiểm tra như mục 4.1.
+ViT hỗ trợ `return_attn=True` để trả attention theo từng head và layer, trước dropout. Ở cấu hình mặc định, danh sách có 8 tensor `(B,8,65,65)`, trong đó token đầu tiên là CLS. Shape, tổng hàng và độ khớp logits giữa hai nhánh đã được kiểm tra như mục 4.1.
 
-### 6.2. Phương án dự kiến cho TASK-008
+Ngày 2026-11-20, TV2 dùng checkpoint `vit_small_seed42_best.pt` do TV4 bàn giao, epoch 50, để sinh hình trên CPU. SHA-256 bắt đầu bằng `97fbd0daa0e0` khớp file best trong bằng chứng TASK-011 trên nhánh `hoangdang`; hash đầy đủ và thông tin kiểm chứng được lưu tại [task008_attention_checks.json](../outputs/results/task008_attention_checks.json). Kiến trúc, trọng số, tên lớp và mean/std đều lấy từ checkpoint; không train lại hoặc chọn checkpoint dựa trên test. Việc bàn giao checkpoint độc lập với việc review code train của TV4, vốn chưa gộp vào nhánh nền của TASK-008.
 
-Phần dưới mô tả phương án đã thống nhất trong [docs/07_evaluation.md](../docs/07_evaluation.md) và spec; chưa có code sinh hình hoặc checkpoint đã huấn luyện để chạy phương án này.
+### 6.2. CLS attention map và attention rollout
+
+Các phép biến đổi dưới đây đã được cài trong [src/attention.py](../src/attention.py), theo [docs/07_evaluation.md](../docs/07_evaluation.md) và spec. Hai loại map được nội suy bilinear và min-max riêng từng ảnh về `[0,1]`; map hằng cho toàn 0 để tránh chia cho 0. Heatmap dùng colormap jet, phủ lên ảnh RGB với alpha 0,5. Màu biểu diễn độ lớn tương đối trong từng map, không phải xác suất dự đoán và không dùng để so cường độ attention tuyệt đối giữa các ảnh.
 
 **CLS attention map:** lấy hàng CLS tới các patch ở layer cuối, bỏ cột CLS, trung bình theo head rồi reshape thành lưới `img_size // patch_size`. Sau đó nội suy bilinear lên kích thước ảnh và phủ heatmap lên ảnh gốc. Với cấu hình mặc định, lưới patch là 8 × 8.
 
@@ -212,19 +214,28 @@ $$
 \qquad R_0 = I,\quad R_l = \widetilde A_l R_{l-1}.
 $$
 
-Hàng CLS của $R_L$, bỏ cột CLS, được đưa về lưới patch để tạo heatmap. Kế hoạch trình bày gồm ít nhất 12 ảnh từ nhiều lớp, có cả dự đoán đúng và sai; mỗi ảnh đặt cạnh CLS map layer cuối và rollout. Chỉ thực hiện trên checkpoint đã chốt, không dùng tập test để chọn cấu hình hoặc checkpoint.
+Hàng CLS của $R_L$, bỏ cột CLS, được đưa về lưới patch để tạo heatmap. Bộ kiểm thử bao gồm ma trận tính tay kiểm thứ tự tích từ layer thấp đến cao, trung bình head, lưới patch khác, map hằng, overlay, checkpoint và pipeline sinh hình. Kết quả toàn repo là **73 test pass**, gồm **21 ca attention**, theo [file bằng chứng TASK-008](../outputs/results/task008_attention_checks.json).
 
 ### 6.3. Hình và nhận xét thực tế
 
-| Nội dung | Trạng thái |
-|---|---|
-| Trả attention từ ViT | Đã cài và kiểm tra trên dữ liệu giả |
-| Code sinh CLS map / rollout | Chưa có, thuộc TASK-008 |
-| Hình cho ít nhất 12 ảnh | Chưa có |
-| So sánh ảnh dự đoán đúng và sai | Chưa có |
-| Nhận xét vùng được chú ý trên ảnh thật | Chưa có |
+**Chọn ảnh.** Dùng test của đồ án, tức val gốc Tiny ImageNet. Với seed 42 và checkpoint cố định, chương trình duyệt 512 ảnh theo thứ tự ngẫu nhiên đã xác định, chọn 12 ảnh gồm 6 đúng và 6 sai, ưu tiên nhãn thật chưa chọn. Kết quả có 12 lớp khác nhau. Các chỉ số ảnh, nhãn, dự đoán, confidence và đường dẫn hình nằm trong [manifest](../outputs/figures/attention/vit_small_seed42_test/manifest.json). Số lượng đúng/sai được cân bằng chủ động để minh họa; tập này không dùng để ước lượng Top-1/Top-5 hoặc chọn mô hình.
 
-Phần này sẽ được cập nhật sau khi có pipeline huấn luyện và checkpoint (TASK-011). Khi phân tích, heatmap được dùng để khảo sát phân bố attention; không coi riêng heatmap là bằng chứng quan hệ nhân quả của quyết định phân loại. Bài [Abnar và Zuidema](https://aclanthology.org/2020.acl-main.385/) cũng phân tích hạn chế của việc dùng attention thô để giải thích khi thông tin đã trộn qua nhiều layer.
+![Hình attention của 12 ảnh: gốc, CLS layer cuối và rollout](../outputs/figures/attention/vit_small_seed42_test/gallery.png)
+
+*Mỗi hàng: ảnh gốc và nhãn/dự đoán, CLS attention layer cuối, attention rollout. Mỗi map được chuẩn hóa riêng; ảnh nền có độ phân giải 64 × 64, lưới patch 8 × 8. Tensor map được lưu trong `maps.npz` cùng thư mục để đối chiếu với hình.*
+
+Một số ví dụ trong gallery (confidence là softmax của lớp dự đoán, làm tròn từ manifest):
+
+| Chỉ số ảnh | Nhãn thật | Dự đoán | Confidence | Kết quả |
+|---|---|---|---|---|
+| 8268 | police van | police van | 0,9741 | Đúng |
+| 8132 | butcher shop | barbershop | 0,1726 | Sai |
+| 9034 | walking stick | walking stick | 0,6256 | Đúng |
+| 5650 | steel arch bridge | water tower | 0,5523 | Sai |
+
+**Quan sát từ hình.** Ở ảnh `police van` (#8268), CLS map có các vùng nóng trên thân xe, trong khi rollout trải rộng hơn sang vùng lân cận. Ở `walking stick` (#9034), cả hai map tập trung gần vùng sáng ở giữa-bên phải ảnh và ít hơn ở phần nền tối. Với ảnh sai `butcher shop` (#8132), rollout vẫn tô nổi vùng trung tâm/phần quầy phía dưới nhưng dự đoán là `barbershop`; việc có vùng nóng không bảo đảm phân loại đúng. Trường hợp `steel arch bridge` (#5650) bị đoán thành `water tower` cũng cho thấy một dự đoán sai vẫn có confidence đáng kể trong tập minh họa.
+
+Đây là nhận xét định tính trên các ảnh được chọn, không phải kết quả đo định vị vật thể hoặc so sánh độ tốt của hai phương pháp. Heatmap không tự chứng minh vùng nào gây ra quyết định phân loại; mô hình chưa được kiểm tra bằng can thiệp hoặc che vùng trong TASK-008. Bài [Abnar và Zuidema](https://aclanthology.org/2020.acl-main.385/) cũng phân tích hạn chế của attention thô khi thông tin đã trộn qua nhiều layer. Kết quả hình và code đang chờ TV1 review tại [PR #6](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/6) trước khi đánh dấu TASK-008 Hoàn thành.
 
 ### 6.4. Grad-CAM cho CNN (TV3, nếu làm)
 
@@ -236,7 +247,7 @@ Chưa có. Phần mở rộng, chỉ làm nếu còn thời gian theo thứ tự
 
 Cần có: overfit (so sánh đường cong train và validation); lớp hay bị nhầm và ví dụ ảnh sai; ảnh 64 × 64 mất chi tiết; giới hạn tính toán. Bắt buộc có đoạn về độ tin cậy: tập test 10.000 ảnh cho sai số khoảng ±0,5 điểm phần trăm và chỉ chạy 1 seed, nên chênh lệch giữa ViT và CNN dưới khoảng 1–1,5 điểm không đủ để kết luận mô hình nào tốt hơn (nếu chạy 3 seed thì cập nhật câu này).
 
-Giới hạn hiện có của phần ViT: kiểm chứng mới dùng dữ liệu giả trên CPU; chưa đo CUDA, AMP, VRAM, tốc độ hoặc chất lượng phân loại. Chưa có checkpoint huấn luyện để phân tích overfit, lớp hay nhầm hoặc attention trên ảnh thật. Các test truyền gradient và khớp hai nhánh không thay thế đánh giá trên dữ liệu thật.
+Giới hạn phần TV2: kiểm chứng chức năng và sinh hình attention được chạy trên CPU; chưa chạy attention trên CUDA/AMP hoặc benchmark tốc độ/VRAM. Đã có hình thật từ checkpoint được bàn giao, nhưng nhóm ảnh chọn cân bằng đúng/sai không đại diện cho accuracy toàn bộ test. Bản đồ có lưới patch thô, được nội suy và chuẩn hóa riêng; chưa có kiểm chứng định vị hoặc quan hệ nhân quả. Các test truyền gradient và khớp hai nhánh không thay thế đánh giá accuracy hoặc phân tích overfit của các phần thực nghiệm còn lại.
 
 TV5 và các thành viên bổ sung phân tích lỗi, giới hạn ngân sách huấn luyện và độ tin cậy của kết quả sau khi hoàn thành thí nghiệm. Không kết luận ưu thế giữa hai mô hình khi chưa có số liệu.
 
@@ -255,7 +266,7 @@ TV5 và các thành viên bổ sung phân tích lỗi, giới hạn ngân sách 
 | `src/models/cnn.py` | ResNet nhỏ, `match_param_count` | TV3 | Chưa có |
 | `src/train.py` | Vòng lặp train | TV4 | Chưa có |
 | `src/evaluate.py`, `scripts/error_analysis.py`, `src/compare.py` | Đánh giá, phân tích lỗi, so sánh | TV5 | Chưa có |
-| `src/attention.py` | CLS attention, rollout | TV2 | Chưa có |
+| `src/attention.py` | CLS attention, rollout và CLI từ checkpoint | TV2 | Có code, 12 ảnh thật; chờ review TASK-008 |
 | `app/demo.py` | Demo Gradio | TV5 | Chưa có |
 
 **Cài đặt và chạy.**
