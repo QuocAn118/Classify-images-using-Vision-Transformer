@@ -1,4 +1,5 @@
 {
+  "note": "2026-11-20: TV1 xóa CSV và hình đường cong của các lần chạy --quick khỏi repo (chỉ là kiểm tra pipeline); các số quick vẫn giữ trong file này. Đường dẫn log/curves bên dưới không còn tồn tại.",
   "task": "TASK-006",
   "date": "2026-11-19",
   "branch": "hoangdang",
