@@ -1,6 +1,6 @@
 # Báo cáo: Phân loại ảnh Tiny ImageNet bằng Vision Transformer
 
-> **Bản nháp, cập nhật ngày 2026-11-17.** Khung theo mục 15 của [spec](../SPEC_ViT.md). Đã có: mục 2 (dữ liệu), 3.1 và 4.1 (ViT). Chưa có kết quả huấn luyện hoặc đánh giá.
+> **Bản nháp, cập nhật ngày 2026-11-19.** Khung theo mục 15 của [spec](../SPEC_ViT.md). Đã có dữ liệu, kiến trúc ViT/CNN và phần triển khai huấn luyện TV4. Kết quả train thật cập nhật ở mục 4.2 từ log; chưa có đánh giá test cuối.
 
 **Phân công viết** (theo mục 19 spec; TV5 ghép bản cuối):
 
@@ -157,9 +157,25 @@ Kết quả trên xác nhận baseline CNN đáp ứng yêu cầu về số tham
 
 ### 3.3. Công thức huấn luyện và augmentation
 
-*Người viết: TV4.* Chưa có.
+*Người viết: TV4 (Hđang).* Cài đặt tại [src/train.py](../src/train.py), hướng dẫn và hợp đồng tại [docs/06_training.md](../docs/06_training.md).
 
-Cần có: optimizer, lịch learning rate (warmup, cosine), batch size, số epoch, label smoothing, Mixup/CutMix, AMP, gradient clipping, cách chọn checkpoint trên validation. Lấy giá trị từ `configs/*.yaml` thật đã chạy, không chép từ spec. Nguồn: [docs/06_training.md](../docs/06_training.md).
+ViT và CNN dùng cùng phần `data`, `train` và seed trong hai YAML. Lần quick đã chạy cả hai cấu hình, giữ kiến trúc và batch mặc định nhưng giới hạn 2 epoch × 2 batch/tập; đây chỉ là kiểm tra pipeline. Lần train chính sử dụng toàn bộ cache train/validation với cấu hình sau:
+
+| Thành phần | Cấu hình |
+|---|---|
+| Optimizer | AdamW, betas (0,9; 0,999) |
+| Learning rate | Đỉnh 2,5 × 10⁻⁴; warmup tuyến tính 5 epoch, cosine về 10⁻⁵; cập nhật theo từng bước optimizer |
+| Ngân sách | 50 epoch, batch 64, seed 42 |
+| Weight decay | 0,05; loại bias, normalization, CLS token và positional embedding |
+| Loss | CrossEntropy với label smoothing 0,1, nhận nhãn mềm |
+| Augmentation ảnh | RandomCrop 64 với padding 4, lật ngang, RandAugment; RandomErasing tắt; chuẩn hóa mean/std ImageNet |
+| Augmentation batch | Xác suất 0,5, chọn Mixup (alpha 0,8) hoặc CutMix (alpha 1,0); CutMix tính lại hệ số nhãn theo diện tích thật |
+| Gradient | AMP float16 trên CUDA, unscale trước clipping với max_norm 1,0; overflow bỏ bước optimizer và scheduler |
+| Chọn checkpoint | Validation Top-1 cao nhất; giữ cả best và last; không đọc tập test |
+
+Các giá trị lấy từ cấu hình/checkpoint đã kiểm tra ở [task006_training_checks.json](../outputs/results/task006_training_checks.json) và hai file YAML; kết quả train chính chỉ xác nhận khi đủ log 50 epoch. `train_acc` tính so với nhãn gốc sau Mixup/CutMix không dùng để nhận xét chất lượng; theo dõi validation Top-1/Top-5 và loss.
+
+`--resume` khôi phục optimizer, scheduler, AMP scaler, epoch, best, RNG và lịch sử; CSV được dựng lại theo checkpoint để loại dòng trùng hoặc dòng nằm sau điểm khôi phục. Lịch 50 epoch phải giữ nguyên khi tiếp tục. Dữ liệu chỉ gồm cache train/val; tên lớp trong checkpoint khớp `class_names.json`.
 
 ## 4. Thực nghiệm
 
@@ -183,9 +199,28 @@ Những bằng chứng trên xác nhận mô hình có thể forward, truyền g
 
 ### 4.2. Huấn luyện, đường cong học và ablation
 
-*Người viết: TV4.* Chưa có.
+*Người viết: TV4 (Hđang).*
 
-Cần có: máy và GPU đã dùng; kết quả chính trên validation; đường cong loss và accuracy theo epoch (hình từ `outputs/logs/`); ablation nếu có. Bắt buộc ghi câu: ngân sách 50 epoch có thể làm ViT thiệt hơn CNN, nên kết luận ViT so với CNN chỉ đúng trong ngân sách này. Top-1, Top-5, thời gian mỗi epoch, tốc độ inference và VRAM đỉnh hiện **chưa có**; không dùng kết quả trên batch giả để điền các chỉ số này.
+**Kiểm chứng pipeline (TASK-006).** Máy Windows của TV4 có NVIDIA GeForce RTX 5060 Laptop 8GB; Python 3.12.10, torch 2.11.0+cu128, torchvision 0.26.0+cu128. Toàn repo đạt 72 test, gồm 20 test train. Quick CPU/CUDA cho cả ViT và CNN mặc định đều lưu được best/last, CSV và đường cong; checkpoint nạp lại bằng `weights_only=True`, model cho logits hữu hạn `(2,200)`. Bộ nhớ tensor đỉnh trong quick CUDA batch 64: ViT khoảng 498,97 MiB, CNN khoảng 311,35 MiB. Nguồn: [task006_training_checks.json](../outputs/results/task006_training_checks.json). Các số này đo bằng dữ liệu giả, không phải accuracy hay VRAM của toàn bộ lần train thật.
+
+Kiểm tra resume dùng cache giả nhỏ, ngắt sau epoch 6 của lịch 8 epoch (warmup 5). Learning rate từng bước khớp với chạy liên tục trong ngưỡng 10⁻⁸, val loss sau resume thay đổi không quá 10%, CSV đủ epoch không trùng; kiểm tra cả khôi phục best bị sai và lỗi ghi giữ bản cũ. Đây là kiểm chứng chức năng AC-008, chưa phải kiểm tra mất điện thật hay độ tái lập bit-identical trên GPU.
+
+**Train chính (TASK-011).** Dùng 90.000 ảnh train và 10.000 validation, seed chia tập 42, khớp thứ tự 200 tên lớp; chạy ViT rồi CNN trên cùng GPU, giữ lịch 50 epoch. Loader train bỏ batch lẻ, nên mỗi epoch xử lý 89.984 ảnh ở batch 64; validation giữ đủ 10.000 ảnh.
+
+| Mô hình | Tiến độ | Epoch best | Val Top-1 (%) | Val Top-5 tại best (%) | Trung bình giây/epoch | Peak allocated VRAM (MiB) |
+|---|---|---:|---:|---:|---:|---:|
+| ViT-small | 50/50 | 50 | 47,63 | 71,77 | 31,94 | 498,97 |
+| ResNet-small | 50/50 | 50 | 58,73 | 81,03 | 22,36 | 320,47 |
+
+Nguồn: [task011_training_checks.json](../outputs/results/task011_training_checks.json), [CSV ViT](../outputs/logs/vit_small_seed42.csv) và [CSV CNN](../outputs/logs/cnn_baseline_seed42.csv). Hai checkpoint best/last nạp lại bằng weights_only, đủ 50 epoch không trùng; best khớp Top-1 lớn nhất trong CSV. JSON có cấu hình, SHA-256 checkpoint và kết quả kiểm tra model. Số VRAM là max_memory_allocated chia 1024² của lần train CUDA, không phải tổng bộ nhớ driver; thời gian epoch gồm train/validation, chưa gồm ghi checkpoint và vẽ hình. Đây là số trên validation, không phải kết quả test cuối. Top-1/Top-5 trên test và tốc độ inference thuộc phần đánh giá của TV5, hiện **chưa có**.
+
+![Đường cong huấn luyện và validation ViT, 50 epoch](../outputs/figures/vit_small_seed42_curves.png)
+
+![Đường cong huấn luyện và validation CNN, 50 epoch](../outputs/figures/cnn_baseline_seed42_curves.png)
+
+Loss train chịu ảnh hưởng của augmentation và nhãn trộn, nên không diễn giải riêng chênh lệch train/validation như một phép đo overfit trực tiếp. Checkpoint best/last hiện lưu cục bộ trong `outputs/checkpoints/`; chưa có link chia sẻ bên ngoài, không đưa checkpoint vào Git.
+
+Ngân sách 50 epoch có thể làm ViT thiệt hơn CNN, nên kết luận ViT so với CNN chỉ đúng trong ngân sách này. Chưa chạy ablation; không dùng kết quả trên batch giả để điền các chỉ số của thí nghiệm chính.
 
 ## 5. So sánh ViT với CNN
 
@@ -201,7 +236,7 @@ ViT đã hỗ trợ `return_attn=True` để trả attention theo từng head v�
 
 ### 6.2. Phương án dự kiến cho TASK-008
 
-Phần dưới mô tả phương án đã thống nhất trong [docs/07_evaluation.md](../docs/07_evaluation.md) và spec; chưa có code sinh hình hoặc checkpoint đã huấn luyện để chạy phương án này.
+Phần dưới mô tả phương án đã thống nhất trong [docs/07_evaluation.md](../docs/07_evaluation.md) và spec; chưa có code sinh hình (TASK-008); checkpoint ViT đã train có trong TASK-011 để TV2 sử dụng.
 
 **CLS attention map:** lấy hàng CLS tới các patch ở layer cuối, bỏ cột CLS, trung bình theo head rồi reshape thành lưới `img_size // patch_size`. Sau đó nội suy bilinear lên kích thước ảnh và phủ heatmap lên ảnh gốc. Với cấu hình mặc định, lưới patch là 8 × 8.
 
@@ -224,7 +259,7 @@ Hàng CLS của $R_L$, bỏ cột CLS, được đưa về lưới patch để t
 | So sánh ảnh dự đoán đúng và sai | Chưa có |
 | Nhận xét vùng được chú ý trên ảnh thật | Chưa có |
 
-Phần này sẽ được cập nhật sau khi có pipeline huấn luyện và checkpoint (TASK-011). Khi phân tích, heatmap được dùng để khảo sát phân bố attention; không coi riêng heatmap là bằng chứng quan hệ nhân quả của quyết định phân loại. Bài [Abnar và Zuidema](https://aclanthology.org/2020.acl-main.385/) cũng phân tích hạn chế của việc dùng attention thô để giải thích khi thông tin đã trộn qua nhiều layer.
+Checkpoint ViT đã có từ TASK-011; TV2 cập nhật hình và nhận xét sau khi triển khai TASK-008. Khi phân tích, heatmap được dùng để khảo sát phân bố attention; không coi riêng heatmap là bằng chứng quan hệ nhân quả của quyết định phân loại. Bài [Abnar và Zuidema](https://aclanthology.org/2020.acl-main.385/) cũng phân tích hạn chế của việc dùng attention thô để giải thích khi thông tin đã trộn qua nhiều layer.
 
 ### 6.4. Grad-CAM cho CNN (TV3, nếu làm)
 
@@ -236,7 +271,7 @@ Chưa có. Phần mở rộng, chỉ làm nếu còn thời gian theo thứ tự
 
 Cần có: overfit (so sánh đường cong train và validation); lớp hay bị nhầm và ví dụ ảnh sai; ảnh 64 × 64 mất chi tiết; giới hạn tính toán. Bắt buộc có đoạn về độ tin cậy: tập test 10.000 ảnh cho sai số khoảng ±0,5 điểm phần trăm và chỉ chạy 1 seed, nên chênh lệch giữa ViT và CNN dưới khoảng 1–1,5 điểm không đủ để kết luận mô hình nào tốt hơn (nếu chạy 3 seed thì cập nhật câu này).
 
-Giới hạn hiện có của phần ViT: kiểm chứng mới dùng dữ liệu giả trên CPU; chưa đo CUDA, AMP, VRAM, tốc độ hoặc chất lượng phân loại. Chưa có checkpoint huấn luyện để phân tích overfit, lớp hay nhầm hoặc attention trên ảnh thật. Các test truyền gradient và khớp hai nhánh không thay thế đánh giá trên dữ liệu thật.
+Giới hạn hiện có: đã train ViT/CNN 50 epoch trên CUDA với AMP, có checkpoint và kết quả validation ở mục 4.2, nhưng chỉ chạy một seed. Chưa có đánh giá test cuối, benchmark inference, phân tích lớp nhầm hay hình attention trên ảnh thật. Không dùng kiểm chứng quick hoặc số validation để thay cho kết quả test.
 
 TV5 và các thành viên bổ sung phân tích lỗi, giới hạn ngân sách huấn luyện và độ tin cậy của kết quả sau khi hoàn thành thí nghiệm. Không kết luận ưu thế giữa hai mô hình khi chưa có số liệu.
 
@@ -252,8 +287,8 @@ TV5 và các thành viên bổ sung phân tích lỗi, giới hạn ngân sách 
 | `scripts/prepare_data.py` | Tải, chia tập, tạo cache | TV1 | Có |
 | `src/data.py` | DataLoader và augmentation | TV1 | Có |
 | `src/models/vit.py`, `src/models/__init__.py` | ViT tự cài, `build_model` | TV2 | Có |
-| `src/models/cnn.py` | ResNet nhỏ, `match_param_count` | TV3 | Chưa có |
-| `src/train.py` | Vòng lặp train | TV4 | Chưa có |
+| `src/models/cnn.py` | ResNet nhỏ, `match_param_count` | TV3 | Có |
+| `src/train.py` | Vòng lặp train, quick, resume | TV4 | Đã triển khai, kiểm thử; chờ TV1 review |
 | `src/evaluate.py`, `scripts/error_analysis.py`, `src/compare.py` | Đánh giá, phân tích lỗi, so sánh | TV5 | Chưa có |
 | `src/attention.py` | CLS attention, rollout | TV2 | Chưa có |
 | `app/demo.py` | Demo Gradio | TV5 | Chưa có |
@@ -266,7 +301,7 @@ Chưa hoàn thiện phần bàn giao cuối. Hướng dẫn đang chạy đượ
 python -m pytest tests/test_models.py -q -W error
 ```
 
-TV1 và TV5 bổ sung lệnh train, đánh giá, demo và link checkpoint sau khi đã chạy thành công; hiện chưa có các sản phẩm đó.
+Lệnh train/resume đã có trong README và docs/06_training.md; checkpoint best/last của hai mô hình đã lưu cục bộ. TV1 và TV5 bổ sung lệnh đánh giá/demo và link chia sẻ checkpoint khi có đích lưu; các phần này chưa có.
 
 ## 9. Kết luận và hướng phát triển
 

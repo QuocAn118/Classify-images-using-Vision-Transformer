@@ -9,10 +9,10 @@ File này giữ phân công, danh sách đầu việc, mốc và quy tắc cắt
 | TV1 | Trưởng nhóm, dữ liệu, tài liệu | [04_data.md](04_data.md), [01_define.md](01_define.md), [02_architecture.md](02_architecture.md), file này | 1, 2, 8, 9 |
 | TV2 | ViT và attention | [05_model.md](05_model.md) phần ViT, phần attention trong [07_evaluation.md](07_evaluation.md) | 3 (ViT), 6 |
 | TV3 | CNN, đo FLOPs/MACs | [05_model.md](05_model.md) phần CNN | 3 (CNN), 6 (Grad-CAM nếu có) |
-| TV4 | Huấn luyện | [06_training.md](06_training.md) | 4 |
+| TV4 (Hđang) | Huấn luyện | [06_training.md](06_training.md) | 4 |
 | TV5 | Đánh giá, demo, ghép báo cáo | [07_evaluation.md](07_evaluation.md), [08_demo.md](08_demo.md) | 5, 7, 10 |
 
-TV1 đã xác định (trưởng nhóm, chủ repo); tên thật của TV2-TV5 sẽ thay khi nhóm chốt. TV4 nên là thành viên có máy GPU, vì phụ trách train và quản lý checkpoint.
+TV1 là trưởng nhóm/chủ repo; TV4 là Hđang theo phân công nhóm người dùng cung cấp ngày 2026-11-19. Máy TV4 hiện kiểm tra được RTX 5060 Laptop 8GB; giả định GPU 6GB trong kế hoạch cần phân biệt với phép đo máy này.
 
 ## Theo dõi trạng thái trên GitHub
 - Mỗi đầu việc là một **Issue**, tạo từ mẫu `.github/ISSUE_TEMPLATE/task.md`. Phần mô tả đầu việc (bước Describe) viết trong Issue.
@@ -21,7 +21,7 @@ TV1 đã xác định (trưởng nhóm, chủ repo); tên thật của TV2-TV5 s
 - Chỉ chuyển sang Hoàn thành khi PR đã có bằng chứng kiểm tra và người duyệt đã xem. AI báo xong chưa đủ.
 - Lỗi phát sinh tạo Issue từ mẫu `.github/ISSUE_TEMPLATE/bug.md`.
 
-**Hiện trạng:** Issue và bảng Projects chưa tạo. Cho đến khi tạo: TASK-000 hoàn thành (nhóm duyệt `docs/` ngày 2026-11-15); TASK-014 hoàn thành (đã nộp mẫu đăng ký, TV1 báo ngày 2026-11-15); TASK-001 hoàn thành (12 test pass, TV1 đọc code ngày 2026-11-16); TASK-002 hoàn thành (18 test pass, chạy trên dữ liệu thật, TV1 đọc code ngày 2026-11-17); TASK-003 hoàn thành (25 test pass, TV1 đọc code ngày 2026-11-17); TASK-004 hoàn thành (TV2, PR #2 gộp ngày 2026-11-17, 48 test pass); TASK-005 hoàn thành (TV3, PR #3 gộp ngày 2026-11-19, 52 test pass); các đầu việc khác chưa bắt đầu.
+**Mốc đã ghi nhận trong lịch sử repo:** TASK-000 hoàn thành (nhóm duyệt `docs/` ngày 2026-11-15); TASK-014 hoàn thành (đã nộp mẫu đăng ký, TV1 báo ngày 2026-11-15); TASK-001 hoàn thành (12 test pass, TV1 đọc code ngày 2026-11-16); TASK-002 hoàn thành (18 test pass, chạy trên dữ liệu thật, TV1 đọc code ngày 2026-11-17); TASK-003 hoàn thành (25 test pass, TV1 đọc code ngày 2026-11-17); TASK-004 hoàn thành (TV2, PR #2 gộp ngày 2026-11-17, 48 test pass); TASK-005 hoàn thành (TV3, PR #3 gộp ngày 2026-11-19, 52 test pass). Tiến độ mới của TV4 ghi bên dưới; trạng thái Projects chưa kiểm tra lại được trong buổi này.
 
 ## Danh sách đầu việc
 
@@ -45,7 +45,11 @@ TV1 đã xác định (trưởng nhóm, chủ repo); tên thật của TV2-TV5 s
 
 **Điều kiện bắt đầu code:** Chỉ bắt đầu TASK-001 và các đầu việc code khác sau khi nhóm duyệt `docs/`. Bản thử đầu của TASK-001 viết sai thứ tự nên đã bị xóa.
 
-**Đầu việc tiếp theo:** TASK-004, TASK-005 xong; TASK-006 (TV4, dùng `build_loader` và `build_model` theo [04_data.md](04_data.md), [05_model.md](05_model.md)); TV1 chốt làm lần lượt ngày 2026-11-17; song song, TV2 làm TASK-008 (code `src/attention.py`); TV1 làm thẳng trên `main` (DEC-014).
+**Cập nhật TV4 ngày 2026-11-19:** TASK-006 đã triển khai, 72 test pass và quick CPU/CUDA trên hai model, chờ TV1 review (chưa đánh dấu Hoàn thành). Người dùng cho phép lưu mô tả Issue trong [docs/tasks/TASK-006.md](tasks/TASK-006.md) rồi triển khai do GitHub chưa truy cập được; TASK-011 theo dõi tại [TASK-011.md](tasks/TASK-011.md). Chưa cập nhật được Projects.
+
+**Cập nhật TASK-011:** TV4 đã train ViT/CNN đủ 50 epoch trên cùng GPU, seed 42; validation và kiểm chứng tại [task011_training_checks.json](../outputs/results/task011_training_checks.json). Chưa đánh dấu Hoàn thành trước TV1 review, chưa có đánh giá test cuối hoặc link chia sẻ checkpoint.
+
+**Đầu việc tiếp theo:** TV1 review phần TV4; bàn giao checkpoint cho TV2 làm TASK-008 và TV5 đánh giá/so sánh/demo. TV1 làm thẳng trên `main` (DEC-014). Không dùng test để chọn checkpoint hoặc siêu tham số.
 
 ## Mốc và lịch
 

@@ -223,6 +223,48 @@ Ghi ngắn sau mỗi buổi hoặc mốc đáng kể.
 - **Điều chưa xác minh:** chưa chạy CNN trên CUDA, chưa đo VRAM (TASK-006).
 - **Bước tiếp theo:** TV4 làm TASK-006; TV2 làm TASK-008.
 
+## 2026-11-19 (Codex đọc tài liệu)
+
+- **Đầu việc:** Đọc tài liệu theo yêu cầu người dùng, chưa bắt đầu đầu việc triển khai mới.
+- **Kết quả:** Đọc README, Project_description, spec, toàn bộ `docs/`, AI_Usage và bản nháp báo cáo. Nắm phạm vi, phân công, hợp đồng và tiến độ được ghi nhận: TASK-001 đến 004 đã xong; tiếp theo TASK-005 → TASK-006, song song TASK-008.
+- **Đối chiếu tài liệu:** Spec mục 6 còn ghi số tham số ViT chưa xác minh bằng code; bảng lệnh trong `02_architecture.md` còn ghi 25 test, trong khi nhật ký review TASK-004 ghi 48 test pass. Chưa sửa các nội dung này trong buổi đọc.
+- **Giới hạn:** Chưa đối chiếu code, chạy lại test hoặc kiểm tra GitHub Issues/Projects; các kết quả và trạng thái trên là thông tin đã ghi trong tài liệu. Chỉ cập nhật nhật ký và ghi nhận AI, không commit/push.
+- **Bước tiếp theo:** Chờ đầu việc cụ thể từ người dùng; giữ phạm vi một đầu việc theo kế hoạch.
+
+## 2026-11-19 (đồng bộ nhánh hoangdang và đọc lại docs)
+
+- **Đầu việc:** Kiểm tra các nhánh, gộp phần còn thiếu vào nhánh hiện tại và đọc lại tài liệu theo yêu cầu người dùng; chưa triển khai đầu việc code mới.
+- **Kết quả:** `git fetch --all --prune`; `hoangdang` được fast-forward từ `dc2b84a` lên `59f57c8` (6 commit), bằng `origin/main`. `origin/xbao` (`aff5e82`, TASK-005) đã nằm trong main. Kiểm tra fork `BinhNg1208:thanhbinh` (`107e504`) và refs PR #2/#3 bằng `git ls-remote`: đều là tổ tiên của HEAD; không còn nhánh origin nào chưa gộp vào hoangdang. Local main giữ nguyên.
+- **Giữ thay đổi có sẵn:** Sao lưu hai file trong `.git/codex/branch-sync-20261119-211257/`, tạm stash rồi khôi phục; giải quyết xung đột AI_Usage và nhật ký bằng cách giữ cả nội dung mới từ main lẫn toàn bộ ghi chú buổi đọc trước. Không tạo commit mới hoặc push.
+- **Bằng chứng kiểm tra:** `git merge-base --is-ancestor` đạt với xbao, thanhbinh và origin/main; `git branch -r --no-merged HEAD` không có kết quả; không còn file unmerged; `git diff --check` đạt. `python -m pytest -q -W error` dừng khi thu thập test: 4 lỗi `ModuleNotFoundError: No module named 'torch'` trên Python 3.12.10 hiện tại. Số 52 test pass trong docs là bằng chứng lịch sử của lần review TASK-005, không phải kết quả chạy lại buổi này.
+- **Đọc lại tài liệu:** TASK-001 đến TASK-005 đã được ghi nhận hoàn thành; tiếp theo TASK-006 (TV4, train) và TASK-008 (TV2, code attention với trọng số ngẫu nhiên); hình attention thật cần TASK-011. Chưa có vòng lặp train, checkpoint đã huấn luyện, đánh giá hay demo; không bắt đầu các phần này trong buổi đồng bộ.
+- **Nội dung chưa đồng bộ phát hiện khi đọc:** Project_description còn coi TASK-005 là việc tiếp theo và số tham số là tính tay; docs/02_architecture còn ghi chưa có CNN, danh sách khóa bắt buộc thiếu data.cache_dir; docs/03_plan còn ghi chưa có Issue dù đã dẫn Issue #1; đầu báo cáo và bảng mã nguồn mục 8 chưa ghi nhận CNN; SPEC_ViT mục 6 còn ghi số tham số chưa xác minh bằng code; ghi nhận AI của TASK-005 còn ghi chờ review cuối. Chỉ ghi nhận trong buổi đọc, chưa sửa các tài liệu này.
+- **Giới hạn:** GitHub CLI chưa đăng nhập; REST API công khai trả lỗi hết hạn mức. Chưa kiểm tra/cập nhật được Issues, reviews hay GitHub Projects trực tiếp; kết luận gộp nhánh dựa trên lịch sử Git và refs công khai. Chưa cài thêm dependency hoặc chạy GPU/train.
+- **Bước tiếp theo:** Dùng môi trường có các dependency trong requirements.txt để chạy lại test; nhóm tiếp tục đúng phân công TASK-006 và TASK-008.
+
+## 2026-11-19 (TV4, TASK-006 và bắt đầu TASK-011)
+
+- **Người thực hiện / phạm vi:** Người dùng xác nhận TV4 (Hđang) và giao hoàn thiện phần huấn luyện trên `hoangdang`; giữ nguyên các ghi chú chưa commit của buổi trước. Không làm phần đánh giá/attention/demo của TV khác.
+- **Describe:** AGENTS yêu cầu Issue trước code. GitHub CLI chưa đăng nhập, REST hết hạn mức; Computer Use bị dừng vì không xác định được URL Chrome để kiểm tra chính sách. Người dùng chọn lưu mô tả trong repo rồi triển khai: `docs/tasks/TASK-006.md`, sau khi kiểm chứng TASK-006 thì mô tả tiếp TASK-011 riêng. Chưa có Issue/PR/Projects mới trên GitHub.
+- **TASK-006:** Thêm `src/train.py`: dùng loader/model/utils sẵn có; AdamW chia nhóm weight decay, warmup/cosine theo iteration, Mixup/CutMix, nhãn mềm/smoothing, AMP và clipping, chọn best trên validation. Quick riêng tên, giữ kiến trúc/batch, fallback dữ liệu giả có cảnh báo. Resume giữ lịch/config, optimizer/scaler/RNG/lịch sử; lưu nguyên tử, phục hồi cả best và CSV; chặn ghi đè khi chưa có resume.
+- **Bằng chứng:** `.venv/Scripts/python.exe -m pytest -q -W error --basetemp .git/codex/pytest-task006-final --tb=short --junitxml=.git/codex/task006_pytest.xml` → 72 passed (20 test train). Mặc định pytest không chạy được do Access denied ở thư mục tạm chung, dùng thư mục riêng trong .git; không đổi quyền hệ thống. `pip check` đạt. Quick mặc định ViT/CNN trên CPU (seed 142) và CUDA (seed 42) đều chạy 2 epoch × 2 batch train/val; input giả; nạp lại checkpoint weights_only, model logits hữu hạn và best khớp CSV. CUDA peak allocated: ViT 498,97 MB; CNN 311,35 MB. Nguồn: `outputs/results/task006_training_checks.json`.
+- **Review / giải thích:** Train chỉ gọi split train/val; test tích hợp không tạo cache test. Resume thử ngắt sau epoch 6/8, warmup 5, có Mixup/CutMix; so sánh learning rate từng bước ngưỡng 1e-8 và loss với chạy liên tục; phục hồi log/best sai, thử chuyển checkpoint best sang thư mục mới và lỗi ghi CSV. Khóa checkpoint bắt buộc giữ nguyên; trainer thêm lịch sử/RNG và snapshot best để phục hồi, đã ghi rõ ở docs/06_training.md cho bên dùng. Người dùng/TV1 chưa xác nhận đọc code.
+- **Môi trường:** Windows, Python 3.12.10, torch 2.11.0+cu128, torchvision 0.26.0+cu128 trong .venv; RTX 5060 Laptop 8GB, driver 582.05 (đã chạy phép toán CUDA). Cài từ kho chính thức PyTorch; không đổi dependency của project. Terminal có đường dẫn tiếng Việt cần PYTHONUTF8/PYTHONIOENCODING=utf-8.
+- **TASK-011:** Chạy prepare_data sẵn có với output thống kê/ảnh mẫu trong `.git/codex/task011_data/` để giữ nguyên artifact dữ liệu của TV1. Thực tế đủ 200 lớp, 100.000 train gốc, 10.000 val gốc; cache 90.000 train / 10.000 validation / 10.000 test, 1,35 GB. Thứ tự class_names tạo lại trùng file tracked. Bắt đầu `python -m src.train --config configs/vit_small.yaml --device cuda`, lịch 50 epoch; chưa ghi kết quả cuối khi đang chạy. CNN chạy sau trên cùng GPU. Trainer không đọc test.
+- **Tài liệu:** Cập nhật README, Project_description, docs/02, docs/03, docs/06, AI_Usage và phần TV4 (3.3, 4.2) trong báo cáo. Không thêm số test accuracy hoặc accuracy giả; số quick chỉ dùng kiểm chứng pipeline.
+- **Giới hạn / trạng thái:** TASK-006 đã triển khai và kiểm thử, chờ TV1 review; chưa đánh dấu Hoàn thành. Chưa có số train cuối hoặc link checkpoint chia sẻ; chưa mô phỏng mất điện vật lý hay GPU 6GB khác. Dữ liệu, .venv, checkpoint được gitignore; không commit/push.
+- **Bước tiếp theo:** Theo dõi đủ 50 epoch ViT rồi CNN, kiểm tra checkpoint/log, cập nhật JSON và báo cáo từ file kết quả; TV1 review, đưa Issue/PR lên GitHub khi có quyền.
+
+## 2026-11-19 (TV4, hoàn tất chạy và kiểm chứng TASK-011)
+
+- **Kết quả:** ViT và CNN chạy lần lượt đủ 50 epoch, seed 42, batch 64 trên cùng RTX 5060 Laptop; giữ nguyên hai YAML, cùng data/train. ViT best epoch 50: validation Top-1 47,63%, Top-5 71,77%; CNN best epoch 50: 58,73% / 81,03%. Đây là validation, chưa có test cuối.
+- **Hiệu năng:** ViT trung bình 31,94 giây/epoch, peak allocated 498,97 MiB; CNN 22,36 giây/epoch, 320,47 MiB. Thời gian gồm train/validation, chưa gồm ghi checkpoint/vẽ hình; bộ nhớ tensor tính bytes/1024², không phải toàn bộ VRAM driver.
+- **Bằng chứng kiểm tra:** `outputs/results/task011_training_checks.json` sinh từ CSV/checkpoint và JSON cuối của hai lệnh CLI; đủ 100 dòng epoch không trùng, loss/model hữu hạn, best khớp max val Top-1 và snapshot trong last, config data/train/seed bằng nhau, đúng 450 train / 50 val mỗi lớp. Model best tải lại trên CPU qua build_model với weights_only, logits `(2,200)` hữu hạn. JSON có SHA-256 của bốn checkpoint. 72 test pass đã ghi ở TASK-006; không đổi logic train sau lần kiểm thử cuối.
+- **Sản phẩm:** Checkpoint best/last cho hai model tại outputs/checkpoints (gitignore); hai CSV 50 epoch, hai PNG đường cong, JSON kiểm chứng; báo cáo mục 3.3/4.2, docs/06_training, README, phân công/tiến độ và AI_Usage đã cập nhật. Giữ nguyên mọi ghi chú chưa commit có sẵn trước buổi làm.
+- **Phiên bị ngắt:** CNN vẫn chạy nền; kiểm tra PID, session và CSV rồi tiếp tục theo dõi, không khởi động trùng. Không mất epoch hoặc cần resume ở lần train thật; chức năng resume đã kiểm thử sau warmup trên cache giả trong TASK-006.
+- **Giới hạn / bàn giao:** Một seed, ngân sách 50 epoch; chưa làm ablation, benchmark inference, đánh giá test, attention hoặc demo của thành viên khác. Chưa chia sẻ checkpoint ra ngoài hoặc có offsite backup. Chưa commit/push/Issue/PR/Projects do chưa được yêu cầu/quyền GitHub; mô tả local theo lựa chọn người dùng. Chờ TV1 review, không tự đánh dấu Hoàn thành.
+- **Bước tiếp theo:** TV1 xem source và bằng chứng; bàn giao hai file best cho TV2/TV5, đánh giá test sau khi nhóm chốt cấu hình; tạo Issue/PR khi có quyền và commit/push khi người dùng yêu cầu.
+
 ## Mẫu buổi làm
 - Ngày: [YYYY-MM-DD]
 - Đầu việc: [TASK-xxx — tên]

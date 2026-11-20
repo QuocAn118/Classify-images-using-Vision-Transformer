@@ -1,6 +1,8 @@
 # Huấn luyện
 
-**Người giữ:** TV4. **Đầu việc:** TASK-006, TASK-011. **Code:** `src/train.py` (chưa có).
+**Người giữ:** TV4 (Hđang). **Đầu việc:** TASK-006, TASK-011. **Code:** `src/train.py`.
+
+TASK-006 đã triển khai trên `hoangdang`, chờ TV1 review; mô tả đầu việc tạm lưu tại [TASK-006.md](tasks/TASK-006.md) theo sự đồng ý của người dùng do chưa có quyền truy cập GitHub. TASK-011 đã train đủ 50 epoch cho hai mô hình, có bằng chứng bên dưới; chờ TV1 review.
 
 ## Thành phần làm gì
 Train ViT và CNN từ một lệnh, chọn checkpoint trên validation, chịu được ngắt phiên, và ghi log cùng checkpoint theo hợp đồng chung.
@@ -25,9 +27,25 @@ Augmentation trên ảnh nằm ở [04_data.md](04_data.md).
 
 **Checkpoint** (`.pt`): `model`, `optimizer`, `scheduler`, `scaler` (trạng thái `GradScaler`, `None` khi không dùng AMP), `epoch`, `best_val_top1`, `config`, `seed`, `class_names`. Demo lấy tên lớp từ `class_names` và mean/std từ `config`. Checkpoint chỉ chứa tensor, dict, list, số và chuỗi; không lưu đối tượng Python hay trạng thái RNG của numpy, để `weights_only=True` nạp được; trạng thái RNG nếu cần lưu thành tensor.
 
+Các khóa bắt buộc trên giữ nguyên. Trainer bổ sung `history` (các dòng CSV), `rng_state` (Python, numpy được chuyển thành số/list, torch/CUDA) và `best_checkpoint` trong file last. Bản best giữ trạng thái model/optimizer/scheduler của đúng epoch đạt val Top-1 cao nhất. Snapshot này giúp khôi phục cả best và CSV khi file bị thiếu, bị ngắt giữa các lần ghi, hoặc resume từ last cũ hơn log; file last lớn hơn vì chứa cả trạng thái best. Các bên đánh giá/demo tiếp tục dùng các khóa bắt buộc như trước.
+
+File: `outputs/checkpoints/<run_name>_last.pt`, `<run_name>_best.pt`. Epoch đánh số từ 1. CSV/checkpoint/ảnh được ghi qua file tạm cùng thư mục rồi đổi tên; lỗi ghi giữ bản cũ. Không resume thì một lần chạy có sẵn sẽ bị từ chối để tránh mất kết quả.
+
 **Log CSV** (`outputs/logs/<run_name>.csv`): `epoch, train_loss, train_acc, val_loss, val_top1, val_top5, lr, epoch_time_s`.
 
 Bên dùng: [07_evaluation.md](07_evaluation.md), [08_demo.md](08_demo.md). Muốn đổi thì sửa ở đây và báo cả nhóm.
+
+## Luồng cài đặt và resume
+
+1. Nạp/kiểm tra config, đặt seed; tạo model qua `build_model(cfg)` và loader chỉ cho `train`, `val`.
+2. AdamW chia hai nhóm: weight decay cho trọng số, không áp dụng cho bias, normalization, CLS token và positional embedding. Lịch warmup/cosine bước theo cập nhật optimizer; AMP bỏ bước vì overflow thì scheduler cũng không tiến.
+3. Mixup/CutMix chọn ngẫu nhiên một phép trong các phép có alpha dương, áp với xác suất `mix_prob`. CutMix chỉnh hệ số nhãn theo diện tích hộp thật sau khi cắt ở biên. Loss là CrossEntropy với label smoothing cho cả nhãn cứng và mềm.
+4. Validation không có Mixup/CutMix, Top-1/Top-5 tính bằng phần trăm, loss trung bình theo số ảnh. `train_acc` vẫn ghi so với nhãn gốc để giữ CSV, không dùng nhận xét chất lượng khi có nhãn trộn.
+5. Chọn best bằng validation Top-1; checkpoint last kèm lịch sử và trạng thái RNG. `--resume` khôi phục các trạng thái rồi chạy từ epoch kế tiếp, dựng lại CSV từ checkpoint để không trùng dòng.
+
+Resume phải giữ model, seed, số epoch tổng, công thức train, batch/augmentation và thứ tự tên lớp. Cho phép đổi đường dẫn dữ liệu và số worker khi chuyển máy. Độ dài loader phải giữ nguyên để không lệch lịch learning rate. `--epochs` là tổng số epoch của lịch, không phải số epoch cộng thêm khi resume. Số worker khác nhau/GPU có thể làm kết quả khác vì augmentation và kernel; không hứa trọng số bit-identical trên GPU.
+
+`--quick` giữ kiến trúc, kích thước ảnh và batch trong YAML (để đo bộ nhớ), chạy tối đa 2 epoch × 2 batch train/val. Nó thêm `_quick` vào tên gốc, ví dụ `vit_small_quick_seed42`, nên không ghi đè lần train thật. Không dùng checkpoint quick để resume train thật. Thiếu bất kỳ cache train/val nào thì cả hai loader quick dùng dữ liệu giả với cảnh báo; chế độ train thật luôn báo lỗi nếu thiếu cache. Không đọc cache test.
 
 ## FR-004: Huấn luyện
 - **Người sử dụng:** TV4.
@@ -72,13 +90,42 @@ Bên dùng: [07_evaluation.md](07_evaluation.md), [08_demo.md](08_demo.md). Mu�
 
 | Mục đích | Lệnh | Điều kiện | Trạng thái |
 |---|---|---|---|
-| Smoke test | `python -m src.train --config configs/vit_small.yaml --quick` | Không cần dữ liệu thật | Chưa có code |
-| Train | `python -m src.train --config configs/vit_small.yaml` | Dữ liệu đã chuẩn bị, nên có GPU | Chưa có code |
+| Smoke test CPU | `python -m src.train --config configs/vit_small.yaml --quick --device cpu` | Không cần dữ liệu thật; đổi config để kiểm tra CNN | Đã kiểm tra, xem bằng chứng dưới |
+| Smoke test CUDA | `python -m src.train --config configs/cnn_baseline.yaml --quick --device cuda` | PyTorch CUDA, GPU khả dụng | Đã kiểm tra batch 64 |
+| Train ViT | `python -m src.train --config configs/vit_small.yaml` | Cache và class_names đã chuẩn bị | Đã chạy đủ 50 epoch, xem bằng chứng TASK-011 |
+| Train CNN | `python -m src.train --config configs/cnn_baseline.yaml` | Như ViT, chạy sau ViT trên cùng GPU | Đã chạy đủ 50 epoch, xem bằng chứng TASK-011 |
+| Resume | `python -m src.train --config configs/vit_small.yaml --resume outputs/checkpoints/vit_small_seed42_last.pt` | Giữ nguyên lịch/config, có checkpoint last | Đã kiểm tra ngắt sau warmup bằng cache giả |
 
-**Lưu ý, chưa kiểm chứng:**
+Mặc định tự chọn CUDA nếu có, nếu không dùng CPU. `--device cpu`/`cuda` để chọn rõ; yêu cầu CUDA khi không có GPU sẽ báo lỗi. `--seed S` tách tên lần chạy. Cấu hình thật giữ 50 epoch là mức sàn; không dùng số epoch rút gọn của kiểm thử làm kết quả cuối.
+
+Trên Windows trong repo này có thể dùng `.venv/Scripts/python.exe` thay `python`. Nếu terminal/pipe lỗi mã hóa đường dẫn tiếng Việt, đặt `$env:PYTHONUTF8 = "1"` và `$env:PYTHONIOENCODING = "utf-8"` trong PowerShell trước khi chạy.
+
+## Bằng chứng TASK-006
+
+- Kiểm thử hồi quy: `python -m pytest -q -W error --basetemp .git/codex/pytest-task006-final --tb=short` (thư mục tạm riêng vì thư mục pytest mặc định trên máy bị Access denied).
+- Chi tiết môi trường, kết quả và smoke test cấu hình mặc định: [task006_training_checks.json](../outputs/results/task006_training_checks.json).
+- Test resume dùng mô hình nhỏ và cache giả chỉ có train/val, ngắt sau epoch 6 trong lịch 8 epoch (warmup 5), sửa log thành dữ liệu cũ/sai và mô phỏng best không khớp; so sánh learning rate từng bước với chạy liên tục ở ngưỡng 1e-8, loss và CSV không trùng. Đây là kiểm chứng AC-008 trên CPU, không phải kết quả Tiny ImageNet.
+- Chưa mô phỏng mất điện thật; chưa kiểm tra GPU 6GB khác của nhóm. VRAM trong bằng chứng là lượng tensor cấp phát đỉnh trên RTX 5060 Laptop 8GB, không phải cam kết cho mọi GPU.
+
+**Lưu ý vận hành:**
 - Chạy `--quick` trên CPU trước khi tốn giờ GPU.
 - Nếu máy GPU chạy Windows thì dùng `if __name__ == "__main__":`, kiểm tra `num_workers` trên Windows, không dùng `torch.compile`. Khi `num_workers=0` thì không bật `persistent_workers` (PyTorch báo lỗi).
 - Lưu checkpoint thường xuyên và sao lưu ra ngoài máy GPU (Google Drive hoặc Kaggle Dataset), vì cả nhóm phụ thuộc vào một máy.
+
+## Bằng chứng TASK-011
+
+Đã chạy lần lượt ViT rồi CNN trên cùng RTX 5060 Laptop 8GB với seed 42, batch 64, 50 epoch, cùng phần data/train trong YAML. Không chạy ablation hoặc đánh giá test.
+
+| Model | Epoch best / tổng | Val Top-1 (%) | Val Top-5 tại best (%) | Giây/epoch trung bình | VRAM tensor đỉnh (MiB) |
+|---|---:|---:|---:|---:|---:|
+| ViT-small | 50 / 50 | 47,63 | 71,77 | 31,94 | 498,97 |
+| ResNet-small | 50 / 50 | 58,73 | 81,03 | 22,36 | 320,47 |
+
+Nguồn: [task011_training_checks.json](../outputs/results/task011_training_checks.json), [CSV ViT](../outputs/logs/vit_small_seed42.csv), [CSV CNN](../outputs/logs/cnn_baseline_seed42.csv). Đã kiểm tra 50 dòng không trùng, loss hữu hạn, config data/train/seed bằng nhau, nhãn 450 train / 50 val mỗi lớp; best khớp CSV và snapshot trong last. Model từ checkpoint best nạp lại trên CPU bằng `torch.load(..., map_location="cpu", weights_only=True)` qua `build_model`, logits hữu hạn `(2,200)`.
+
+Checkpoint local: `outputs/checkpoints/vit_small_seed42_{best,last}.pt` và `cnn_baseline_seed42_{best,last}.pt`; không commit. File JSON có SHA-256 để đối chiếu khi sao chép. Chưa có link chia sẻ/offsite backup. Thời gian gồm train/validation, không gồm ghi checkpoint/vẽ hình; VRAM là max_memory_allocated chia 1024² (MiB), không phải toàn bộ bộ nhớ driver. Các trường JSON có hậu tố `_mb` giữ tên cũ của hợp đồng, đơn vị được ghi rõ trong bằng chứng.
+
+TASK-006 và TASK-011 đã có bằng chứng triển khai/chạy, chưa đánh dấu Hoàn thành trước khi TV1 review; chưa có Issue/PR/Projects mới vì chưa có quyền GitHub.
 
 ## Rủi ro
 

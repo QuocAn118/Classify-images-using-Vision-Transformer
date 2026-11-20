@@ -3,7 +3,7 @@
 Chi tiết từng thành phần nằm ở file riêng; file này chỉ giữ phần dùng chung. Các quyết định thiết kế ở [09_decisions.md](09_decisions.md).
 
 ## Hiện trạng
-- Đã có `src/utils.py`, `scripts/prepare_data.py`, `src/data.py` (TASK-001 đến 003) và `src/models/` với ViT, `build_model` (TASK-004); chưa có CNN, vòng lặp train, đánh giá hay demo.
+- Đã có tiện ích, dữ liệu, DataLoader, ViT và CNN (TASK-001 đến 005). `src/train.py` (TASK-006) đã triển khai trên `hoangdang`, kiểm thử quick/resume, chờ TV1 review; chưa có đánh giá test hay demo.
 - Tái sử dụng `torchvision`: transform, RandAugment, CIFAR-100.
 - Cấu trúc thư mục code lấy từ mục 4 của [spec](../SPEC_ViT.md), với gốc repo là gốc project (DEC-004).
 
@@ -57,7 +57,7 @@ Muốn đổi hợp đồng nào thì sửa tài liệu và báo cả nhóm trư
 
 **Config YAML** (`configs/vit_small.yaml`, `configs/cnn_baseline.yaml`), các khóa bắt buộc do `load_config` trong `src/utils.py` kiểm tra:
 - `run_name`, `seed`
-- `data`: `name, root, img_size, num_classes, batch_size, num_workers, val_ratio, mean, std`
+- `data`: `name, root, cache_dir, img_size, num_classes, batch_size, num_workers, val_ratio, mean, std`
 - `model`: `name`
 - `train`: `epochs, optimizer, lr, weight_decay`
 
