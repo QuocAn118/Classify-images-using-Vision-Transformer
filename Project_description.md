@@ -23,7 +23,7 @@ Chi tiết, yêu cầu chức năng và giả định còn mở: [docs/01_define
 
 ## Design
 - **Luồng:** Tiny ImageNet → chuẩn bị dữ liệu và cache → train ViT, CNN → checkpoint → đánh giá, attention, demo → bảng so sánh.
-- **Mô hình:** ViT-small (patch 8, dim 256, depth 8, khoảng 6,4 triệu tham số, tính tay) và ResNet nhỏ khớp số tham số.
+- **Mô hình:** ViT-small (patch 8, dim 256, depth 8, 6.436.296 tham số) và ResNet-small (6.476.808 tham số, chênh 0,63%); bằng chứng tại [docs/05_model.md](docs/05_model.md).
 - **Huấn luyện:** AdamW, batch 64, lr 2,5e-4, 50 epoch (mức sàn), chọn checkpoint trên validation.
 
 | Thành phần | Tài liệu | Người giữ |
@@ -38,8 +38,8 @@ Chi tiết, yêu cầu chức năng và giả định còn mở: [docs/01_define
 
 ## Plan
 - **Mốc:** duyệt tài liệu và nộp mẫu đăng ký → khung repo → `--quick` chạy thông → train thật → số cuối trên test → nộp bài 24/11 (25/11 dự phòng).
-- **Trạng thái:** theo dõi trên GitHub Issues và Projects. Đã xong khung repo, dữ liệu, DataLoader (TASK-001 đến 003) và ViT (TASK-004); đang làm CNN, vòng lặp train và attention.
-- **Đầu việc tiếp theo:** TASK-005 (TV3, CNN) → TASK-006 (TV4, train); song song TASK-008 (TV2, attention). Chi tiết ở [docs/03_plan.md](docs/03_plan.md).
+- **Trạng thái:** TASK-001 đến TASK-006, TASK-008 và TASK-011 đã gộp vào main; ViT/CNN đã train đủ 50 epoch, có log/checkpoint/báo cáo validation. Chưa có đánh giá test cuối (TASK-007, 012). Mô tả TASK-006/011 lưu tạm trong `docs/tasks/` theo sự đồng ý của người dùng vì chưa truy cập được GitHub.
+- **Đầu việc tiếp theo:** TV1 review phần TV4; bàn giao checkpoint cho TASK-008 (TV2, attention) và các phần đánh giá/so sánh/demo của TV5. Chưa có kết quả test cuối hoặc link chia sẻ checkpoint. Chi tiết ở [docs/03_plan.md](docs/03_plan.md).
 
 Phân công, danh sách đầu việc, thứ tự cắt việc và checklist nộp bài: [docs/03_plan.md](docs/03_plan.md). Nhật ký: [docs/10_work_log.md](docs/10_work_log.md).
 

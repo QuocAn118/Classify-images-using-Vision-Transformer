@@ -9,10 +9,10 @@ File này giữ phân công, danh sách đầu việc, mốc và quy tắc cắt
 | TV1 | Trưởng nhóm, dữ liệu, tài liệu | [04_data.md](04_data.md), [01_define.md](01_define.md), [02_architecture.md](02_architecture.md), file này | 1, 2, 8, 9 |
 | TV2 | ViT và attention | [05_model.md](05_model.md) phần ViT, phần attention trong [07_evaluation.md](07_evaluation.md) | 3 (ViT), 6 |
 | TV3 | CNN, đo FLOPs/MACs | [05_model.md](05_model.md) phần CNN | 3 (CNN), 6 (Grad-CAM nếu có) |
-| TV4 | Huấn luyện | [06_training.md](06_training.md) | 4 |
+| TV4 (Hđang) | Huấn luyện | [06_training.md](06_training.md) | 4 |
 | TV5 | Đánh giá, demo, ghép báo cáo | [07_evaluation.md](07_evaluation.md), [08_demo.md](08_demo.md) | 5, 7, 10 |
 
-TV1 đã xác định (trưởng nhóm, chủ repo); tên thật của TV2-TV5 sẽ thay khi nhóm chốt. TV4 nên là thành viên có máy GPU, vì phụ trách train và quản lý checkpoint.
+TV1 là trưởng nhóm/chủ repo; TV4 là Hđang theo phân công nhóm người dùng cung cấp ngày 2026-11-19. Máy TV4 hiện kiểm tra được RTX 5060 Laptop 8GB; giả định GPU 6GB trong kế hoạch cần phân biệt với phép đo máy này.
 
 ## Theo dõi trạng thái trên GitHub
 - Mỗi đầu việc là một **Issue**, tạo từ mẫu `.github/ISSUE_TEMPLATE/task.md`. Phần mô tả đầu việc (bước Describe) viết trong Issue.
@@ -21,7 +21,7 @@ TV1 đã xác định (trưởng nhóm, chủ repo); tên thật của TV2-TV5 s
 - Chỉ chuyển sang Hoàn thành khi PR đã có bằng chứng kiểm tra và người duyệt đã xem. AI báo xong chưa đủ.
 - Lỗi phát sinh tạo Issue từ mẫu `.github/ISSUE_TEMPLATE/bug.md`.
 
-**Hiện trạng:** Issue và bảng Projects chưa tạo. Cho đến khi tạo: TASK-000 hoàn thành (nhóm duyệt `docs/` ngày 2026-11-15); TASK-014 hoàn thành (đã nộp mẫu đăng ký, TV1 báo ngày 2026-11-15); TASK-001 hoàn thành (12 test pass, TV1 đọc code ngày 2026-11-16); TASK-002 hoàn thành (18 test pass, chạy trên dữ liệu thật, TV1 đọc code ngày 2026-11-17); TASK-003 hoàn thành (25 test pass, TV1 đọc code ngày 2026-11-17); TASK-004 hoàn thành (TV2, PR #2 gộp ngày 2026-11-17, 48 test pass); TASK-005 hoàn thành (TV3, PR #3 gộp ngày 2026-11-19, 52 test pass); TASK-008 hoàn thành (TV2, PR #6 gộp ngày 2026-11-20, 73 test pass, hình từ checkpoint TV4 bàn giao; nếu train lại thì chạy lại `src.attention`); các đầu việc khác chưa bắt đầu.
+**Hiện trạng:** Issue và bảng Projects chưa tạo. Cho đến khi tạo: TASK-000 hoàn thành (nhóm duyệt `docs/` ngày 2026-11-15); TASK-014 hoàn thành (đã nộp mẫu đăng ký, TV1 báo ngày 2026-11-15); TASK-001 hoàn thành (12 test pass, TV1 đọc code ngày 2026-11-16); TASK-002 hoàn thành (18 test pass, chạy trên dữ liệu thật, TV1 đọc code ngày 2026-11-17); TASK-003 hoàn thành (25 test pass, TV1 đọc code ngày 2026-11-17); TASK-004 hoàn thành (TV2, PR #2 gộp ngày 2026-11-17, 48 test pass); TASK-005 hoàn thành (TV3, PR #3 gộp ngày 2026-11-19, 52 test pass); TASK-008 hoàn thành (TV2, PR #6 gộp ngày 2026-11-20, 73 test pass, hình từ checkpoint TV4 bàn giao; nếu train lại thì chạy lại `src.attention`); TASK-006 và TASK-011 hoàn thành (TV4, nhánh `hoangdang` gộp ngày 2026-11-20 không qua PR theo yêu cầu TV1; TV1 chạy lại val từ checkpoint khớp log); các đầu việc khác chưa bắt đầu.
 
 ## Danh sách đầu việc
 
@@ -45,7 +45,7 @@ TV1 đã xác định (trưởng nhóm, chủ repo); tên thật của TV2-TV5 s
 
 **Điều kiện bắt đầu code:** Chỉ bắt đầu TASK-001 và các đầu việc code khác sau khi nhóm duyệt `docs/`. Bản thử đầu của TASK-001 viết sai thứ tự nên đã bị xóa.
 
-**Đầu việc tiếp theo:** TASK-004, TASK-005 xong; TASK-006 (TV4, dùng `build_loader` và `build_model` theo [04_data.md](04_data.md), [05_model.md](05_model.md)); TV1 chốt làm lần lượt ngày 2026-11-17; TASK-008 xong (PR #6); TV4 mở PR cho nhánh `hoangdang` (TASK-006, 011) để TV1 review; TV1 làm thẳng trên `main` (DEC-014).
+**Đầu việc tiếp theo:** TASK-004 đến 006, 008, 011 xong. TV5 làm TASK-007 (đánh giá test bằng checkpoint best đã chốt), rồi TASK-009 (bảng so sánh) và TASK-010 (demo); TASK-012 sau đó. Mô tả TASK-006/011 lưu tại [tasks/TASK-006.md](tasks/TASK-006.md), [tasks/TASK-011.md](tasks/TASK-011.md). TV1 làm thẳng trên `main` (DEC-014). Không dùng test để chọn checkpoint hoặc siêu tham số.
 
 ## Mốc và lịch
 

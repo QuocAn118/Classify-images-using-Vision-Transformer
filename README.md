@@ -2,7 +2,7 @@
 
 Đồ án môn Học sâu, đề số 9. Nhóm tự cài ViT, so sánh với một CNN có cùng số tham số và trực quan hóa attention.
 
-> **Trạng thái:** đã có khung repo (TASK-001), chuẩn bị dữ liệu (TASK-002) và DataLoader (TASK-003). ViT và test (TASK-004, TV2) đã gộp vào `main` qua [PR #2](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/2). CNN baseline (TASK-005, TV3) gộp qua [PR #3](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/3). Trực quan hóa attention (TASK-008, TV2) gộp qua [PR #6](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/6), có hình 12 ảnh từ checkpoint thật. Code train của TV4 chưa gộp vào `main`; checkpoint TV4 được bàn giao riêng để chạy attention.
+> **Trạng thái:** đã có khung repo, dữ liệu, DataLoader (TASK-001 đến 003), ViT ([PR #2](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/2)), CNN ([PR #3](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/3)), vòng lặp train và train thật 50 epoch (TASK-006, 011, TV4, gộp từ nhánh `hoangdang`) và hình attention (TASK-008, [PR #6](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/6)). Validation Top-1: ViT 47,63%, CNN 58,73% ([bằng chứng](outputs/results/task011_training_checks.json)). Chưa có đánh giá test cuối, bảng so sánh hay demo.
 
 ## Bài toán
 
@@ -31,7 +31,23 @@ python -m pytest
 ```
 
 - `prepare_data.py --download` tải Tiny ImageNet từ Stanford (248 MB) vào `data/`, chia train/validation/test và tạo cache khoảng 1,35 GB ở `data/cache/tiny_imagenet_64/`. Trên máy TV1 (CPU, Windows) mất 64 phút.
-- Lệnh train, đánh giá accuracy và demo sẽ được người phụ trách bổ sung sau khi triển khai và kiểm chứng; lệnh attention đã chạy ở phần dưới.
+- Đánh giá test cuối và demo thuộc TV5; chưa có các lệnh chạy được cho hai phần đó.
+
+### Huấn luyện (TV4)
+
+Môi trường Windows của TV4 dùng `.venv/Scripts/python.exe` thay `python` trong các lệnh bên dưới. Tạo môi trường bằng `python -m venv .venv`, cài PyTorch CUDA theo [hướng dẫn chính thức](https://pytorch.org/get-started/locally/) trước, rồi cài `requirements.txt`. Trên RTX 5060 Laptop của TV4 đã kiểm tra torch 2.11.0+cu128 và torchvision 0.26.0+cu128. Nếu terminal lỗi mã hóa tiếng Việt, đặt `$env:PYTHONUTF8 = "1"` và `$env:PYTHONIOENCODING = "utf-8"` trong PowerShell.
+
+```bash
+python -m src.train --config configs/vit_small.yaml --quick --device cpu
+python -m src.train --config configs/cnn_baseline.yaml --quick --device cuda
+python -m src.train --config configs/vit_small.yaml
+python -m src.train --config configs/cnn_baseline.yaml
+python -m src.train --config configs/vit_small.yaml --resume outputs/checkpoints/vit_small_seed42_last.pt
+```
+
+Quick chạy tối đa 2 epoch × 2 batch mỗi tập, thiếu cache thì cảnh báo và dùng dữ liệu giả. Tên có `_quick` để không ghi đè train thật; giữ batch 64 và kiến trúc mặc định khi đo VRAM. Train thật cần cache cùng `outputs/results/class_names.json`, chạy lần lượt ViT rồi CNN, mặc định 50 epoch, chọn checkpoint bằng validation; không đọc test. Hai lệnh train thật đã chạy đủ 50 epoch cho TASK-011; số liệu và kiểm chứng nằm ở [task011_training_checks.json](outputs/results/task011_training_checks.json), bảng validation và đường cong ở [báo cáo mục 4.2](report/report.md#42-huấn-luyện-đường-cong-học-và-ablation).
+
+Checkpoint best/last ở `outputs/checkpoints/`, CSV ở `outputs/logs/`, hình đường cong ở `outputs/figures/`. Chưa có resume thì chương trình từ chối ghi đè lần chạy cũ. Resume giữ cùng model, seed, batch và lịch số epoch tổng. Chi tiết và bằng chứng: [06_training.md](docs/06_training.md), [task006_training_checks.json](outputs/results/task006_training_checks.json). Dữ liệu và checkpoint không commit. Hiện checkpoint best/last của cả hai mô hình có trên máy trong `outputs/checkpoints/`, chưa có link chia sẻ bên ngoài. Trên máy TV4, pytest cần thư mục tạm riêng: `python -m pytest -q -W error --basetemp .git/codex/pytest-local` (thư mục cha `.git/codex/` đã được tạo trong phiên này).
 
 ### Kiểm tra ViT (TASK-004)
 
@@ -53,7 +69,7 @@ python -m src.attention --checkpoint outputs/checkpoints/vit_small_seed42_best.p
 
 CLI lấy kiến trúc, mean/std và tên lớp từ checkpoint, đối chiếu thứ tự nhãn với `outputs/results/class_names.json`; `--expected-sha256` cho phép xác minh file bàn giao, `--cache-dir` đổi nơi đọc cache. Mặc định dùng validation; test chỉ đọc khi chỉ định `--split test` và checkpoint đã chốt.
 
-Đã chạy ngày 2026-11-20: **12 ảnh, 12 lớp, 6 đúng và 6 sai**. Xem [gallery](outputs/figures/attention/vit_small_seed42_test/gallery.png), [manifest từng ảnh](outputs/figures/attention/vit_small_seed42_test/manifest.json) và [bằng chứng](outputs/results/task008_attention_checks.json). Toàn repo **73 test pass**; không đo accuracy từ tập ảnh được chọn cân bằng này. API dùng lại cho demo ở [docs/07_evaluation.md](docs/07_evaluation.md). Chưa kiểm tra CUDA/AMP; TASK-008 chờ TV1 review.
+Đã chạy ngày 2026-11-20: **12 ảnh, 12 lớp, 6 đúng và 6 sai**. Xem [gallery](outputs/figures/attention/vit_small_seed42_test/gallery.png), [manifest từng ảnh](outputs/figures/attention/vit_small_seed42_test/manifest.json) và [bằng chứng](outputs/results/task008_attention_checks.json). Toàn repo **73 test pass**; không đo accuracy từ tập ảnh được chọn cân bằng này. API dùng lại cho demo ở [docs/07_evaluation.md](docs/07_evaluation.md). Chưa kiểm tra CUDA/AMP; TV1 đã chạy lại và gộp TASK-008.
 
 ## Tài liệu
 

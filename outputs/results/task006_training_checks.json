@@ -1,0 +1,142 @@
+{
+  "task": "TASK-006",
+  "date": "2026-11-19",
+  "branch": "hoangdang",
+  "environment": {
+    "python": "3.12.10",
+    "torch": "2.11.0+cu128",
+    "torchvision": "0.26.0+cu128",
+    "os": "Windows-11-10.0.26200-SP0",
+    "gpu": "NVIDIA GeForce RTX 5060 Laptop GPU",
+    "gpu_total_vram_mb": 8150.5625
+  },
+  "pytest": {
+    "command": "python -m pytest -q -W error --basetemp .git/codex/pytest-task006-final --tb=short --junitxml=.git/codex/task006_pytest.xml",
+    "tests": 72,
+    "failures": 0,
+    "errors": 0,
+    "time_s": 17.085,
+    "training_tests": 20
+  },
+  "resume": {
+    "evidence": "tests/test_train.py::test_resume_after_warmup_matches_uninterrupted_and_repairs_stale_log",
+    "total_epochs": 8,
+    "interruption_epoch": 6,
+    "warmup_epochs": 5,
+    "cpu_only": true,
+    "lr_tolerance": 1e-08,
+    "val_loss_relative_tolerance": 0.1,
+    "csv_and_best_recovered": true,
+    "mixup_cutmix_active": true,
+    "resume_best_to_new_directory": true
+  },
+  "smoke_runs": [
+    {
+      "run_name": "vit_small_quick_seed42",
+      "model": "vit",
+      "device": "cuda",
+      "seed": 42,
+      "command": "python -m src.train --config configs/vit_small.yaml --quick --device cuda",
+      "synthetic": true,
+      "epochs": 2,
+      "train_batches_per_epoch": 2,
+      "val_batches_per_epoch": 2,
+      "batch_size": 64,
+      "peak_allocated_vram_mb": 498.97412109375,
+      "vram_source": "Observed CLI return from this run",
+      "epoch_time_s": [
+        0.574581599998055,
+        0.08933539999998175
+      ],
+      "checkpoint_round_trip": true,
+      "optimizer_tensors_finite": true,
+      "best_matches_csv": true,
+      "scaler_present": true,
+      "log": "outputs/logs/vit_small_quick_seed42.csv",
+      "curves": "outputs/figures/vit_small_quick_seed42_curves.png",
+      "checkpoint_committed": false
+    },
+    {
+      "run_name": "cnn_baseline_quick_seed42",
+      "model": "resnet_small",
+      "device": "cuda",
+      "seed": 42,
+      "command": "python -m src.train --config configs/cnn_baseline.yaml --quick --device cuda",
+      "synthetic": true,
+      "epochs": 2,
+      "train_batches_per_epoch": 2,
+      "val_batches_per_epoch": 2,
+      "batch_size": 64,
+      "peak_allocated_vram_mb": 311.34765625,
+      "vram_source": "Observed CLI return from this run",
+      "epoch_time_s": [
+        0.6425193000031868,
+        0.08288109999557491
+      ],
+      "checkpoint_round_trip": true,
+      "optimizer_tensors_finite": true,
+      "best_matches_csv": true,
+      "scaler_present": true,
+      "log": "outputs/logs/cnn_baseline_quick_seed42.csv",
+      "curves": "outputs/figures/cnn_baseline_quick_seed42_curves.png",
+      "checkpoint_committed": false
+    },
+    {
+      "run_name": "vit_small_quick_seed142",
+      "model": "vit",
+      "device": "cpu",
+      "seed": 142,
+      "command": "python -m src.train --config configs/vit_small.yaml --quick --device cpu --seed 142",
+      "synthetic": true,
+      "epochs": 2,
+      "train_batches_per_epoch": 2,
+      "val_batches_per_epoch": 2,
+      "batch_size": 64,
+      "peak_allocated_vram_mb": null,
+      "vram_source": null,
+      "epoch_time_s": [
+        2.5384984999982407,
+        2.782550599993556
+      ],
+      "checkpoint_round_trip": true,
+      "optimizer_tensors_finite": true,
+      "best_matches_csv": true,
+      "scaler_present": false,
+      "log": "outputs/logs/vit_small_quick_seed142.csv",
+      "curves": "outputs/figures/vit_small_quick_seed142_curves.png",
+      "checkpoint_committed": false
+    },
+    {
+      "run_name": "cnn_baseline_quick_seed142",
+      "model": "resnet_small",
+      "device": "cpu",
+      "seed": 142,
+      "command": "python -m src.train --config configs/cnn_baseline.yaml --quick --device cpu --seed 142",
+      "synthetic": true,
+      "epochs": 2,
+      "train_batches_per_epoch": 2,
+      "val_batches_per_epoch": 2,
+      "batch_size": 64,
+      "peak_allocated_vram_mb": null,
+      "vram_source": null,
+      "epoch_time_s": [
+        1.4834633999998914,
+        1.7112577999942005
+      ],
+      "checkpoint_round_trip": true,
+      "optimizer_tensors_finite": true,
+      "best_matches_csv": true,
+      "scaler_present": false,
+      "log": "outputs/logs/cnn_baseline_quick_seed142.csv",
+      "curves": "outputs/figures/cnn_baseline_quick_seed142_curves.png",
+      "checkpoint_committed": false
+    }
+  ],
+  "test_dataset_read_by_training": false,
+  "limitations": [
+    "All smoke inputs are synthetic; these are not Tiny ImageNet accuracy results.",
+    "No physical power-loss test; no test on a different 6GB GPU.",
+    "Awaiting TV1 review; GitHub Issue/PR/Projects not published."
+  ],
+  "vram_unit": "MiB (bytes / 1024**2); legacy field names retain the _mb suffix"
+}
