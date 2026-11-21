@@ -1,0 +1,21 @@
+group,rank,class_name,correct,total,accuracy_pct
+best,1,bullet train,45,50,90.0
+best,2,dugong,44,50,88.0
+best,3,monarch,43,50,86.0
+best,4,school bus,43,50,86.0
+best,5,trolleybus,43,50,86.0
+best,6,lifeboat,42,50,84.0
+best,7,sulphur butterfly,41,50,82.0
+best,8,freight car,41,50,82.0
+best,9,obelisk,41,50,82.0
+best,10,rugby ball,41,50,82.0
+worst,1,plunger,4,50,8.0
+worst,2,umbrella,5,50,10.0
+worst,3,syringe,5,50,10.0
+worst,4,wooden spoon,6,50,12.0
+worst,5,Chihuahua,6,50,12.0
+worst,6,boa constrictor,6,50,12.0
+worst,7,pole,7,50,14.0
+worst,8,dumbbell,7,50,14.0
+worst,9,bucket,7,50,14.0
+worst,10,standard poodle,7,50,14.0

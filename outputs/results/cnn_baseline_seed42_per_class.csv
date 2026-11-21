@@ -1,0 +1,201 @@
+class_id,class_name,correct,total,accuracy_pct
+0,goldfish,42,50,84.0
+1,European fire salamander,41,50,82.0
+2,bullfrog,29,50,58.0
+3,tailed frog,28,50,56.0
+4,American alligator,32,50,64.0
+5,boa constrictor,18,50,36.0
+6,trilobite,40,50,80.0
+7,scorpion,22,50,44.0
+8,black widow,41,50,82.0
+9,tarantula,28,50,56.0
+10,centipede,21,50,42.0
+11,goose,34,50,68.0
+12,koala,35,50,70.0
+13,jellyfish,38,50,76.0
+14,brain coral,38,50,76.0
+15,snail,24,50,48.0
+16,slug,20,50,40.0
+17,sea slug,39,50,78.0
+18,American lobster,28,50,56.0
+19,spiny lobster,35,50,70.0
+20,black stork,39,50,78.0
+21,king penguin,37,50,74.0
+22,albatross,38,50,76.0
+23,dugong,44,50,88.0
+24,Chihuahua,18,50,36.0
+25,Yorkshire terrier,39,50,78.0
+26,golden retriever,33,50,66.0
+27,Labrador retriever,21,50,42.0
+28,German shepherd,27,50,54.0
+29,standard poodle,16,50,32.0
+30,tabby,26,50,52.0
+31,Persian cat,34,50,68.0
+32,Egyptian cat,19,50,38.0
+33,cougar,22,50,44.0
+34,lion,34,50,68.0
+35,brown bear,37,50,74.0
+36,ladybug,39,50,78.0
+37,fly,29,50,58.0
+38,bee,36,50,72.0
+39,grasshopper,29,50,58.0
+40,walking stick,24,50,48.0
+41,cockroach,23,50,46.0
+42,mantis,25,50,50.0
+43,dragonfly,30,50,60.0
+44,monarch,44,50,88.0
+45,sulphur butterfly,41,50,82.0
+46,sea cucumber,34,50,68.0
+47,guinea pig,31,50,62.0
+48,hog,19,50,38.0
+49,ox,19,50,38.0
+50,bison,36,50,72.0
+51,bighorn,27,50,54.0
+52,gazelle,40,50,80.0
+53,Arabian camel,30,50,60.0
+54,orangutan,35,50,70.0
+55,chimpanzee,34,50,68.0
+56,baboon,29,50,58.0
+57,African elephant,37,50,74.0
+58,lesser panda,38,50,76.0
+59,abacus,27,50,54.0
+60,academic gown,36,50,72.0
+61,altar,34,50,68.0
+62,apron,22,50,44.0
+63,backpack,24,50,48.0
+64,bannister,19,50,38.0
+65,barbershop,26,50,52.0
+66,barn,40,50,80.0
+67,barrel,18,50,36.0
+68,basketball,31,50,62.0
+69,bathtub,25,50,50.0
+70,beach wagon,29,50,58.0
+71,beacon,40,50,80.0
+72,beaker,26,50,52.0
+73,beer bottle,25,50,50.0
+74,bikini,35,50,70.0
+75,binoculars,28,50,56.0
+76,birdhouse,29,50,58.0
+77,bow tie,14,50,28.0
+78,brass,40,50,80.0
+79,broom,19,50,38.0
+80,bucket,11,50,22.0
+81,bullet train,45,50,90.0
+82,butcher shop,37,50,74.0
+83,candle,22,50,44.0
+84,cannon,20,50,40.0
+85,cardigan,20,50,40.0
+86,cash machine,26,50,52.0
+87,CD player,27,50,54.0
+88,chain,18,50,36.0
+89,chest,25,50,50.0
+90,Christmas stocking,35,50,70.0
+91,cliff dwelling,33,50,66.0
+92,computer keyboard,28,50,56.0
+93,confectionery,34,50,68.0
+94,convertible,22,50,44.0
+95,crane,28,50,56.0
+96,dam,23,50,46.0
+97,desk,27,50,54.0
+98,dining table,33,50,66.0
+99,drumstick,15,50,30.0
+100,dumbbell,17,50,34.0
+101,flagpole,33,50,66.0
+102,fountain,33,50,66.0
+103,freight car,40,50,80.0
+104,frying pan,26,50,52.0
+105,fur coat,26,50,52.0
+106,gasmask,27,50,54.0
+107,go-kart,42,50,84.0
+108,gondola,42,50,84.0
+109,hourglass,33,50,66.0
+110,iPod,29,50,58.0
+111,jinrikisha,34,50,68.0
+112,kimono,25,50,50.0
+113,lampshade,26,50,52.0
+114,lawn mower,24,50,48.0
+115,lifeboat,41,50,82.0
+116,limousine,24,50,48.0
+117,magnetic compass,32,50,64.0
+118,maypole,38,50,76.0
+119,military uniform,20,50,40.0
+120,miniskirt,24,50,48.0
+121,moving van,33,50,66.0
+122,nail,15,50,30.0
+123,neck brace,25,50,50.0
+124,obelisk,43,50,86.0
+125,oboe,27,50,54.0
+126,organ,39,50,78.0
+127,parking meter,26,50,52.0
+128,pay-phone,29,50,58.0
+129,picket fence,37,50,74.0
+130,pill bottle,24,50,48.0
+131,plunger,4,50,8.0
+132,pole,9,50,18.0
+133,police van,33,50,66.0
+134,poncho,26,50,52.0
+135,pop bottle,10,50,20.0
+136,potter's wheel,30,50,60.0
+137,projectile,21,50,42.0
+138,punching bag,16,50,32.0
+139,reel,16,50,32.0
+140,refrigerator,28,50,56.0
+141,remote control,26,50,52.0
+142,rocking chair,27,50,54.0
+143,rugby ball,41,50,82.0
+144,sandal,27,50,54.0
+145,school bus,47,50,94.0
+146,scoreboard,35,50,70.0
+147,sewing machine,29,50,58.0
+148,snorkel,27,50,54.0
+149,sock,33,50,66.0
+150,sombrero,27,50,54.0
+151,space heater,25,50,50.0
+152,spider web,35,50,70.0
+153,sports car,33,50,66.0
+154,steel arch bridge,35,50,70.0
+155,stopwatch,33,50,66.0
+156,sunglasses,30,50,60.0
+157,suspension bridge,32,50,64.0
+158,swimming trunks,18,50,36.0
+159,syringe,12,50,24.0
+160,teapot,29,50,58.0
+161,teddy,31,50,62.0
+162,thatch,38,50,76.0
+163,torch,32,50,64.0
+164,tractor,33,50,66.0
+165,triumphal arch,43,50,86.0
+166,trolleybus,45,50,90.0
+167,turnstile,31,50,62.0
+168,umbrella,14,50,28.0
+169,vestment,27,50,54.0
+170,viaduct,38,50,76.0
+171,volleyball,32,50,64.0
+172,water jug,17,50,34.0
+173,water tower,38,50,76.0
+174,wok,28,50,56.0
+175,wooden spoon,7,50,14.0
+176,comic book,36,50,72.0
+177,plate,28,50,56.0
+178,guacamole,34,50,68.0
+179,ice cream,23,50,46.0
+180,ice lolly,16,50,32.0
+181,pretzel,26,50,52.0
+182,mashed potato,30,50,60.0
+183,cauliflower,30,50,60.0
+184,bell pepper,42,50,84.0
+185,mushroom,36,50,72.0
+186,orange,31,50,62.0
+187,lemon,30,50,60.0
+188,banana,37,50,74.0
+189,pomegranate,40,50,80.0
+190,meat loaf,25,50,50.0
+191,pizza,39,50,78.0
+192,potpie,29,50,58.0
+193,espresso,40,50,80.0
+194,alp,37,50,74.0
+195,cliff,33,50,66.0
+196,coral reef,35,50,70.0
+197,lakeside,24,50,48.0
+198,seashore,34,50,68.0
+199,acorn,24,50,48.0

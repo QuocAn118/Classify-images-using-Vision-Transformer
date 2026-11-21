@@ -295,7 +295,24 @@ Ghi ngắn sau mỗi buổi hoặc mốc đáng kể.
 - **Điều chưa xác minh:** chưa chạy lại resume trên dữ liệu thật hay GPU; một số bằng chứng của TV4 trỏ vào `.git/codex/` chỉ có trên máy TV4; checkpoint chưa sao lưu ra ngoài.
 - **Bước tiếp theo:** TV5 làm TASK-007 (đánh giá test) bằng hai checkpoint best; chia sẻ checkpoint cho TV5 kèm SHA-256.
 
+## 2026-11-21 (TV5, sửa theo review TASK-007, TASK-009, TASK-010)
+
+- **Describe:** Đọc review của TV1; kiểm tra lần lượt đánh giá/phân tích lỗi, so sánh, demo trên nhánh `vananh`. Tiếp tục các sửa đổi chưa commit có sẵn; giữ nguyên thay đổi ngoài phạm vi ở `outputs/figures/samples.png`.
+- **Kết quả:** Xác minh các bản sửa đã có: khai báo Gradio 6.32.0, kiểm tra checkpoint và thông báo dễ hiểu, resize từ config, tên lớp lấy từ checkpoint, bỏ gọi phân tích lỗi/import/dòng TASK-009 trùng, đổi `test.jpg` thành `goldfish.jpg`. Bổ sung sửa nhãn lưới ảnh sai bị ẩn, biểu đồ Top-1 thiếu số liệu, backend Agg không cần Tk. Thu nhỏ ảnh khải hoàn môn từ 9.081.088 byte xuống 56.302 byte (500×331); ghi sáu URL nguồn do người dùng cung cấp vào `app/examples/README.md`.
+- **Run / Test:** Python 3.13, torch 2.15.0+cpu, Gradio 6.32.0. Toàn bộ suite: **109 passed in 29.02s**, coi warning là lỗi. Lệnh thực tế: `python -X utf8 -c "import sys; sys.path.insert(0,'.test-deps'); import torch,pytest; torch.set_num_threads(2); raise SystemExit(pytest.main(['-q','-W','error','-p','no:cacheprovider','--basetemp','.pytest-tmp-review-verified']))"`. `.test-deps` chứa Pygments 2.21.0 tải tạm vì Python trên máy thiếu dependency này; tắt cacheprovider vì cache cũ bị từ chối quyền ghi. Các thư mục tạm được dọn sau kiểm tra. Khi môi trường đầy đủ, chạy `python -m pytest -q -W error -p no:cacheprovider`.
+- **Kiểm tra demo thực tế:** Tạo Gradio Interface và gọi callback với hai checkpoint thật, ảnh cá vàng chuyển RGB/L/RGBA: đều trả hai bảng 5 nhãn và rollout RGB 64×64; `None` báo lỗi ảnh không hợp lệ. Không train lại hoặc dùng test chọn checkpoint. `git diff --check` đạt.
+- **Debug:** Lần đầu không khởi động được pytest do thiếu Pygments; sau bổ sung dependency, gặp cache bị khóa và Tk thiếu `ttk.tcl`. Khắc phục bằng cacheprovider tắt trong lệnh kiểm tra và backend Agg cho hai script chỉ xuất PNG; lần chạy cuối exit 0.
+- **Documentation / giới hạn:** Cập nhật README, tài liệu demo/đánh giá và AI_Usage; kế hoạch giữ trạng thái đã triển khai, chờ TV1 xác minh. Chưa kiểm tra lại bằng trình duyệt hoặc cài trên máy sạch; tác giả/giấy phép ảnh chưa xác nhận. Chưa cập nhật GitHub Projects; không commit, push hoặc đánh dấu Hoàn thành.
+- **Bước tiếp theo:** TV1 xem diff, bằng chứng và kiểm tra demo trên máy sạch trước khi duyệt/gộp.
+
+## 2026-11-21 (TV5, cập nhật báo cáo)
+
+- **Bổ sung báo cáo ngày 2026-11-21 (TV5):** Cập nhật `report/report.md` phần đánh giá, so sánh, demo và kiểm thử; sửa trạng thái cũ còn ghi chưa có kết quả test, thêm MACs “chưa có”. Đối chiếu JSON kết quả ViT/CNN và comparison.csv, giữ nguyên số đo. Chạy bốn file test: **16 passed in 13.87s**.<br>
+Copy project sang thư mục mới, bỏ `.git`, `.venv`, `data/` và `checkpoint`; tạo `.venv` mới, cài `requirements.txt` và chạy pytest: 109 passed.
+
+
 ## Mẫu buổi làm
+
 - Ngày: [YYYY-MM-DD]
 - Đầu việc: [TASK-xxx — tên]
 - Kết quả / thay đổi chính: [cần điền]

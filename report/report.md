@@ -1,6 +1,6 @@
 # Báo cáo: Phân loại ảnh Tiny ImageNet bằng Vision Transformer
 
-> **Bản nháp, cập nhật ngày 2026-11-20.** Khung theo mục 15 của [spec](../SPEC_ViT.md). Đã có mục 2 (dữ liệu), 3.1–3.3, 4.1–4.2 (ViT, CNN, huấn luyện, kết quả validation) và mục 6 (attention trên checkpoint thật). Chưa có đánh giá test cuối.
+> **Bản nháp, cập nhật ngày 2026-11-21.** Khung theo mục 15 của [spec](../SPEC_ViT.md). Đã có dữ liệu, phương pháp, huấn luyện, kết quả test và so sánh (mục 5), attention (mục 6), phân tích lỗi (mục 7), hướng dẫn demo và kiểm thử (mục 8). Phần TV5 chờ TV1 xác minh; mục 1 và 9, link checkpoint và kiểm tra máy sạch còn cần hoàn thiện.
 
 **Phân công viết** (theo mục 19 spec; TV5 ghép bản cuối):
 
@@ -212,7 +212,7 @@ Kiểm tra resume dùng cache giả nhỏ, ngắt sau epoch 6 của lịch 8 epo
 | ViT-small | 50/50 | 50 | 47,63 | 71,77 | 31,94 | 498,97 |
 | ResNet-small | 50/50 | 50 | 58,73 | 81,03 | 22,36 | 320,47 |
 
-Nguồn: [task011_training_checks.json](../outputs/results/task011_training_checks.json), [CSV ViT](../outputs/logs/vit_small_seed42.csv) và [CSV CNN](../outputs/logs/cnn_baseline_seed42.csv). Hai checkpoint best/last nạp lại bằng weights_only, đủ 50 epoch không trùng; best khớp Top-1 lớn nhất trong CSV. JSON có cấu hình, SHA-256 checkpoint và kết quả kiểm tra model. Số VRAM là max_memory_allocated chia 1024² của lần train CUDA, không phải tổng bộ nhớ driver; thời gian epoch gồm train/validation, chưa gồm ghi checkpoint và vẽ hình. Đây là số trên validation, không phải kết quả test cuối. Top-1/Top-5 trên test và tốc độ inference thuộc phần đánh giá của TV5, hiện **chưa có**.
+Nguồn: [task011_training_checks.json](../outputs/results/task011_training_checks.json), [CSV ViT](../outputs/logs/vit_small_seed42.csv) và [CSV CNN](../outputs/logs/cnn_baseline_seed42.csv). Hai checkpoint best/last nạp lại bằng weights_only, đủ 50 epoch không trùng; best khớp Top-1 lớn nhất trong CSV. JSON có cấu hình, SHA-256 checkpoint và kết quả kiểm tra model. Số VRAM là max_memory_allocated chia 1024² của lần train CUDA, không phải tổng bộ nhớ driver; thời gian epoch gồm train/validation, chưa gồm ghi checkpoint và vẽ hình. Đây là số trên validation, không phải kết quả test cuối. Top-1/Top-5 trên test và tốc độ inference do TV5 đo được trình bày riêng tại mục 5.
 
 ![Đường cong huấn luyện và validation ViT, 50 epoch](../outputs/figures/vit_small_seed42_curves.png)
 
@@ -224,9 +224,38 @@ Ngân sách 50 epoch có thể làm ViT thiệt hơn CNN, nên kết luận ViT 
 
 ## 5. So sánh ViT với CNN
 
-*Người viết: TV5.* Chưa có.
+*Người viết: TV5.* 
+Hai mô hình được đánh giá trên cùng 10.000 ảnh test của Tiny ImageNet, mỗi ảnh có kích thước 64 × 64 pixel. Cả hai sử dụng checkpoint tốt nhất đã chọn theo Top-1 trên tập validation, với seed 42
 
-Cần có: bảng so sánh theo mục 12 spec (Top-1, Top-5 trên test, số tham số, FLOPs/MACs, thời gian train, tốc độ inference, VRAM đỉnh), dẫn về file kết quả thực tế; nhận xét ViT thiếu inductive bias nên cần nhiều dữ liệu và augmentation; nêu rõ cùng số tham số không đồng nghĩa cùng chi phí tính toán. Chưa có cơ sở kết luận ViT tốt hơn hoặc kém hơn CNN; FLOPs/MACs chưa đo thì ghi "chưa có".
+| Chỉ số | ViT-small | CNN baseline (ResNet-small) |
+|---|:---:|:---:|
+| Top-1 trên test | 48,46% | 59,03% |
+| Top-5 trên test | 72,76% | 81,74% |
+| Số tham số | 6.436.296 | 6.476.808 |
+| FLOPs cho một ảnh 64 × 64 | 824.283.136 | 809.050.112 |
+| MACs | Chưa có | Chưa có |
+| Thời gian trung bình mỗi epoch (train + validation) | 31,94 giây | 22,36 giây |
+| Tổng thời gian 50 epoch (train + validation) | 26,61 phút | 18,64 phút |
+| Tốc độ suy luận trên CPU (ảnh/giây, batch 64) | 124,40 | 159,23 |
+| VRAM đỉnh khi huấn luyện | 498,97 MiB | 320,47 MiB |
+
+![Top-1 của ViT-small và CNN trên tập test](../outputs/figures/comparison_test_top1.png)
+
+![Top-1 trên tập validation của hai mô hình qua 50 epoch](../outputs/figures/comparison_val_top1.png)
+
+Bảng kết quả do `src.compare` tạo: [Markdown](../outputs/results/comparison.md) · [CSV](../outputs/results/comparison.csv).
+
+Trong lần chạy với seed 42, CNN đạt Top-1 cao hơn ViT **_10,57 điểm phần trăm_**, tương ứng với **_1.057 ảnh_** được phân loại đúng nhiều hơn. Ở Top-5, khoảng cách là **_8,98 điểm phần trăm_**. Hai mô hình chỉ chênh khoảng 0,63% về số tham số, nhưng CNN hoàn thành mỗi epoch nhanh hơn khoảng 9,57 giây trên cùng GPU NVIDIA GeForce RTX 5060 Laptop và sử dụng ít VRAM hơn.
+
+Một cách lý giải có thể liên quan đến đặc điểm kiến trúc. Các lớp tích chập của CNN khai thác trực tiếp quan hệ giữa những pixel lân cận và dùng chung bộ lọc ở nhiều vị trí. ViT có ít ràng buộc cục bộ hơn, nên lượng dữ liệu và cách tăng cường dữ liệu có thể ảnh hưởng đến việc học các đặc trưng này<br>
+Thí nghiệm hiện tại dùng một seed và chưa khảo sát riêng ảnh hưởng của từng yếu tố, nên kết luận chỉ áp dụng cho hai cấu hình đã thử.
+
+**Nguồn**
+
+- Kết quả test: [ViT-small](../outputs/results/vit_small_seed42.json) và [CNN baseline](../outputs/results/cnn_baseline_seed42.json).
+- Số tham số và FLOPs: [kết quả đo TASK-005](../outputs/results/task005_cnn_checks.json).
+- Thời gian huấn luyện, thiết bị và VRAM: [kết quả TASK-011](../outputs/results/task011_training_checks.json).
+
 
 ## 6. Trực quan hóa attention (TV2)
 
@@ -277,18 +306,67 @@ Một số ví dụ trong gallery (confidence là softmax của lớp dự đoá
 Chưa có. Phần mở rộng, chỉ làm nếu còn thời gian theo thứ tự cắt việc trong [docs/03_plan.md](../docs/03_plan.md).
 
 ## 7. Phân tích lỗi và giới hạn
+### 7.1. Dấu hiệu overfitting
 
-*Người viết: TV5; mỗi người bổ sung giới hạn của phần mình.*
+Đường cong huấn luyện và validation của hai mô hình được trình bày ở mục 4.2. Với ViT-small, validation loss đạt mức thấp nhất là 2,816 ở epoch 36. Từ epoch 36 đến epoch 50, train loss giảm từ 2,870 xuống 2,584, trong khi
+validation loss tăng nhẹ lên 2,836. Diễn biến này gợi ý ViT bắt đầu có dấu hiệu overfitting nhẹ ở cuối quá trình huấn luyện<br>
 
-Cần có: overfit (so sánh đường cong train và validation); lớp hay bị nhầm và ví dụ ảnh sai; ảnh 64 × 64 mất chi tiết; giới hạn tính toán. Bắt buộc có đoạn về độ tin cậy: tập test 10.000 ảnh cho sai số khoảng ±0,5 điểm phần trăm và chỉ chạy 1 seed, nên chênh lệch giữa ViT và CNN dưới khoảng 1–1,5 điểm không đủ để kết luận mô hình nào tốt hơn (nếu chạy 3 seed thì cập nhật câu này).
+Với CNN, từ epoch 25 đến epoch 50, train loss giảm từ 3,049 xuống 2,584 và validation loss giảm từ 2,593 xuống 2,391. Validation loss đạt mức thấp
+nhất ở epoch cuối, nên chưa thấy dấu hiệu overfitting rõ rệt trong phạm vi 50 epoch. Do quá trình train sử dụng augmentation và nhãn trộn, nhận xét trên dựa vào xu hướng của từng đường loss qua các epoch<br>
+
+**Nguồn số liệu:** [log ViT-small](../outputs/logs/vit_small_seed42.csv) và [log CNN baseline](../outputs/logs/cnn_baseline_seed42.csv).
+
+### 7.2. Các cặp lớp thường bị nhầm và độ chính xác theo lớp
+
+Trên 10.000 ảnh test, ViT-small dự đoán sai 5.154 ảnh và CNN baseline dự đoán sai 4.097 ảnh. Bảng dưới liệt kê ba cặp nhầm thường gặp nhất của mỗi mô hình. Mũi tên đi từ nhãn thật sang nhãn dự đoán.
+
+| Hạng | ViT-small | Số ảnh | CNN baseline | Số ảnh |
+|---:|---|---:|---|---:|
+| 1 | convertible → beach wagon | 16 | tabby → Egyptian cat | 13 |
+| 2 | tabby → Egyptian cat | 13 | Egyptian cat → tabby | 11 |
+| 3 | standard poodle → Labrador retriever | 10 | pop bottle → beer bottle | 10 |
+
+ViT thường nhầm nhất ở cặp `convertible` → `beach wagon`, với 16 trong 50 ảnh `convertible` bị phân loại nhầm theo chiều này (32%). Với CNN, hai cặp đứng đầu là hai chiều nhầm giữa `tabby` và `Egyptian cat`, tổng cộng 24 ảnh.
+
+Xét độ chính xác trên từng lớp, CNN cao hơn ViT ở 168 trong 200 lớp, ViT cao hơn CNN ở 13 lớp và hai mô hình bằng nhau ở 19 lớp. Bảng dưới đưa ra ba ví dụ, mỗi lớp gồm 50 ảnh test.
+
+| Lớp | ViT-small | CNN baseline | Chênh lệch |
+|---|---:|---:|---|
+| teddy | 12/50 (24%) | 31/50 (62%) | CNN cao hơn 38 điểm phần trăm |
+| tabby | 13/50 (26%) | 26/50 (52%) | CNN cao hơn 26 điểm phần trăm |
+| punching bag | 21/50 (42%) | 16/50 (32%) | ViT cao hơn 10 điểm phần trăm |
+
+`teddy` là lớp CNN có lợi thế lớn nhất so với ViT, còn `punching bag` là lớp ViT có lợi thế lớn nhất so với CNN. Riêng với `tabby`, cả hai mô hình đều nhầm 13 ảnh thành `Egyptian cat`. Điểm khác biệt nằm ở các ảnh bị nhầm sang những lớp khác: ViT nhầm thêm 24 ảnh, còn CNN nhầm thêm 11 ảnh. Vì vậy, CNN nhận diện đúng 26 ảnh `tabby`, gấp đôi con số 13 ảnh của ViT.
+
+**Nguồn số liệu**
+
+- Các cặp lớp hay nhầm của [ViT-small](../outputs/results/vit_small_seed42_top20_confusions.csv) và [CNN baseline](../outputs/results/cnn_baseline_seed42_top20_confusions.csv).
+- Độ chính xác theo lớp của [ViT-small](../outputs/results/vit_small_seed42_per_class.csv) và [CNN baseline](../outputs/results/cnn_baseline_seed42_per_class.csv).
+
+### 7.3. Ví dụ ảnh dự đoán sai và ảnh hưởng của độ phân giải
+
+Mỗi hình dưới đây gồm 20 ảnh được chọn ngẫu nhiên từ những ảnh mà mô hình tương ứng dự đoán sai, với seed 42. Dưới mỗi ảnh, `True` là nhãn thật, `Pred` là nhãn dự đoán và tỷ lệ phần trăm là độ tin cậy mô hình gán cho
+nhãn đã chọn
+
+![20 ảnh test ViT-small dự đoán sai](../outputs/figures/errors_vit_small_seed42.png)
+
+![20 ảnh test CNN baseline dự đoán sai](../outputs/figures/errors_cnn_baseline_seed42.png)
+
+Ở độ phân giải 64 × 64 pixel, các chi tiết nhỏ như hoa văn lông mèo hoặc đường nét thân xe có thể khó nhận biết, đặc biệt khi đối tượng chỉ chiếm một phần nhỏ của ảnh. Đây là một giả thuyết cho những cặp nhầm quan sát
+được ở mục 7.2. Để kiểm chứng ảnh hưởng riêng của độ phân giải, cần so sánh thêm với ảnh có độ phân giải cao hơn.
+
+### 7.4. Giới hạn tính toán và độ tin cậy
+
+Hai mô hình được huấn luyện 50 epoch trên GPU NVIDIA GeForce RTX 5060 Laptop, với một seed duy nhất là 42. Vì vậy, kết quả ở mục 5 phản ánh hiệu năng trong ngân sách huấn luyện đã thử. Nhóm chưa đo được mức dao động của kết quả khi thay đổi seed hoặc tăng số epoch.
+
+Với 10.000 ảnh test và Top-1 trong khoảng 48–59%, sai số chuẩn ước tính của từng giá trị Top-1 là khoảng 0,5 điểm phần trăm. Do chỉ chạy một seed, chênh lệch dưới khoảng 1–1,5 điểm phần trăm cần được diễn giải thận trọng và chưa đủ để kết luận mô hình nào tốt hơn. Trong lần chạy này, CNN đạt Top-1 cao hơn ViT 10,57 điểm phần trăm trên cùng tập test. Cần lặp lại với nhiều seed để đánh giá mức độ ổn định của chênh lệch này.<br>
 
 Giới hạn phần TV2: kiểm chứng chức năng và sinh hình attention được chạy trên CPU; chưa chạy attention trên CUDA/AMP hoặc benchmark tốc độ/VRAM. Đã có hình thật từ checkpoint được bàn giao, nhưng nhóm ảnh chọn cân bằng đúng/sai không đại diện cho accuracy toàn bộ test. Bản đồ có lưới patch thô, được nội suy và chuẩn hóa riêng; chưa có kiểm chứng định vị hoặc quan hệ nhân quả. Các test truyền gradient và khớp hai nhánh không thay thế đánh giá accuracy hoặc phân tích overfit của các phần thực nghiệm còn lại.
 
-TV5 và các thành viên bổ sung phân tích lỗi, giới hạn ngân sách huấn luyện và độ tin cậy của kết quả sau khi hoàn thành thí nghiệm. Không kết luận ưu thế giữa hai mô hình khi chưa có số liệu.
+---
+Kết quả so sánh và phân tích lỗi ở mục 5–7 áp dụng cho hai cấu hình và seed đã thử; chưa có thí nghiệm nhiều seed hoặc ablation để tách ảnh hưởng từng yếu tố.
 
 ## 8. Mã nguồn, hướng dẫn cài đặt, chạy và demo
-
-*Người viết: TV1; TV5 bổ sung phần demo.*
 
 **Mã nguồn** (đề yêu cầu nộp kèm):
 
@@ -300,9 +378,9 @@ TV5 và các thành viên bổ sung phân tích lỗi, giới hạn ngân sách 
 | `src/models/vit.py`, `src/models/__init__.py` | ViT tự cài, `build_model` | TV2 | Có |
 | `src/models/cnn.py` | ResNet nhỏ, `match_param_count` | TV3 | Có |
 | `src/train.py` | Vòng lặp train, quick, resume | TV4 | Có code, đã train 50 epoch |
-| `src/evaluate.py`, `scripts/error_analysis.py`, `src/compare.py` | Đánh giá, phân tích lỗi, so sánh | TV5 | Chưa có |
+| `src/evaluate.py`, `scripts/error_analysis.py`, `src/compare.py` | Đánh giá, phân tích lỗi, so sánh | TV5 | Có |
 | `src/attention.py` | CLS attention, rollout và CLI từ checkpoint | TV2 | Có code, 12 ảnh thật |
-| `app/demo.py` | Demo Gradio | TV5 | Chưa có |
+| `app/demo.py` | Demo Gradio | TV5 | Có |
 
 **Cài đặt và chạy.**
 
@@ -312,7 +390,50 @@ Chưa hoàn thiện phần bàn giao cuối. Hướng dẫn đang chạy đượ
 python -m pytest tests/test_models.py -q -W error
 ```
 
-Lệnh train/resume đã có trong README và docs/06_training.md; checkpoint best/last của hai mô hình đã lưu cục bộ. TV1 và TV5 bổ sung lệnh đánh giá/demo và link chia sẻ checkpoint khi có đích lưu; các phần này chưa có.
+Lệnh train/resume đã có trong README và docs/06_training.md; checkpoint best/last của hai mô hình đã lưu cục bộ. Link chia sẻ checkpoint bên ngoài chưa có.
+
+### 8.1. Đánh giá và tạo bảng so sánh (TV5)
+
+Chạy tại thư mục gốc repo sau khi cài các thư viện trong `requirements.txt`. Đặt hai checkpoint đã chốt `vit_small_seed42_best.pt` và `cnn_baseline_seed42_best.pt` trong `outputs/checkpoints/`; đánh giá cần cache test đã chuẩn bị theo mục 2.
+
+```bash
+python -m src.evaluate
+python -m scripts.error_analysis
+python -m src.compare
+```
+
+Đánh giá lấy cấu hình và tên lớp từ checkpoint, xuất JSON chỉ số, CSV từng lớp và CSV dự đoán vào `outputs/results/`. Phân tích lỗi dùng các CSV này để tạo bảng cặp nhầm, xếp hạng lớp và hình minh họa. Bảng so sánh tổng hợp số liệu từ các file kết quả; chỉ số chưa đo ghi “chưa có”, không tự quy đổi MACs từ FLOPs. Chỉ đánh giá test sau khi chốt checkpoint theo validation.
+
+### 8.2. Demo phân loại ảnh (TV5)
+
+Demo dùng Gradio 6.32.0, chạy trên CPU và không cần bộ dữ liệu Tiny ImageNet. Sau khi cài `requirements.txt` và đặt hai checkpoint vào thư mục trên, chạy:
+
+```bash
+python app/demo.py
+```
+
+Mở URL cục bộ được in trong terminal, tải ảnh lên hoặc chọn ảnh mẫu rồi bấm Submit. Giao diện trả Top-5 kèm xác suất của ViT và CNN, cùng ảnh phủ attention rollout của ViT. Ảnh được chuyển sang RGB, resize và chuẩn hóa theo cấu hình của từng checkpoint; tên lớp cũng lấy từ checkpoint. Điểm softmax không bảo đảm dự đoán đúng.
+
+Khi thiếu hoặc hỏng checkpoint, chương trình báo thông tin dễ hiểu và thoát; đầu vào không phải ảnh hợp lệ bị từ chối. Ảnh xám và ảnh có kênh alpha được hỗ trợ.
+
+### 8.3. Kiểm thử phần đánh giá, so sánh và demo (TV5)
+
+Ngày 2026-11-21, TV5 trực tiếp chạy lệnh sau và báo kết quả **16 passed in 13.87s**:
+
+```bash
+python -m pytest tests/test_evaluate.py tests/test_compare.py tests/test_demo.py tests/test_error_analysis.py -v
+```
+
+| Phần kiểm tra | Hành vi được kiểm chứng |
+|---|---|
+| Đánh giá | Top-1/Top-5 và chỉ số ảnh qua nhiều batch; từ chối tập rỗng; xuất tên lớp nhận từ checkpoint thay vì JSON ngoài |
+| So sánh | Xuất bảng và biểu đồ khi thiếu số đo hoặc Top-1; giá trị thiếu hiển thị “chưa có” |
+| Demo | Resize, chuẩn hóa theo config; ảnh RGB/xám/alpha; thông báo khi thiếu hoặc hỏng checkpoint |
+| Phân tích lỗi | Ít hơn 20 ảnh sai hoặc không có ảnh sai; bỏ lớp chưa có mẫu khi xếp hạng; nhãn thật/dự đoán vẫn hiển thị |
+
+Các test dùng dữ liệu giả nhỏ và thư mục tạm, không cần checkpoint thật hay bộ dữ liệu Tiny ImageNet. Đây là kiểm chứng chức năng code, khác với đánh giá độ chính xác mô hình trên tập test ở mục 5. TV5 chạy kiểm thử. Chi tiết ghi trong [AI_Usage.md](../AI_Usage.md) và [nhật ký](../docs/10_work_log.md).
+
+Demo đã được kiểm tra trên bản copy sạch với môi trường Python mới, không copy `.git`, `.venv`, `data/` hoặc checkpoint cũ. Sau khi cài `requirements.txt`, toàn bộ pytest đạt 109 passed và chép hai checkpoint best để chạy demo. Thao tác trình duyệt đã được kiểm tra với ảnh mẫu và ảnh tải lên; callback Gradio với hai checkpoint thật cho ảnh RGB, xám và alpha đều trả hai bảng Top-5 cùng ảnh rollout. Các task của TV5 vẫn chờ TV1 xác minh.
 
 ## 9. Kết luận và hướng phát triển
 
@@ -330,4 +451,12 @@ Cần có: trả lời hai câu hỏi của đồ án (ViT so với CNN cùng s�
 5. Sangdoo Yun và cộng sự (2019). [CutMix: Regularization Strategy to Train Strong Classifiers with Localizable Features](https://arxiv.org/abs/1905.04899). ICCV. Dùng ở mục 3.3.
 6. Ramprasaath R. Selvaraju và cộng sự (2017). [Grad-CAM: Visual Explanations from Deep Networks via Gradient-based Localization](https://arxiv.org/abs/1610.02391). ICCV. Chỉ giữ nếu làm mục 6.4.
 
-*TV5 rà lại danh mục khi ghép bản cuối; tài liệu nào không được dẫn trong bài thì bỏ.*
+## 11. Nguồn ảnh demo
+| File | Nội dung | Nguồn |
+|---|---|---|
+| goldfish.jpg | Cá vàng | [LiveAquaria — Fantail Goldfish Red](https://www.liveaquaria.com/products/fantail-goldfish-red) |
+| guinea pig.jpg | Guinea pig | [PetSmart — Guinea Pig Care Guide](https://www.petsmart.com/learning-center/small-pet-care/guinea-pig-care-guide/A0176.html) |
+| jellyfish.jpg | Sứa | [Loro Parque — Jellyfish](https://www.loroparque.com/en/jellyfish-fascinating-creatures-and-their-role-in-the-ocean/) |
+| teapot.jpg | Ấm trà | [Tea Shop — Teapot Bright Violet 1 L](https://teashop.com/en/products/teapot-bright-violet-1-l) |
+| triumphal arch.jpg | Khải hoàn môn | [Wikipedia — Triumphal arch](https://en.wikipedia.org/wiki/Triumphal_arch) |
+| Yorkshire terrier.jpg | Yorkshire terrier | [A-Z Animals — Yorkshire Terrier](https://a-z-animals.com/animals/yorkshire-terrier/) |

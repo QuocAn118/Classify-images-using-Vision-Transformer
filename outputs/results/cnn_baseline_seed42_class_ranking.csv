@@ -1,0 +1,21 @@
+group,rank,class_name,correct,total,accuracy_pct
+best,1,school bus,47,50,94.0
+best,2,bullet train,45,50,90.0
+best,3,trolleybus,45,50,90.0
+best,4,dugong,44,50,88.0
+best,5,monarch,44,50,88.0
+best,6,obelisk,43,50,86.0
+best,7,triumphal arch,43,50,86.0
+best,8,goldfish,42,50,84.0
+best,9,go-kart,42,50,84.0
+best,10,gondola,42,50,84.0
+worst,1,plunger,4,50,8.0
+worst,2,wooden spoon,7,50,14.0
+worst,3,pole,9,50,18.0
+worst,4,pop bottle,10,50,20.0
+worst,5,bucket,11,50,22.0
+worst,6,syringe,12,50,24.0
+worst,7,umbrella,14,50,28.0
+worst,8,bow tie,14,50,28.0
+worst,9,nail,15,50,30.0
+worst,10,drumstick,15,50,30.0

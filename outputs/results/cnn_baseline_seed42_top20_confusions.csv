@@ -1,0 +1,21 @@
+true_label,true_name,pred_label,pred_name,count
+30,tabby,32,Egyptian cat,13
+32,Egyptian cat,30,tabby,11
+135,pop bottle,73,beer bottle,10
+153,sports car,94,convertible,10
+104,frying pan,174,wok,10
+197,lakeside,198,seashore,10
+94,convertible,70,beach wagon,10
+174,wok,104,frying pan,10
+73,beer bottle,135,pop bottle,9
+186,orange,187,lemon,9
+94,convertible,153,sports car,9
+77,bow tie,123,neck brace,8
+187,lemon,188,banana,8
+86,cash machine,128,pay-phone,8
+29,standard poodle,26,golden retriever,8
+117,magnetic compass,155,stopwatch,7
+70,beach wagon,94,convertible,7
+116,limousine,70,beach wagon,7
+68,basketball,171,volleyball,7
+41,cockroach,37,fly,7

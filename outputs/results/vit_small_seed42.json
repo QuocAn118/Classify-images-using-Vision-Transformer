@@ -1,0 +1,12 @@
+{
+  "run_name": "vit_small_seed42",
+  "model": "vit",
+  "seed": 42,
+  "params": 6436296,
+  "macs": null,
+  "top1": 48.46,
+  "top5": 72.76,
+  "epoch_time_s": null,
+  "inference_img_per_s": 124.40271631779203,
+  "peak_vram_mb": null
+}
