@@ -13,7 +13,7 @@ def load_model_for_evaluation(checkpoint_path, device):
     model.load_state_dict(checkpoint["model"], strict= True)
     model.to(device)
     model.eval()
-    return model, cfg
+    return model, cfg, checkpoint["class_names"]
 
 def evaluate_model(model, loader, device):
     total = 0
@@ -71,11 +71,9 @@ def evaluate_model(model, loader, device):
 
     return metrics, per_class, predictions
 
-def save_results(run_name, metrics, per_class, predictions):
+def save_results(run_name, metrics, per_class, predictions, class_names):
     results_dir = Path("outputs/results")
     results_dir.mkdir(parents=True, exist_ok=True)
-    class_names_path = results_dir / "class_names.json"
-    class_names = json.loads(class_names_path.read_text(encoding="utf-8"))
 
     summary = {"run_name": run_name,
                "model": metrics["model"],
@@ -106,27 +104,31 @@ def save_results(run_name, metrics, per_class, predictions):
 
     predictions_path = results_dir / f"{run_name}_predictions.csv"
     with predictions_path.open("w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=["image_index", "true_label", 
+        writer = csv.DictWriter(f, fieldnames=["image_index", "true_label",
                                                "pred_label", "confidence"],)
         writer.writeheader()
         writer.writerows(predictions)
 
 def measure_inference_speed(model, images, repeats=10):
+    if repeats <= 0 or images.size(0) == 0:
+        raise ValueError("repeats và batch size phải lớn hơn 0.")
     model.eval()
     with torch.inference_mode():
         for _ in range(3):
             model(images)
 
+        if images.is_cuda:
+            torch.cuda.synchronize(images.device)
         start = perf_counter()
         for _ in range(repeats):
             model(images)
+        if images.is_cuda:
+            torch.cuda.synchronize(images.device)
         elapsed = perf_counter() - start
 
     return images.size(0) * repeats / elapsed
 
 def update_inference_speeds():
-    from src.data import build_loader
-
     results_dir = Path("outputs/results")
     checkpoint_dir = Path("outputs/checkpoints")
     images = None
@@ -136,7 +138,7 @@ def update_inference_speeds():
         result = json.loads(result_path.read_text(encoding="utf-8"))
 
         checkpoint_path = checkpoint_dir / f"{run_name}_best.pt"
-        model, cfg = load_model_for_evaluation(checkpoint_path, device="cpu")
+        model, cfg, class_names = load_model_for_evaluation(checkpoint_path, device="cpu")
 
         if images is None:
             cfg["data"].update(batch_size=64, num_workers=0)
@@ -157,12 +159,12 @@ def main():
                    "cnn_baseline_seed42": "outputs/checkpoints/cnn_baseline_seed42_best.pt",}
 
     for run_name, checkpoint_path in checkpoints.items():
-        model, cfg = load_model_for_evaluation(checkpoint_path, device)        
+        model, cfg, class_names = load_model_for_evaluation(checkpoint_path, device)
         loader = build_loader(cfg, "test")
         metrics, per_class, predictions = evaluate_model(model, loader, device)
         metrics.update({"model": cfg["model"]["name"], "seed": cfg["seed"],
-                        "params": sum(p.numel() for p in model.parameters()),})        
-        save_results(run_name, metrics, per_class, predictions)
+                        "params": sum(p.numel() for p in model.parameters()),})
+        save_results(run_name, metrics, per_class, predictions, class_names)
 
 if __name__ == "__main__":
     main()

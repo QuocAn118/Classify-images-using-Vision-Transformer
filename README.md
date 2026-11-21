@@ -2,7 +2,7 @@
 
 Đồ án môn Học sâu, đề số 9. Nhóm tự cài ViT, so sánh với một CNN có cùng số tham số và trực quan hóa attention.
 
-> **Trạng thái:** đã có khung repo, dữ liệu, DataLoader (TASK-001 đến 003), ViT ([PR #2](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/2)), CNN ([PR #3](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/3)), vòng lặp train và train thật 50 epoch (TASK-006, 011, TV4, gộp từ nhánh `hoangdang`) và hình attention (TASK-008, [PR #6](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/6)). Validation Top-1: ViT 47,63%, CNN 58,73% ([bằng chứng](outputs/results/task011_training_checks.json)). Chưa có đánh giá test cuối, bảng so sánh hay demo.
+> **Trạng thái:** đã có khung repo, dữ liệu, DataLoader (TASK-001 đến 003), ViT ([PR #2](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/2)), CNN ([PR #3](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/3)), vòng lặp train và train thật 50 epoch (TASK-006, 011, TV4, gộp từ nhánh `hoangdang`) và hình attention (TASK-008, [PR #6](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/6)). Validation Top-1: ViT 47,63%, CNN 58,73% ([bằng chứng](outputs/results/task011_training_checks.json)). Đánh giá test, bảng so sánh và demo đã triển khai trên nhánh `vananh`, đang sửa theo review và chờ TV1 xác minh.
 
 ## Bài toán
 
@@ -31,7 +31,20 @@ python -m pytest
 ```
 
 - `prepare_data.py --download` tải Tiny ImageNet từ Stanford (248 MB) vào `data/`, chia train/validation/test và tạo cache khoảng 1,35 GB ở `data/cache/tiny_imagenet_64/`. Trên máy TV1 (CPU, Windows) mất 64 phút.
-- Đánh giá test cuối và demo thuộc TV5; chưa có các lệnh chạy được cho hai phần đó.
+- Đánh giá, so sánh và demo đã triển khai trên nhánh `vananh`, đang sửa theo review và chờ TV1 xác minh.
+
+### Đánh giá, so sánh và demo (TV5)
+
+Đặt hai checkpoint đã chốt `vit_small_seed42_best.pt` và `cnn_baseline_seed42_best.pt` vào `outputs/checkpoints/`.
+
+```bash
+python -m src.evaluate
+python -m scripts.error_analysis
+python -m src.compare
+python app/demo.py
+```
+
+Đánh giá và phân tích lỗi cần cache test. So sánh đọc kết quả trong `outputs/results/`; số chưa đo hiển thị “chưa có”. Demo chỉ cần checkpoint và các thư viện trong `requirements.txt`, không cần tải bộ dữ liệu. Thiếu hoặc hỏng checkpoint sẽ có thông báo hướng dẫn. Ảnh mẫu và thông tin nguồn ở [app/examples/README.md](app/examples/README.md).
 
 ### Huấn luyện (TV4)
 

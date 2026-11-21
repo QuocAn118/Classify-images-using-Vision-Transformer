@@ -80,10 +80,18 @@ python -m src.attention --checkpoint outputs/checkpoints/vit_small_seed42_best.p
 
 | Mục đích | Lệnh | Điều kiện | Trạng thái |
 |---|---|---|---|
-| Đánh giá | `python -m src.evaluate` | Hai checkpoint ViT/CNN, cache test và `class_names.json` | Đã đánh giá 10.000 ảnh cho mỗi mô hình và lưu kết quả JSON, CSV trong `outputs/results/`. |
-| Phân tích lỗi | `python -m scripts.error_analysis` | CSV dự đoán, CSV kết quả từng lớp, `class_names.json` và `test_x.npy` | Đã thống kê các cặp lớp hay nhầm, xếp hạng lớp và lưu confusion matrix cùng lưới ảnh sai trong `outputs/figures/`. |
+| Đánh giá | `python -m src.evaluate` | Hai checkpoint ViT/CNN và cache test (tên lớp lấy từ checkpoint) | Đã đánh giá 10.000 ảnh cho mỗi mô hình và lưu kết quả JSON, CSV trong `outputs/results/`. |
+| Phân tích lỗi | `python -m scripts.error_analysis` | CSV dự đoán, CSV kết quả từng lớp (gồm tên lớp từ checkpoint) và `test_x.npy` | Đã thống kê các cặp lớp hay nhầm, xếp hạng lớp và lưu confusion matrix cùng lưới ảnh sai trong `outputs/figures/`. |
 | Attention | `python -m src.attention --checkpoint outputs/checkpoints/vit_small_seed42_best.pt --split test` | Checkpoint ViT đã chốt, cache test và class_names khớp | Đã chạy CPU 2026-11-20; 12 ảnh, TV1 chạy lại khớp review |
 | So sánh | `python -m src.compare` | Hai JSON kết quả test, số liệu FLOPs của TASK-005, số liệu huấn luyện của TASK-011 và hai log theo epoch | Lưu `comparison.csv` và `comparison.md` vào `outputs/results/`. Lưu `comparison_test_top1.png` và `comparison_val_top1.png` vào `outputs/figures/`. |
 
 ## Rủi ro
 - Rò rỉ dữ liệu test: đánh giá số cuối và vẽ attention chỉ sau khi chốt cấu hình/checkpoint. Không dùng nhóm ảnh đã chọn cân bằng đúng/sai để báo accuracy hoặc chọn mô hình.
+
+### Rà soát TV5 ngày 2026-11-21
+
+- `load_model_for_evaluation` trả `(model, cfg, class_names)`; `save_results` nhận tên lớp từ checkpoint, không đọc bản tên lớp ngoài. Phân tích lỗi lấy tên lớp từ CSV per-class cùng lần chạy.
+- Lưới lỗi chấp nhận 0–19 ảnh sai; xếp hạng bỏ lớp chưa có mẫu. Mỗi loại đầu ra chỉ tính một lần cho mỗi model.
+- So sánh thiếu file FLOPs/thống kê train vẫn xuất bảng với “chưa có”; thiếu log thì biểu đồ ghi rõ chưa có log.
+- Benchmark đồng bộ CUDA trước/sau vùng đo; chưa xác minh trên GPU trong buổi này.
+- Lưới ảnh sai giữ nhãn thật/dự đoán hiển thị; chỉ ẩn ô trống. Biểu đồ Top-1 nhận `null` và ghi “chưa có”. Hai script xuất hình dùng backend Agg, không yêu cầu Tk hoặc màn hình đồ họa.

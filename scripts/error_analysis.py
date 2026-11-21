@@ -1,7 +1,8 @@
 import csv
-import json
 from collections import Counter
 from pathlib import Path
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -72,10 +73,13 @@ def save_error_grid(run_name, results_dir, class_names, test_images):
         ]
 
     rng = np.random.default_rng(42)
-    selected = rng.choice(len(wrong_rows), size=20, replace=False)
+    selected = rng.choice(len(wrong_rows), size=min(20, len(wrong_rows)), replace=False)
 
     fig, axes = plt.subplots(4, 5, figsize=(15, 12), layout="constrained")
-    fig.suptitle(f"20 misclassified test images – {run_name}", fontsize=16)
+    fig.suptitle(f"{len(selected)} misclassified test images – {run_name}", fontsize=16)
+
+    for ax in axes.flat:
+        ax.set_axis_off()
 
     for ax, row_index in zip(axes.flat, selected):
         row = wrong_rows[row_index]
@@ -84,6 +88,7 @@ def save_error_grid(run_name, results_dir, class_names, test_images):
         pred_name = class_names[int(row["pred_label"])]
         confidence = float(row["confidence"])
 
+        ax.set_axis_on()
         ax.imshow(test_images[image_index])
         ax.set_xticks([])
         ax.set_yticks([])
@@ -104,7 +109,7 @@ def save_class_ranking(run_name, results_dir):
     with input_path.open(encoding="utf-8", newline="") as f:
         rows = list(csv.DictReader(f))
 
-    ranked = sorted(rows, key=lambda row: float(row["accuracy_pct"]), reverse=True)
+    ranked = sorted((row for row in rows if row["accuracy_pct"] not in ("", "None") and int(row["total"]) > 0), key=lambda row: float(row["accuracy_pct"]), reverse=True)
 
     output_path = results_dir / f"{run_name}_class_ranking.csv"
     with output_path.open("w", encoding="utf-8", newline="") as f:
@@ -122,24 +127,15 @@ def save_class_ranking(run_name, results_dir):
 
 def main():
     results_dir = Path("outputs/results")
-    class_names = json.loads(
-        (results_dir / "class_names.json").read_text(encoding="utf-8")
-    )
-
+    test_images = np.load("data/cache/tiny_imagenet_64/test_x.npy", mmap_mode="r")
     for run_name in ("vit_small_seed42", "cnn_baseline_seed42"):
-        save_top_confusions(run_name, results_dir, class_names)
-
-    for run_name in ("vit_small_seed42", "cnn_baseline_seed42"):
-        save_top_confusions(run_name, results_dir, class_names)
-        save_confusion_heatmap(run_name, results_dir, class_names)
-
-        test_images = np.load("data/cache/tiny_imagenet_64/test_x.npy", mmap_mode="r")
-
-    for run_name in ("vit_small_seed42", "cnn_baseline_seed42"):
+        with (results_dir / f"{run_name}_per_class.csv").open(encoding="utf-8", newline="") as f:
+            classes = sorted(csv.DictReader(f), key=lambda row: int(row["class_id"]))
+        class_names = [row["class_name"] for row in classes]
         save_top_confusions(run_name, results_dir, class_names)
         save_confusion_heatmap(run_name, results_dir, class_names)
         save_error_grid(run_name, results_dir, class_names, test_images)
-        save_class_ranking(run_name, results_dir)  
+        save_class_ranking(run_name, results_dir)
 
 if __name__ == "__main__":
     main()
