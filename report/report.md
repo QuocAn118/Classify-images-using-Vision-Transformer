@@ -460,6 +460,3 @@ Cần có: trả lời hai câu hỏi của đồ án (ViT so với CNN cùng s�
 | teapot.jpg | Ấm trà | [Tea Shop — Teapot Bright Violet 1 L](https://teashop.com/en/products/teapot-bright-violet-1-l) |
 | triumphal arch.jpg | Khải hoàn môn | [Wikipedia — Triumphal arch](https://en.wikipedia.org/wiki/Triumphal_arch) |
 | Yorkshire terrier.jpg | Yorkshire terrier | [A-Z Animals — Yorkshire Terrier](https://a-z-animals.com/animals/yorkshire-terrier/) |
-
-
-*TV5 rà lại danh mục khi ghép bản cuối; tài liệu nào không được dẫn trong bài thì bỏ.*
