@@ -26,10 +26,11 @@ Chỉ ghi công cụ và đóng góp đã biết. Phần chưa rõ ghi "chưa x�
 | Codex (GPT-6) | TV5 – TASK-009: so sánh ViT-small và CNN baseline (2026-11-20) | Hỗ trợ tổng hợp số liệu từ JSON và log huấn luyện, đo tốc độ suy luận trên CPU và xuất bảng, biểu đồ bằng `src.compare`. | TV5 chỉnh sửa code và chạy phép đo trên cùng batch 64 ảnh, ghi nhận ViT đạt 124,40 ảnh/giây và CNN đạt 159,23 ảnh/giây. Đã xuất bảng CSV, Markdown và hai biểu đồ, cập nhật mục 5 của báo cáo và chạy bộ test với kết quả 93 passed. |
 | Codex (GPT-6) | TV5: Demo Gradio, TASK-010 (2026-11-20) | Hỗ trợ xây dựng hàm dự đoán Top-5, sửa lỗi chuyển ảnh sang tensor và resize ảnh, hướng dẫn tích hợp attention rollout của ViT. | TV5 chỉnh sửa `app/demo.py`, chạy demo trên CPU, kiểm tra kết quả với ảnh cá vàng và ảnh sứa, chạy pytest thành công. |
 | Codex (GPT-6) | TV5: sửa theo ảnh review TASK-007, TASK-009, TASK-010 (2026-11-21) | Hỗ trợ rà soát và sửa lỗi theo review; thu nhỏ ảnh khải hoàn môn; hướng dẫn viết test cho evaluate, compare, demo và error_analysis | TV5 bổ sung nguồn sáu ảnh, trực tiếp chạy kiểm thử và báo kết quả 16 passed in 13.87s cho bốn phần vừa sửa. Chờ TV1 xác minh |
+| Claude Code (Claude Opus 5.5), plugin ponytail | TV1 review và gộp PR #11 TASK-007, 009, 010 (2026-11-21) | Đọc diff; chạy lại đánh giá test, phân tích lỗi, so sánh, callback demo và 109 test; liệt kê lỗi để TV5 sửa; gộp `--no-ff`; trả `samples.png`, tạo `app/examples/README.md`; cập nhật trạng thái tài liệu | TV1 yêu cầu review, quyết định gộp và chấp nhận ảnh mẫu không có URL nguồn |
 | Copilot SDK trong VS Code (2026-11-21) | Hướng dẫn kiểm tra môi trường mới và cập nhật bằng chứng | Hướng dẫn copy project không mang theo `.git`, `.venv`, dữ liệu hoặc checkpoint | TV5 tạo thư mục mới, tạo `.venv`, cài dependency, chạy pytest đạt 109 passed, chép hai checkpoint vào bản mới, chạy demo không chép dữ liệu và kiểm tra giao diện bằng trình duyệt. TV5 chạy kiểm thử; kết quả chờ TV1 xác minh |
 
 ## Ghi chú
 
 - TV4 là Hđang theo phân công nhóm. Chỉ ghi đóng góp và việc review đã được xác nhận, không suy đoán đóng góp cá nhân.
-- TASK-001 đến TASK-006, TASK-008 và TASK-011 đã có trên `main` <br>
-- TASK-011 ghi kết quả trên tập validation. TV5 đã đánh giá hai checkpoint trên 10.000 ảnh test trong TASK-007. Kết quả trên nhánh `vananh` được lưu tại `outputs/results/vit_small_seed42.json` và `outputs/results/cnn_baseline_seed42.json`.
+- TASK-001 đến TASK-011 đã có trên `main`.
+- TASK-011 ghi kết quả trên tập validation. TV5 đã đánh giá hai checkpoint trên 10.000 ảnh test trong TASK-007. Kết quả lưu tại `outputs/results/vit_small_seed42.json` và `outputs/results/cnn_baseline_seed42.json`.

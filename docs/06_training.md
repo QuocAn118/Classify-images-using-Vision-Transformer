@@ -2,7 +2,7 @@
 
 **Người giữ:** TV4 (Hđang). **Đầu việc:** TASK-006, TASK-011. **Code:** `src/train.py`.
 
-TASK-006 và TASK-011 hoàn thành. TV1 review và gộp vào `main` ngày 2026-11-20 (không qua PR): 72 test pass, SHA-256 bốn checkpoint khớp, chạy lại val từ checkpoint best khớp log (ViT 47,61 / CNN 58,74 trên CPU fp32). mô tả đầu việc tạm lưu tại [TASK-006.md](tasks/TASK-006.md) theo sự đồng ý của người dùng do chưa có quyền truy cập GitHub. TASK-011 đã train đủ 50 epoch cho hai mô hình, có bằng chứng bên dưới.
+TASK-006 và TASK-011 hoàn thành. TV1 review và gộp vào `main` ngày 2026-11-20 (không qua PR): 72 test pass, SHA-256 bốn checkpoint khớp, chạy lại val từ checkpoint best khớp log (ViT 47,61 / CNN 58,74 trên CPU fp32). mô tả đầu việc từng lưu tạm trong `docs/tasks/` do chưa có quyền truy cập GitHub, TV1 xóa ngày 2026-11-20 sau khi gộp. TASK-011 đã train đủ 50 epoch cho hai mô hình, có bằng chứng bên dưới.
 
 ## Thành phần làm gì
 Train ViT và CNN từ một lệnh, chọn checkpoint trên validation, chịu được ngắt phiên, và ghi log cùng checkpoint theo hợp đồng chung.

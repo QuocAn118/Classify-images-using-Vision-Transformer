@@ -1,6 +1,6 @@
 # Đánh giá, attention và so sánh
 
-**Người giữ:** TV5 (đánh giá, so sánh), TV2 (attention). **Đầu việc:** TASK-007, TASK-008, TASK-009, TASK-012. **Code:** đã có `src/attention.py` (TASK-008, TV1 review và gộp qua [PR #6](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/6) ngày 2026-11-20). Đã triển khai `src/evaluate.py` và `scripts/error_analysis.py` cho TASK-007 trên nhánh `vananh`. Đã triển khai `src/compare.py` cho TASK-009. Chạy `python -m src.compare` từ thư mục gốc để tạo bảng so sánh ViT–CNN và hai biểu đồ.
+**Người giữ:** TV5 (đánh giá, so sánh), TV2 (attention). **Đầu việc:** TASK-007, TASK-008, TASK-009, TASK-012. **Code:** đã có `src/attention.py` (TASK-008, TV1 review và gộp qua [PR #6](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/6) ngày 2026-11-20). Đã có `src/evaluate.py`, `scripts/error_analysis.py` (TASK-007) và `src/compare.py` (TASK-009), TV1 review và gộp qua [PR #11](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/11) ngày 2026-11-21. Chạy `python -m src.compare` từ thư mục gốc để tạo bảng so sánh ViT–CNN và hai biểu đồ.
 
 ## Thành phần làm gì
 Đo kết quả cuối trên test, phân tích lỗi, trực quan hóa attention của ViT và sinh bảng so sánh ViT với CNN. Mọi số đều lấy từ file.
@@ -87,6 +87,12 @@ python -m src.attention --checkpoint outputs/checkpoints/vit_small_seed42_best.p
 
 ## Rủi ro
 - Rò rỉ dữ liệu test: đánh giá số cuối và vẽ attention chỉ sau khi chốt cấu hình/checkpoint. Không dùng nhóm ảnh đã chọn cân bằng đúng/sai để báo accuracy hoặc chọn mô hình.
+
+### TV1 review ngày 2026-11-21
+
+- Chạy lại `evaluate_model` trên CPU với hai checkpoint best (epoch 50): ViT 48,46 / 72,76, CNN 59,03 / 81,74; 10.000/10.000 dự đoán trùng CSV đã commit, số ảnh sai 5.154 và 4.097. Tên lớp trong checkpoint khớp `class_names.json`.
+- Chạy lại `scripts.error_analysis` và `src.compare`: mọi CSV/JSON giống hệt; PNG chỉ khác byte do render. Số liệu mục 5, 7 báo cáo (168/13/19 lớp, cặp nhầm, val loss) khớp file.
+- `python -m pytest -q -W error` → 109 passed. Tốc độ suy luận đo trên batch val, không đọc test để chọn gì.
 
 ### Rà soát TV5 ngày 2026-11-21
 

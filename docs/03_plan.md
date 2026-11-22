@@ -21,7 +21,7 @@ TV1 là trưởng nhóm/chủ repo; TV4 là Hđang theo phân công nhóm ngư�
 - Chỉ chuyển sang Hoàn thành khi PR đã có bằng chứng kiểm tra và người duyệt đã xem. AI báo xong chưa đủ.
 - Lỗi phát sinh tạo Issue từ mẫu `.github/ISSUE_TEMPLATE/bug.md`.
 
-**Hiện trạng:** Issue và bảng Projects chưa tạo. Cho đến khi tạo: TASK-000 hoàn thành (nhóm duyệt `docs/` ngày 2026-11-15); TASK-014 hoàn thành (đã nộp mẫu đăng ký, TV1 báo ngày 2026-11-15); TASK-001 hoàn thành (12 test pass, TV1 đọc code ngày 2026-11-16); TASK-002 hoàn thành (18 test pass, chạy trên dữ liệu thật, TV1 đọc code ngày 2026-11-17); TASK-003 hoàn thành (25 test pass, TV1 đọc code ngày 2026-11-17); TASK-004 hoàn thành (TV2, PR #2 gộp ngày 2026-11-17, 48 test pass); TASK-005 hoàn thành (TV3, PR #3 gộp ngày 2026-11-19, 52 test pass); TASK-008 hoàn thành (TV2, PR #6 gộp ngày 2026-11-20, 73 test pass, hình từ checkpoint TV4 bàn giao; nếu train lại thì chạy lại `src.attention`); TASK-006 và TASK-011 hoàn thành (TV4, nhánh `hoangdang` gộp ngày 2026-11-20 không qua PR theo yêu cầu TV1; TV1 chạy lại val từ checkpoint khớp log); TASK-007, TASK-009 và TASK-010 đã triển khai trên nhánh `vananh`, đang sửa theo review ngày 2026-11-21 và chờ TV1 xác minh; các đầu việc còn lại chưa xác nhận hoàn thành.
+**Hiện trạng:** Issue và bảng Projects chưa tạo. Cho đến khi tạo: TASK-000 hoàn thành (nhóm duyệt `docs/` ngày 2026-11-15); TASK-014 hoàn thành (đã nộp mẫu đăng ký, TV1 báo ngày 2026-11-15); TASK-001 hoàn thành (12 test pass, TV1 đọc code ngày 2026-11-16); TASK-002 hoàn thành (18 test pass, chạy trên dữ liệu thật, TV1 đọc code ngày 2026-11-17); TASK-003 hoàn thành (25 test pass, TV1 đọc code ngày 2026-11-17); TASK-004 hoàn thành (TV2, PR #2 gộp ngày 2026-11-17, 48 test pass); TASK-005 hoàn thành (TV3, PR #3 gộp ngày 2026-11-19, 52 test pass); TASK-008 hoàn thành (TV2, PR #6 gộp ngày 2026-11-20, 73 test pass, hình từ checkpoint TV4 bàn giao; nếu train lại thì chạy lại `src.attention`); TASK-006 và TASK-011 hoàn thành (TV4, nhánh `hoangdang` gộp ngày 2026-11-20 không qua PR theo yêu cầu TV1; TV1 chạy lại val từ checkpoint khớp log); TASK-007, TASK-009 và TASK-010 hoàn thành (TV5, [PR #11](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/11) gộp ngày 2026-11-21, 109 test pass; TV1 chạy lại đánh giá test khớp 10.000/10.000 dự đoán mỗi mô hình, chạy lại `scripts.error_analysis` và `src.compare` ra CSV/JSON giống hệt, gọi callback demo với hai checkpoint thật); các đầu việc còn lại chưa xác nhận hoàn thành.
 
 ## Danh sách đầu việc
 
@@ -45,7 +45,7 @@ TV1 là trưởng nhóm/chủ repo; TV4 là Hđang theo phân công nhóm ngư�
 
 **Điều kiện bắt đầu code:** Chỉ bắt đầu TASK-001 và các đầu việc code khác sau khi nhóm duyệt `docs/`. Bản thử đầu của TASK-001 viết sai thứ tự nên đã bị xóa.
 
-**Đầu việc tiếp theo:** TASK-004 đến 006, 008, 011 xong. TV5 làm TASK-007 (đánh giá test bằng checkpoint best đã chốt), rồi TASK-009 (bảng so sánh) và TASK-010 (demo); TASK-012 sau đó. Mô tả TASK-006/011 lưu tại [tasks/TASK-006.md](tasks/TASK-006.md), [tasks/TASK-011.md](tasks/TASK-011.md). TV1 làm thẳng trên `main` (DEC-014). Không dùng test để chọn checkpoint hoặc siêu tham số.
+**Đầu việc tiếp theo:** TASK-001 đến 011 xong. TASK-012 (TV5, cả nhóm): hoàn thiện báo cáo từ số test đã có, không chạy lại test để chọn gì. TV1 viết mục 1, 8, 9, tải checkpoint lấy link công khai và đi checklist "Nộp bài". TASK-013 chỉ làm nếu còn thời gian. TV1 làm thẳng trên `main` (DEC-014). Không dùng test để chọn checkpoint hoặc siêu tham số.
 
 ## Mốc và lịch
 
@@ -90,6 +90,6 @@ Với đồ án này, "phát hành" là bản nộp cho giảng viên. Chưa có
 |---|---|---|
 | Copy mới, cài đặt, chạy `pytest` | Đã chạy trên môi trường Python mới cùng máy | 109 passed tại `D:\Classify-images-clean-check`; chi tiết tại `docs/10_work_log.md` |
 | Tải checkpoint, chạy `app/demo.py`, thử một ảnh | Đã thử cùng môi trường mới; không copy `data/` | Hướng dẫn và giới hạn ghi tại `docs/10_work_log.md` |
-| Chạy `src.compare`, đối chiếu với báo cáo | Chưa chạy | Chưa có |
+| Chạy `src.compare`, đối chiếu với báo cáo | TV1 chạy lại 2026-11-21, CSV/MD giống hệt bản commit; số mục 5, 7 báo cáo khớp file | [PR #11](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/11), `docs/10_work_log.md` |
 
 Phản hồi của giảng viên ghi vào [10_work_log.md](10_work_log.md); đầu việc phát sinh tạo Issue mới.

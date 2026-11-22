@@ -311,6 +311,13 @@ Ghi ngắn sau mỗi buổi hoặc mốc đáng kể.
 Copy project sang thư mục mới, bỏ `.git`, `.venv`, `data/` và `checkpoint`; tạo `.venv` mới, cài `requirements.txt` và chạy pytest: 109 passed.
 
 
+## 2026-11-21 (TV1, review và gộp TASK-007, TASK-009, TASK-010)
+
+- **Kết quả:** Gộp [PR #11](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/11) (nhánh `vananh`, TV5) vào `main` bằng `--no-ff`. Vòng 1 yêu cầu sửa: thiếu `gradio` trong requirements, demo in traceback khi thiếu checkpoint, ảnh mẫu 9 MB, code lặp trong `error_analysis.py`; TV5 sửa đủ và thêm 16 test. Sau gộp TV1 trả `outputs/figures/samples.png` về bản TASK-002 (TV5 vô tình đổi) và tạo `app/examples/README.md`; TV1 chấp nhận ảnh mẫu không có URL nguồn.
+- **Bằng chứng:** chạy lại test trên CPU khớp 10.000/10.000 dự đoán mỗi mô hình (ViT 48,46 / 72,76, CNN 59,03 / 81,74); `scripts.error_analysis` và `src.compare` ra CSV/JSON giống hệt; callback demo với hai checkpoint thật; `python -m pytest -q -W error` trên `main` sau gộp → 109 passed.
+- **Chưa xác minh:** chưa mở demo trong trình duyệt trên máy TV1; kiểm tra máy sạch của TV5 là bản copy trên cùng máy, chưa phải clone trên máy khác; giấy phép ảnh mẫu chưa xác nhận.
+- **Bước tiếp theo:** TASK-012 hoàn thiện báo cáo; TV1 viết mục 1, 8, 9, tải checkpoint lấy link công khai, đi checklist "Nộp bài".
+
 ## Mẫu buổi làm
 
 - Ngày: [YYYY-MM-DD]

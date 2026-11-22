@@ -38,7 +38,7 @@ Chi tiết, yêu cầu chức năng và giả định còn mở: [docs/01_define
 
 ## Plan
 - **Mốc:** duyệt tài liệu và nộp mẫu đăng ký → khung repo → `--quick` chạy thông → train thật → số cuối trên test → nộp bài 24/11 (25/11 dự phòng).
-- **Trạng thái:** TASK-001 đến TASK-006, TASK-008 và TASK-011 đã gộp vào main; ViT/CNN đã train đủ 50 epoch, có log/checkpoint/báo cáo validation. Chưa có đánh giá test cuối (TASK-007, 012). Mô tả TASK-006/011 lưu tạm trong `docs/tasks/` theo sự đồng ý của người dùng vì chưa truy cập được GitHub.
+- **Trạng thái:** TASK-001 đến TASK-011 đã gộp vào main; ViT/CNN train đủ 50 epoch; test Top-1 ViT 48,46%, CNN 59,03%; có bảng so sánh và demo Gradio. Còn TASK-012 (hoàn thiện báo cáo, nộp bài) và TASK-013 (tùy chọn).
 - **Đầu việc tiếp theo:** TV1 review phần TV4; bàn giao checkpoint cho TASK-008 (TV2, attention) và các phần đánh giá/so sánh/demo của TV5. Chưa có kết quả test cuối hoặc link chia sẻ checkpoint. Chi tiết ở [docs/03_plan.md](docs/03_plan.md).
 
 Phân công, danh sách đầu việc, thứ tự cắt việc và checklist nộp bài: [docs/03_plan.md](docs/03_plan.md). Nhật ký: [docs/10_work_log.md](docs/10_work_log.md).

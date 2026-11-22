@@ -1,6 +1,6 @@
 # Báo cáo: Phân loại ảnh Tiny ImageNet bằng Vision Transformer
 
-> **Bản nháp, cập nhật ngày 2026-11-21.** Khung theo mục 15 của [spec](../SPEC_ViT.md). Đã có dữ liệu, phương pháp, huấn luyện, kết quả test và so sánh (mục 5), attention (mục 6), phân tích lỗi (mục 7), hướng dẫn demo và kiểm thử (mục 8). Phần TV5 chờ TV1 xác minh; mục 1 và 9, link checkpoint và kiểm tra máy sạch còn cần hoàn thiện.
+> **Bản nháp, cập nhật ngày 2026-11-21.** Khung theo mục 15 của [spec](../SPEC_ViT.md). Đã có dữ liệu, phương pháp, huấn luyện, kết quả test và so sánh (mục 5), attention (mục 6), phân tích lỗi (mục 7), hướng dẫn demo và kiểm thử (mục 8). Phần TV5 đã được TV1 xác minh (PR #11); mục 1 và 9, link checkpoint và kiểm tra máy sạch còn cần hoàn thiện.
 
 **Phân công viết** (theo mục 19 spec; TV5 ghép bản cuối):
 
@@ -433,7 +433,7 @@ python -m pytest tests/test_evaluate.py tests/test_compare.py tests/test_demo.py
 
 Các test dùng dữ liệu giả nhỏ và thư mục tạm, không cần checkpoint thật hay bộ dữ liệu Tiny ImageNet. Đây là kiểm chứng chức năng code, khác với đánh giá độ chính xác mô hình trên tập test ở mục 5. TV5 chạy kiểm thử. Chi tiết ghi trong [AI_Usage.md](../AI_Usage.md) và [nhật ký](../docs/10_work_log.md).
 
-Demo đã được kiểm tra trên bản copy sạch với môi trường Python mới, không copy `.git`, `.venv`, `data/` hoặc checkpoint cũ. Sau khi cài `requirements.txt`, toàn bộ pytest đạt 109 passed và chép hai checkpoint best để chạy demo. Thao tác trình duyệt đã được kiểm tra với ảnh mẫu và ảnh tải lên; callback Gradio với hai checkpoint thật cho ảnh RGB, xám và alpha đều trả hai bảng Top-5 cùng ảnh rollout. Các task của TV5 vẫn chờ TV1 xác minh.
+Demo đã được kiểm tra trên bản copy sạch với môi trường Python mới, không copy `.git`, `.venv`, `data/` hoặc checkpoint cũ. Sau khi cài `requirements.txt`, toàn bộ pytest đạt 109 passed và chép hai checkpoint best để chạy demo. Thao tác trình duyệt đã được kiểm tra với ảnh mẫu và ảnh tải lên; callback Gradio với hai checkpoint thật cho ảnh RGB, xám và alpha đều trả hai bảng Top-5 cùng ảnh rollout. TV1 chạy lại đánh giá, phân tích lỗi, so sánh và callback demo ngày 2026-11-21, kết quả khớp.
 
 ## 9. Kết luận và hướng phát triển
 

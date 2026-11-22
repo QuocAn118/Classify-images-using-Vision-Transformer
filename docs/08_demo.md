@@ -1,6 +1,6 @@
 # Demo
 
-**Người giữ:** TV5<br> **Đầu việc:** TASK-010. <br> **Code:** `app/demo.py`
+**Người giữ:** TV5. **Đầu việc:** TASK-010, hoàn thành ([PR #11](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/11) gộp ngày 2026-11-21). **Code:** `app/demo.py`, ảnh mẫu trong `app/examples/`.
 
 ## Thành phần làm gì
 Giao diện Gradio chạy cục bộ trên CPU: tải một ảnh lên, xem Top-5 của ViT và CNN cùng ảnh attention rollout. Không cần bộ dữ liệu, chỉ cần checkpoint.
@@ -28,6 +28,6 @@ Giao diện Gradio chạy cục bộ trên CPU: tải một ảnh lên, xem Top-
 
 | Lệnh | Điều kiện | Trạng thái |
 |---|---|---|
-| `python app/demo.py` | Có checkpoint, đã cài `gradio` | Đã có code |
+| `python app/demo.py` | Có checkpoint, đã cài `gradio` (có trong `requirements.txt`) | TV1 gọi callback với hai checkpoint thật 2026-11-21: 4 ảnh mẫu ra Top-5 hai mô hình và rollout 64×64; thiếu ảnh báo lỗi dễ hiểu. Chưa thử trên máy khác |
 
 Kiểm tra bằng trình duyệt: tải ảnh, đối chiếu Top-5 và ảnh attention.
