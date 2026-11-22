@@ -1,6 +1,6 @@
 # Báo cáo: Phân loại ảnh Tiny ImageNet bằng Vision Transformer
 
-> **Bản nháp, cập nhật ngày 2026-11-21.** Khung theo mục 15 của [spec](../SPEC_ViT.md). Đã có dữ liệu, phương pháp, huấn luyện, kết quả test và so sánh (mục 5), attention (mục 6), phân tích lỗi (mục 7), hướng dẫn demo và kiểm thử (mục 8). Phần TV5 đã được TV1 xác minh (PR #11); mục 1 và 9, link checkpoint và kiểm tra máy sạch còn cần hoàn thiện.
+> **Bản nháp, cập nhật ngày 2026-11-21.** Khung theo mục 15 của [spec](../SPEC_ViT.md). Đã có dữ liệu, phương pháp, huấn luyện, kết quả test và so sánh (mục 5), attention (mục 6), phân tích lỗi (mục 7), hướng dẫn demo và kiểm thử (mục 8). Phần TV5 đã được TV1 xác minh (PR #11); mục 1 và 9, kiểm tra máy sạch còn cần hoàn thiện.
 
 **Phân công viết** (theo mục 19 spec; TV5 ghép bản cuối):
 
@@ -218,7 +218,7 @@ Nguồn: [task011_training_checks.json](../outputs/results/task011_training_chec
 
 ![Đường cong huấn luyện và validation CNN, 50 epoch](../outputs/figures/cnn_baseline_seed42_curves.png)
 
-Loss train chịu ảnh hưởng của augmentation và nhãn trộn, nên không diễn giải riêng chênh lệch train/validation như một phép đo overfit trực tiếp. Checkpoint best/last hiện lưu cục bộ trong `outputs/checkpoints/`; chưa có link chia sẻ bên ngoài, không đưa checkpoint vào Git.
+Loss train chịu ảnh hưởng của augmentation và nhãn trộn, nên không diễn giải riêng chênh lệch train/validation như một phép đo overfit trực tiếp. Checkpoint lưu trên [Google Drive](https://drive.google.com/drive/folders/1tt17rM1VGNZwshr4-DTt4OMNHc0IA6BE?usp=drive_link), không đưa vào Git; SHA-256 ghi trong README.
 
 Ngân sách 50 epoch có thể làm ViT thiệt hơn CNN, nên kết luận ViT so với CNN chỉ đúng trong ngân sách này. Chưa chạy ablation; không dùng kết quả trên batch giả để điền các chỉ số của thí nghiệm chính.
 
@@ -390,7 +390,7 @@ Chưa hoàn thiện phần bàn giao cuối. Hướng dẫn đang chạy đượ
 python -m pytest tests/test_models.py -q -W error
 ```
 
-Lệnh train/resume đã có trong README và docs/06_training.md; checkpoint best/last của hai mô hình đã lưu cục bộ. Link chia sẻ checkpoint bên ngoài chưa có.
+Lệnh train/resume đã có trong README và docs/06_training.md; checkpoint best/last của hai mô hình đã lưu cục bộ. Checkpoint tải tại [Google Drive](https://drive.google.com/drive/folders/1tt17rM1VGNZwshr4-DTt4OMNHc0IA6BE?usp=drive_link), SHA-256 ghi trong README.
 
 ### 8.1. Đánh giá và tạo bảng so sánh (TV5)
 

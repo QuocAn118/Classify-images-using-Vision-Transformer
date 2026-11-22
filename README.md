@@ -35,7 +35,14 @@ python -m pytest
 
 ### Đánh giá, so sánh và demo (TV5)
 
-Đặt hai checkpoint đã chốt `vit_small_seed42_best.pt` và `cnn_baseline_seed42_best.pt` vào `outputs/checkpoints/`.
+**Checkpoint:** tải từ [Google Drive](https://drive.google.com/drive/folders/1tt17rM1VGNZwshr4-DTt4OMNHc0IA6BE?usp=drive_link) (không nằm trong Git) và đặt vào `outputs/checkpoints/`. Đối chiếu SHA-256 trước khi dùng:
+
+| File | SHA-256 |
+|---|---|
+| `vit_small_seed42_best.pt` | `97fbd0daa0e088b4b7d8a9c9adca4f61ba858986f00daa9669c83196a5a7b66b` |
+| `cnn_baseline_seed42_best.pt` | `cb2690b3220ad565c4d947a0ba38f18b6653e5447a19050386a8e9b9d659c195` |
+
+Kiểm tra: `certutil -hashfile <file> SHA256` (Windows) hoặc `sha256sum <file>`. Mã của các file `_last` ghi trong [task011_training_checks.json](outputs/results/task011_training_checks.json).
 
 ```bash
 python -m src.evaluate

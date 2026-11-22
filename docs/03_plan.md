@@ -73,8 +73,8 @@ Với đồ án này, "phát hành" là bản nộp cho giảng viên. Chưa có
 - [ ] README khớp cách chạy thật.
 - [ ] Môi trường và dữ liệu cần thiết đã được kiểm tra trên máy sạch.
 - [ ] Mọi số trong báo cáo khớp với file kết quả.
-- [ ] Link checkpoint mở được khi không đăng nhập tài khoản của nhóm.
-- [ ] Repo không chứa `kaggle.json`, dữ liệu hoặc checkpoint.
+- [x] Link checkpoint mở được khi không đăng nhập tài khoản của nhóm. TV1 xác nhận đã mở quyền chia sẻ thư mục [Google Drive](https://drive.google.com/drive/folders/1tt17rM1VGNZwshr4-DTt4OMNHc0IA6BE?usp=drive_link) ngày 2026-11-22; link và SHA-256 ghi trong README.
+- [x] Repo không chứa `kaggle.json`, dữ liệu hoặc checkpoint. TV1 kiểm `git ls-files` ngày 2026-11-22: không có `.pt`, `.npy`, `data/`, `kaggle.json`; chỉ có `maps.npz` là map attention dẫn xuất của TASK-008.
 - [ ] Có commit hoặc tag đánh dấu bản nộp để quay lại khi cần.
 - [ ] Đã xác nhận nơi và hình thức nộp bài.
 

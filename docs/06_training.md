@@ -123,7 +123,7 @@ Trên Windows trong repo này có thể dùng `.venv/Scripts/python.exe` thay `p
 
 Nguồn: [task011_training_checks.json](../outputs/results/task011_training_checks.json), [CSV ViT](../outputs/logs/vit_small_seed42.csv), [CSV CNN](../outputs/logs/cnn_baseline_seed42.csv). Đã kiểm tra 50 dòng không trùng, loss hữu hạn, config data/train/seed bằng nhau, nhãn 450 train / 50 val mỗi lớp; best khớp CSV và snapshot trong last. Model từ checkpoint best nạp lại trên CPU bằng `torch.load(..., map_location="cpu", weights_only=True)` qua `build_model`, logits hữu hạn `(2,200)`.
 
-Checkpoint local: `outputs/checkpoints/vit_small_seed42_{best,last}.pt` và `cnn_baseline_seed42_{best,last}.pt`; không commit. File JSON có SHA-256 để đối chiếu khi sao chép. Chưa có link chia sẻ/offsite backup. Thời gian gồm train/validation, không gồm ghi checkpoint/vẽ hình; VRAM là max_memory_allocated chia 1024² (MiB), không phải toàn bộ bộ nhớ driver. Các trường JSON có hậu tố `_mb` giữ tên cũ của hợp đồng, đơn vị được ghi rõ trong bằng chứng.
+Checkpoint local: `outputs/checkpoints/vit_small_seed42_{best,last}.pt` và `cnn_baseline_seed42_{best,last}.pt`; không commit. Bản sao trên [Google Drive](https://drive.google.com/drive/folders/1tt17rM1VGNZwshr4-DTt4OMNHc0IA6BE?usp=drive_link); file JSON có SHA-256 để đối chiếu khi sao chép. Thời gian gồm train/validation, không gồm ghi checkpoint/vẽ hình; VRAM là max_memory_allocated chia 1024² (MiB), không phải toàn bộ bộ nhớ driver. Các trường JSON có hậu tố `_mb` giữ tên cũ của hợp đồng, đơn vị được ghi rõ trong bằng chứng.
 
 TASK-006 và TASK-011 đã có bằng chứng triển khai/chạy, chưa đánh dấu Hoàn thành trước khi TV1 review; chưa có Issue/PR/Projects mới vì chưa có quyền GitHub.
 
