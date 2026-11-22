@@ -21,7 +21,7 @@ TV1 là trưởng nhóm/chủ repo; TV4 là Hđang theo phân công nhóm ngư�
 - Chỉ chuyển sang Hoàn thành khi PR đã có bằng chứng kiểm tra và người duyệt đã xem. AI báo xong chưa đủ.
 - Lỗi phát sinh tạo Issue từ mẫu `.github/ISSUE_TEMPLATE/bug.md`.
 
-**Hiện trạng:** Issue và bảng Projects chưa tạo. Cho đến khi tạo: TASK-000 hoàn thành (nhóm duyệt `docs/` ngày 2026-11-15); TASK-014 hoàn thành (đã nộp mẫu đăng ký, TV1 báo ngày 2026-11-15); TASK-001 hoàn thành (12 test pass, TV1 đọc code ngày 2026-11-16); TASK-002 hoàn thành (18 test pass, chạy trên dữ liệu thật, TV1 đọc code ngày 2026-11-17); TASK-003 hoàn thành (25 test pass, TV1 đọc code ngày 2026-11-17); TASK-004 hoàn thành (TV2, PR #2 gộp ngày 2026-11-17, 48 test pass); TASK-005 hoàn thành (TV3, PR #3 gộp ngày 2026-11-19, 52 test pass); TASK-008 hoàn thành (TV2, PR #6 gộp ngày 2026-11-20, 73 test pass, hình từ checkpoint TV4 bàn giao; nếu train lại thì chạy lại `src.attention`); TASK-006 và TASK-011 hoàn thành (TV4, nhánh `hoangdang` gộp ngày 2026-11-20 không qua PR theo yêu cầu TV1; TV1 chạy lại val từ checkpoint khớp log); TASK-007, TASK-009 và TASK-010 hoàn thành (TV5, [PR #11](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/11) gộp ngày 2026-11-21, 109 test pass; TV1 chạy lại đánh giá test khớp 10.000/10.000 dự đoán mỗi mô hình, chạy lại `scripts.error_analysis` và `src.compare` ra CSV/JSON giống hệt, gọi callback demo với hai checkpoint thật); các đầu việc còn lại chưa xác nhận hoàn thành.
+**Hiện trạng:** Issue và bảng Projects chưa tạo. Cho đến khi tạo: TASK-000 hoàn thành (nhóm duyệt `docs/` ngày 2026-11-15); TASK-014 hoàn thành (đã nộp mẫu đăng ký, TV1 báo ngày 2026-11-15); TASK-001 hoàn thành (12 test pass, TV1 đọc code ngày 2026-11-16); TASK-002 hoàn thành (18 test pass, chạy trên dữ liệu thật, TV1 đọc code ngày 2026-11-17); TASK-003 hoàn thành (25 test pass, TV1 đọc code ngày 2026-11-17); TASK-004 hoàn thành (TV2, PR #2 gộp ngày 2026-11-17, 48 test pass); TASK-005 hoàn thành (TV3, PR #3 gộp ngày 2026-11-19, 52 test pass); TASK-008 hoàn thành (TV2, PR #6 gộp ngày 2026-11-20, 73 test pass, hình từ checkpoint TV4 bàn giao; nếu train lại thì chạy lại `src.attention`); TASK-006 và TASK-011 hoàn thành (TV4, nhánh `hoangdang` gộp ngày 2026-11-20 không qua PR theo yêu cầu TV1; TV1 chạy lại val từ checkpoint khớp log); TASK-007, TASK-009 và TASK-010 hoàn thành (TV5, [PR #11](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/11) gộp ngày 2026-11-21, 109 test pass; TV1 chạy lại đánh giá test khớp 10.000/10.000 dự đoán mỗi mô hình, chạy lại `scripts.error_analysis` và `src.compare` ra CSV/JSON giống hệt, gọi callback demo với hai checkpoint thật); TASK-012 hoàn thành (TV1 viết mục 1, 8, 9 và dọn định dạng báo cáo ngày 2026-11-22, đi hết checklist "Nộp bài"); TASK-013 (tùy chọn) chưa làm.
 
 ## Danh sách đầu việc
 
@@ -45,7 +45,7 @@ TV1 là trưởng nhóm/chủ repo; TV4 là Hđang theo phân công nhóm ngư�
 
 **Điều kiện bắt đầu code:** Chỉ bắt đầu TASK-001 và các đầu việc code khác sau khi nhóm duyệt `docs/`. Bản thử đầu của TASK-001 viết sai thứ tự nên đã bị xóa.
 
-**Đầu việc tiếp theo:** TASK-001 đến 011 xong. TASK-012 (TV5, cả nhóm): hoàn thiện báo cáo từ số test đã có, không chạy lại test để chọn gì. TV1 viết mục 1, 8, 9, tải checkpoint lấy link công khai và đi checklist "Nộp bài". TASK-013 chỉ làm nếu còn thời gian. TV1 làm thẳng trên `main` (DEC-014). Không dùng test để chọn checkpoint hoặc siêu tham số.
+**Đầu việc tiếp theo:** TASK-001 đến 012 xong, đã gắn tag bản nộp. TASK-013 chỉ làm nếu còn thời gian; nếu làm thì gắn tag bản nộp mới. TV1 làm thẳng trên `main` (DEC-014). Không dùng test để chọn checkpoint hoặc siêu tham số.
 
 ## Mốc và lịch
 
@@ -65,22 +65,22 @@ CNN thứ hai có FLOPs xấp xỉ ViT, rồi ablation, rồi 3 seed, rồi Grad
 
 ## Nộp bài (Definition of Done)
 
-Với đồ án này, "phát hành" là bản nộp cho giảng viên. Chưa có bản nộp.
+Với đồ án này, "phát hành" là bản nộp cho giảng viên. Bản nộp: tag `v1.0-submission` (2026-11-22).
 
 **Trước khi nộp:**
-- [ ] Tiêu chí trong phạm vi đã có bằng chứng kiểm tra.
-- [ ] Hạn chế và phần chưa xác minh được nêu rõ.
-- [ ] README khớp cách chạy thật.
-- [ ] Môi trường và dữ liệu cần thiết đã được kiểm tra trên máy sạch.
-- [ ] Mọi số trong báo cáo khớp với file kết quả.
+- [x] Tiêu chí trong phạm vi đã có bằng chứng kiểm tra (AC của từng đầu việc, `docs/10_work_log.md`).
+- [x] Hạn chế và phần chưa xác minh được nêu rõ (báo cáo mục 7.4 và 9).
+- [x] README khớp cách chạy thật: TV1 chạy lại evaluate, error_analysis, compare, callback demo; `pytest` 109 passed cả khi không có dữ liệu và checkpoint (2026-11-22).
+- [x] Môi trường và dữ liệu cần thiết đã được kiểm tra trên máy sạch (TV1 xác nhận 2026-11-22).
+- [x] Mọi số trong báo cáo khớp với file kết quả: TV1 đối chiếu mục 2–5, 7 với JSON/CSV/log ngày 2026-11-21 và 2026-11-22.
 - [x] Link checkpoint mở được khi không đăng nhập tài khoản của nhóm. TV1 xác nhận đã mở quyền chia sẻ thư mục [Google Drive](https://drive.google.com/drive/folders/1tt17rM1VGNZwshr4-DTt4OMNHc0IA6BE?usp=drive_link) ngày 2026-11-22; link và SHA-256 ghi trong README.
 - [x] Repo không chứa `kaggle.json`, dữ liệu hoặc checkpoint. TV1 kiểm `git ls-files` ngày 2026-11-22: không có `.pt`, `.npy`, `data/`, `kaggle.json`; chỉ có `maps.npz` là map attention dẫn xuất của TASK-008.
-- [ ] Có commit hoặc tag đánh dấu bản nộp để quay lại khi cần.
-- [ ] Đã xác nhận nơi và hình thức nộp bài.
+- [x] Có commit hoặc tag đánh dấu bản nộp để quay lại khi cần: tag `v1.0-submission`.
+- [x] Đã xác nhận nơi và hình thức nộp bài (TV1 xác nhận 2026-11-22).
 
 **Bản nộp:**
-- **Phiên bản / commit:** Chưa có
-- **Nơi truy cập:** GitHub `QuocAn118/Classify-images-using-Vision-Transformer`; nơi nộp chính thức chưa xác nhận
+- **Phiên bản / commit:** tag `v1.0-submission`; xem commit bằng `git show v1.0-submission`
+- **Nơi truy cập:** GitHub `QuocAn118/Classify-images-using-Vision-Transformer`; checkpoint trên Google Drive (link trong README)
 - **Sản phẩm bàn giao:** Mã nguồn, checkpoint, bảng so sánh, hình attention, phân tích lỗi, demo, báo cáo
 - **Cách quay lại bản trước:** Checkout commit hoặc tag đã đánh dấu
 

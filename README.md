@@ -8,11 +8,11 @@
 
 Phân loại ảnh 64x64 vào 200 lớp. Dự án trả lời hai câu hỏi: với cùng số tham số, ViT so với CNN thế nào trên tập dữ liệu nhỏ, và ViT nhìn vào vùng nào của ảnh khi dự đoán.
 
-## Tính năng dự kiến
+## Tính năng
 
 - ViT tự cài bằng PyTorch (patch embedding + Transformer encoder).
 - ResNet nhỏ có số tham số chênh không quá 5% so với ViT.
-- Bảng so sánh Top-1, Top-5, số tham số, FLOPs/MACs, thời gian train và tốc độ inference.
+- Bảng so sánh Top-1, Top-5, số tham số, FLOPs, thời gian train, tốc độ inference và VRAM (MACs ghi "chưa có").
 - Hình CLS attention và attention rollout.
 - Demo Gradio: tải ảnh lên, xem Top-5 và ảnh attention.
 

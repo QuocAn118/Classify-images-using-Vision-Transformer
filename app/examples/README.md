@@ -1,14 +1,14 @@
 # Ảnh mẫu cho demo
 
-Ảnh lấy từ bên ngoài, không thuộc bộ dữ liệu Tiny ImageNet. Tên file trùng tên lớp trong `class_names` của checkpoint. Demo tự resize về kích thước trong config.
+Ảnh lấy từ các trang web dưới đây, không thuộc bộ dữ liệu Tiny ImageNet, chỉ dùng minh họa demo. Tên file trùng tên lớp trong `class_names` của checkpoint. Demo tự resize về kích thước trong config. Giấy phép chưa xác nhận.
 
-| File | Lớp | Nguồn | Giấy phép |
-|---|---|---|---|
-| `goldfish.jpg` | goldfish | chưa có | chưa xác nhận |
-| `guinea pig.jpg` | guinea pig | chưa có | chưa xác nhận |
-| `jellyfish.jpg` | jellyfish | chưa có | chưa xác nhận |
-| `teapot.jpg` | teapot | chưa có | chưa xác nhận |
-| `triumphal arch.jpg` | triumphal arch | chưa có | chưa xác nhận |
-| `Yorkshire terrier.jpg` | Yorkshire terrier | chưa có | chưa xác nhận |
+| File | Lớp | Nguồn |
+|---|---|---|
+| `goldfish.jpg` | goldfish | [LiveAquaria — Fantail Goldfish Red](https://www.liveaquaria.com/products/fantail-goldfish-red) |
+| `guinea pig.jpg` | guinea pig | [PetSmart — Guinea Pig Care Guide](https://www.petsmart.com/learning-center/small-pet-care/guinea-pig-care-guide/A0176.html) |
+| `jellyfish.jpg` | jellyfish | [Loro Parque — Jellyfish](https://www.loroparque.com/en/jellyfish-fascinating-creatures-and-their-role-in-the-ocean/) |
+| `teapot.jpg` | teapot | [Tea Shop — Teapot Bright Violet 1 L](https://teashop.com/en/products/teapot-bright-violet-1-l) |
+| `triumphal arch.jpg` | triumphal arch | [Wikipedia — Triumphal arch](https://en.wikipedia.org/wiki/Triumphal_arch) |
+| `Yorkshire terrier.jpg` | Yorkshire terrier | [A-Z Animals — Yorkshire Terrier](https://a-z-animals.com/animals/yorkshire-terrier/) |
 
-TV5 bổ sung URL nguồn. Ảnh nào không rõ giấy phép thì thay bằng ảnh có giấy phép tự do (ví dụ Wikimedia Commons) trước khi nộp.
+Nguồn ghi theo TV5 trong mục 11 của [báo cáo](../../report/report.md).

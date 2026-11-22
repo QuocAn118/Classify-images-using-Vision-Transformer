@@ -318,6 +318,12 @@ Copy project sang thư mục mới, bỏ `.git`, `.venv`, `data/` và `checkpoin
 - **Chưa xác minh:** chưa mở demo trong trình duyệt trên máy TV1; kiểm tra máy sạch của TV5 là bản copy trên cùng máy, chưa phải clone trên máy khác; giấy phép ảnh mẫu chưa xác nhận.
 - **Bước tiếp theo:** TASK-012 hoàn thiện báo cáo; TV1 viết mục 1, 8, 9, tải checkpoint lấy link công khai, đi checklist "Nộp bài".
 
+## 2026-11-22 (TV1, TASK-012 và bản nộp)
+
+- **Kết quả:** Viết báo cáo mục 1 (vấn đề, phạm vi, chỉ số thành công) và mục 9 (trả lời hai câu hỏi, hướng phát triển); viết lại hướng dẫn cài đặt mục 8; bỏ ghi chú bản nháp, thẻ `<br>`, dòng bị ngắt và mục 6.4 Grad-CAM chưa làm. Ghi link checkpoint Google Drive và SHA-256 vào README; điền nguồn ảnh mẫu vào `app/examples/README.md` từ mục 11 báo cáo. Đi hết checklist "Nộp bài" và gắn tag bản nộp.
+- **Bằng chứng:** `python -m pytest -q -W error` → 109 passed khi tạm ẩn `data/cache` và `outputs/checkpoints`; số trong báo cáo mục 2–4 đối chiếu với `dataset_stats.json`, `task004/005/011` JSON, khớp.
+- **Chưa xác minh:** TV1 xác nhận link Drive đã công khai, kiểm tra máy sạch và nơi nộp; truy cập ẩn danh từ máy TV1 lúc ghi vẫn chuyển sang trang đăng nhập Google. Giấy phép ảnh mẫu chưa xác nhận.
+
 ## Mẫu buổi làm
 
 - Ngày: [YYYY-MM-DD]

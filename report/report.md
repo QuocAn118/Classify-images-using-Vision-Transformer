@@ -1,28 +1,38 @@
 # Báo cáo: Phân loại ảnh Tiny ImageNet bằng Vision Transformer
 
-> **Bản nháp, cập nhật ngày 2026-11-21.** Khung theo mục 15 của [spec](../SPEC_ViT.md). Đã có dữ liệu, phương pháp, huấn luyện, kết quả test và so sánh (mục 5), attention (mục 6), phân tích lỗi (mục 7), hướng dẫn demo và kiểm thử (mục 8). Phần TV5 đã được TV1 xác minh (PR #11); mục 1 và 9, kiểm tra máy sạch còn cần hoàn thiện.
+Đồ án môn Học sâu, đề số 9. Nhóm 5 thành viên; mã nguồn tại repo GitHub `QuocAn118/Classify-images-using-Vision-Transformer`.
 
-**Phân công viết** (theo mục 19 spec; TV5 ghép bản cuối):
+| Mục | Người viết |
+|---|---|
+| 1, 2, 8, 9 | TV1 |
+| 3.1, 6 | TV2 |
+| 3.2 | TV3 |
+| 3.3, 4 | TV4 |
+| 5, 7, 10, 11 | TV5 |
 
-| Mục | Người viết | Viết khi có |
-|---|---|---|
-| 1, 2, 8, 9 | TV1 | 2 đã có; 1 viết ngay; 8, 9 sau khi có train, đánh giá, demo |
-| 3.1, 6 | TV2 | Đã có kiến trúc và hình attention thật; TASK-008 xong (PR #6) |
-| 3.2, 6.4 (Grad-CAM, nếu làm) | TV3 | Sau TASK-005 |
-| 3.3, 4 | TV4 | Sau TASK-006, TASK-011 |
-| 5, 7, 10 | TV5 | Sau TASK-007, TASK-009 |
-
-**Quy tắc chung khi viết:**
-- Mọi con số phải dẫn về file trong `outputs/results/` hoặc `outputs/logs/`; chưa có thì ghi "chưa có" (mục 17 spec).
-- Không dùng tập test để chọn cấu hình hay checkpoint; số trên test chỉ chạy một lần sau khi chốt.
-- Hình để trong `outputs/figures/`, chèn bằng đường dẫn tương đối.
-- Mỗi mục bắt đầu bằng danh sách "Cần có" bên dưới; viết xong thì xóa danh sách đó.
+Mọi con số trong báo cáo dẫn về file trong `outputs/results/` hoặc `outputs/logs/`; số chưa đo ghi "chưa có". Tập test không được dùng để chọn cấu hình hay checkpoint và chỉ được đánh giá một lần sau khi chốt.
 
 ## 1. Vấn đề và phạm vi
 
-*Người viết: TV1.* Chưa viết.
+*Người viết: TV1.*
 
-Cần có: bài toán; vì sao chọn ViT và so sánh với CNN cùng số tham số; phạm vi bắt buộc (ViT tự cài, baseline CNN, attention) và phần mở rộng. Nguồn: [docs/01_define.md](../docs/01_define.md).
+**Bài toán.** Phân loại ảnh màu 64 × 64 vào 200 lớp của Tiny ImageNet bằng Vision Transformer (ViT): ảnh được cắt thành các patch, mỗi patch thành một token, và Transformer encoder học quan hệ giữa các token.
+
+**Vì sao ViT và vì sao so với CNN cùng số tham số.** Tích chập có sẵn hai giả định về ảnh: điểm ảnh gần nhau liên quan với nhau, và cùng một bộ lọc dùng được ở mọi vị trí. ViT không có các giả định đó mà phải tự học từ dữ liệu, nên thường cần nhiều dữ liệu hoặc augmentation mạnh. Tiny ImageNet chỉ có 500 ảnh mỗi lớp ở độ phân giải thấp, là trường hợp khó cho ViT. Các so sánh dùng mô hình khác cỡ thì khó công bằng, nên nhóm đặt hai mô hình cùng quy mô tham số (chênh không quá 5%), cùng dữ liệu, cùng công thức huấn luyện và cùng ngân sách 50 epoch. Đồ án trả lời hai câu hỏi:
+
+1. Trong cùng ngân sách tham số và 50 epoch, ViT tự cài đạt độ chính xác thế nào so với một ResNet nhỏ?
+2. Khi dự đoán, ViT tập trung vào vùng nào của ảnh?
+
+**Phạm vi.**
+
+| Nhóm | Nội dung |
+|---|---|
+| Bắt buộc theo đề | ViT gồm patch embedding và Transformer encoder, phân loại ảnh Tiny ImageNet |
+| Mở rộng theo đề, đã làm | CNN cùng số tham số (ResNet-small, lệch 0,63%, mục 3.2); trực quan hóa attention bằng CLS map và attention rollout (mục 6) |
+| Nhóm bổ sung, đã làm | Tự cài ViT, không dùng pretrained; đo FLOPs; phân tích lỗi; demo Gradio |
+| Không làm | Grad-CAM, ablation, nhiều seed, CNN thứ hai có FLOPs xấp xỉ ViT, đo MACs riêng (bị cắt theo thứ tự ưu tiên khi thiếu thời gian); ViT pretrained; độ phân giải cao |
+
+**Chỉ số thành công** (đặt trước khi train, theo [docs/01_define.md](../docs/01_define.md)): số tham số hai mô hình chênh không quá 5%; có Top-1 và Top-5 trên test cho cả hai mô hình; có hình attention cho ít nhất 12 ảnh test. Cả ba đều đạt (mục 3.2, 5 và 6).
 
 ## 2. Dữ liệu
 
@@ -225,7 +235,7 @@ Ngân sách 50 epoch có thể làm ViT thiệt hơn CNN, nên kết luận ViT 
 ## 5. So sánh ViT với CNN
 
 *Người viết: TV5.* 
-Hai mô hình được đánh giá trên cùng 10.000 ảnh test của Tiny ImageNet, mỗi ảnh có kích thước 64 × 64 pixel. Cả hai sử dụng checkpoint tốt nhất đã chọn theo Top-1 trên tập validation, với seed 42
+Hai mô hình được đánh giá trên cùng 10.000 ảnh test của Tiny ImageNet, mỗi ảnh có kích thước 64 × 64 pixel. Cả hai sử dụng checkpoint tốt nhất đã chọn theo Top-1 trên tập validation, với seed 42.
 
 | Chỉ số | ViT-small | CNN baseline (ResNet-small) |
 |---|:---:|:---:|
@@ -247,7 +257,8 @@ Bảng kết quả do `src.compare` tạo: [Markdown](../outputs/results/compari
 
 Trong lần chạy với seed 42, CNN đạt Top-1 cao hơn ViT **_10,57 điểm phần trăm_**, tương ứng với **_1.057 ảnh_** được phân loại đúng nhiều hơn. Ở Top-5, khoảng cách là **_8,98 điểm phần trăm_**. Hai mô hình chỉ chênh khoảng 0,63% về số tham số, nhưng CNN hoàn thành mỗi epoch nhanh hơn khoảng 9,57 giây trên cùng GPU NVIDIA GeForce RTX 5060 Laptop và sử dụng ít VRAM hơn.
 
-Một cách lý giải có thể liên quan đến đặc điểm kiến trúc. Các lớp tích chập của CNN khai thác trực tiếp quan hệ giữa những pixel lân cận và dùng chung bộ lọc ở nhiều vị trí. ViT có ít ràng buộc cục bộ hơn, nên lượng dữ liệu và cách tăng cường dữ liệu có thể ảnh hưởng đến việc học các đặc trưng này<br>
+Một cách lý giải có thể liên quan đến đặc điểm kiến trúc. Các lớp tích chập của CNN khai thác trực tiếp quan hệ giữa những pixel lân cận và dùng chung bộ lọc ở nhiều vị trí. ViT có ít ràng buộc cục bộ hơn, nên lượng dữ liệu và cách tăng cường dữ liệu có thể ảnh hưởng đến việc học các đặc trưng này. Cùng số tham số và FLOPs gần bằng nhau cũng không có nghĩa cùng tốc độ thực tế: ViT chậm hơn cả khi train trên GPU lẫn khi suy luận trên CPU.
+
 Thí nghiệm hiện tại dùng một seed và chưa khảo sát riêng ảnh hưởng của từng yếu tố, nên kết luận chỉ áp dụng cho hai cấu hình đã thử.
 
 **Nguồn**
@@ -263,7 +274,7 @@ Thí nghiệm hiện tại dùng một seed và chưa khảo sát riêng ảnh h
 
 ViT hỗ trợ `return_attn=True` để trả attention theo từng head và layer, trước dropout. Ở cấu hình mặc định, danh sách có 8 tensor `(B,8,65,65)`, trong đó token đầu tiên là CLS. Shape, tổng hàng và độ khớp logits giữa hai nhánh đã được kiểm tra như mục 4.1.
 
-Ngày 2026-11-20, TV2 dùng checkpoint `vit_small_seed42_best.pt` do TV4 bàn giao, epoch 50, để sinh hình trên CPU. SHA-256 bắt đầu bằng `97fbd0daa0e0` khớp file best trong bằng chứng TASK-011 trên nhánh `hoangdang`; hash đầy đủ và thông tin kiểm chứng được lưu tại [task008_attention_checks.json](../outputs/results/task008_attention_checks.json). Kiến trúc, trọng số, tên lớp và mean/std đều lấy từ checkpoint; không train lại hoặc chọn checkpoint dựa trên test. Việc bàn giao checkpoint độc lập với việc review code train của TV4, vốn chưa gộp vào nhánh nền của TASK-008.
+Ngày 2026-11-20, TV2 dùng checkpoint `vit_small_seed42_best.pt` do TV4 bàn giao, epoch 50, để sinh hình trên CPU. SHA-256 bắt đầu bằng `97fbd0daa0e0` khớp file best trong bằng chứng TASK-011; hash đầy đủ và thông tin kiểm chứng được lưu tại [task008_attention_checks.json](../outputs/results/task008_attention_checks.json). Kiến trúc, trọng số, tên lớp và mean/std đều lấy từ checkpoint; không train lại hoặc chọn checkpoint dựa trên test.
 
 ### 6.2. CLS attention map và attention rollout
 
@@ -301,18 +312,13 @@ Một số ví dụ trong gallery (confidence là softmax của lớp dự đoá
 
 Đây là nhận xét định tính trên các ảnh được chọn, không phải kết quả đo định vị vật thể hoặc so sánh độ tốt của hai phương pháp. Heatmap không tự chứng minh vùng nào gây ra quyết định phân loại; mô hình chưa được kiểm tra bằng can thiệp hoặc che vùng trong TASK-008. Bài [Abnar và Zuidema](https://aclanthology.org/2020.acl-main.385/) cũng phân tích hạn chế của attention thô khi thông tin đã trộn qua nhiều layer. TV1 đã chạy lại và gộp qua [PR #6](https://github.com/QuocAn118/Classify-images-using-Vision-Transformer/pull/6).
 
-### 6.4. Grad-CAM cho CNN (TV3, nếu làm)
-
-Chưa có. Phần mở rộng, chỉ làm nếu còn thời gian theo thứ tự cắt việc trong [docs/03_plan.md](../docs/03_plan.md).
-
 ## 7. Phân tích lỗi và giới hạn
+
 ### 7.1. Dấu hiệu overfitting
 
-Đường cong huấn luyện và validation của hai mô hình được trình bày ở mục 4.2. Với ViT-small, validation loss đạt mức thấp nhất là 2,816 ở epoch 36. Từ epoch 36 đến epoch 50, train loss giảm từ 2,870 xuống 2,584, trong khi
-validation loss tăng nhẹ lên 2,836. Diễn biến này gợi ý ViT bắt đầu có dấu hiệu overfitting nhẹ ở cuối quá trình huấn luyện<br>
+Đường cong huấn luyện và validation của hai mô hình được trình bày ở mục 4.2. Với ViT-small, validation loss đạt mức thấp nhất là 2,816 ở epoch 36. Từ epoch 36 đến epoch 50, train loss giảm từ 2,870 xuống 2,584, trong khi validation loss tăng nhẹ lên 2,836. Diễn biến này gợi ý ViT bắt đầu có dấu hiệu overfitting nhẹ ở cuối quá trình huấn luyện.
 
-Với CNN, từ epoch 25 đến epoch 50, train loss giảm từ 3,049 xuống 2,584 và validation loss giảm từ 2,593 xuống 2,391. Validation loss đạt mức thấp
-nhất ở epoch cuối, nên chưa thấy dấu hiệu overfitting rõ rệt trong phạm vi 50 epoch. Do quá trình train sử dụng augmentation và nhãn trộn, nhận xét trên dựa vào xu hướng của từng đường loss qua các epoch<br>
+Với CNN, từ epoch 25 đến epoch 50, train loss giảm từ 3,049 xuống 2,584 và validation loss giảm từ 2,593 xuống 2,391. Validation loss đạt mức thấp nhất ở epoch cuối, nên chưa thấy dấu hiệu overfitting rõ rệt trong phạm vi 50 epoch. Do quá trình train sử dụng augmentation và nhãn trộn, nhận xét trên dựa vào xu hướng của từng đường loss qua các epoch.
 
 **Nguồn số liệu:** [log ViT-small](../outputs/logs/vit_small_seed42.csv) và [log CNN baseline](../outputs/logs/cnn_baseline_seed42.csv).
 
@@ -345,25 +351,22 @@ Xét độ chính xác trên từng lớp, CNN cao hơn ViT ở 168 trong 200 l�
 
 ### 7.3. Ví dụ ảnh dự đoán sai và ảnh hưởng của độ phân giải
 
-Mỗi hình dưới đây gồm 20 ảnh được chọn ngẫu nhiên từ những ảnh mà mô hình tương ứng dự đoán sai, với seed 42. Dưới mỗi ảnh, `True` là nhãn thật, `Pred` là nhãn dự đoán và tỷ lệ phần trăm là độ tin cậy mô hình gán cho
-nhãn đã chọn
+Mỗi hình dưới đây gồm 20 ảnh được chọn ngẫu nhiên từ những ảnh mà mô hình tương ứng dự đoán sai, với seed 42. Dưới mỗi ảnh, `True` là nhãn thật, `Pred` là nhãn dự đoán và tỷ lệ phần trăm là độ tin cậy mô hình gán cho nhãn đã chọn.
 
 ![20 ảnh test ViT-small dự đoán sai](../outputs/figures/errors_vit_small_seed42.png)
 
 ![20 ảnh test CNN baseline dự đoán sai](../outputs/figures/errors_cnn_baseline_seed42.png)
 
-Ở độ phân giải 64 × 64 pixel, các chi tiết nhỏ như hoa văn lông mèo hoặc đường nét thân xe có thể khó nhận biết, đặc biệt khi đối tượng chỉ chiếm một phần nhỏ của ảnh. Đây là một giả thuyết cho những cặp nhầm quan sát
-được ở mục 7.2. Để kiểm chứng ảnh hưởng riêng của độ phân giải, cần so sánh thêm với ảnh có độ phân giải cao hơn.
+Ở độ phân giải 64 × 64 pixel, các chi tiết nhỏ như hoa văn lông mèo hoặc đường nét thân xe có thể khó nhận biết, đặc biệt khi đối tượng chỉ chiếm một phần nhỏ của ảnh. Đây là một giả thuyết cho những cặp nhầm quan sát được ở mục 7.2. Để kiểm chứng ảnh hưởng riêng của độ phân giải, cần so sánh thêm với ảnh có độ phân giải cao hơn.
 
 ### 7.4. Giới hạn tính toán và độ tin cậy
 
 Hai mô hình được huấn luyện 50 epoch trên GPU NVIDIA GeForce RTX 5060 Laptop, với một seed duy nhất là 42. Vì vậy, kết quả ở mục 5 phản ánh hiệu năng trong ngân sách huấn luyện đã thử. Nhóm chưa đo được mức dao động của kết quả khi thay đổi seed hoặc tăng số epoch.
 
-Với 10.000 ảnh test và Top-1 trong khoảng 48–59%, sai số chuẩn ước tính của từng giá trị Top-1 là khoảng 0,5 điểm phần trăm. Do chỉ chạy một seed, chênh lệch dưới khoảng 1–1,5 điểm phần trăm cần được diễn giải thận trọng và chưa đủ để kết luận mô hình nào tốt hơn. Trong lần chạy này, CNN đạt Top-1 cao hơn ViT 10,57 điểm phần trăm trên cùng tập test. Cần lặp lại với nhiều seed để đánh giá mức độ ổn định của chênh lệch này.<br>
+Với 10.000 ảnh test và Top-1 trong khoảng 48–59%, sai số chuẩn ước tính của từng giá trị Top-1 là khoảng 0,5 điểm phần trăm. Do chỉ chạy một seed, chênh lệch dưới khoảng 1–1,5 điểm phần trăm cần được diễn giải thận trọng và chưa đủ để kết luận mô hình nào tốt hơn. Trong lần chạy này, CNN đạt Top-1 cao hơn ViT 10,57 điểm phần trăm trên cùng tập test. Cần lặp lại với nhiều seed để đánh giá mức độ ổn định của chênh lệch này.
 
-Giới hạn phần TV2: kiểm chứng chức năng và sinh hình attention được chạy trên CPU; chưa chạy attention trên CUDA/AMP hoặc benchmark tốc độ/VRAM. Đã có hình thật từ checkpoint được bàn giao, nhưng nhóm ảnh chọn cân bằng đúng/sai không đại diện cho accuracy toàn bộ test. Bản đồ có lưới patch thô, được nội suy và chuẩn hóa riêng; chưa có kiểm chứng định vị hoặc quan hệ nhân quả. Các test truyền gradient và khớp hai nhánh không thay thế đánh giá accuracy hoặc phân tích overfit của các phần thực nghiệm còn lại.
+Giới hạn của phần attention: kiểm chứng chức năng và sinh hình attention được chạy trên CPU; chưa chạy attention trên CUDA/AMP hoặc benchmark tốc độ/VRAM. Đã có hình thật từ checkpoint được bàn giao, nhưng nhóm ảnh chọn cân bằng đúng/sai không đại diện cho accuracy toàn bộ test. Bản đồ có lưới patch thô, được nội suy và chuẩn hóa riêng; chưa có kiểm chứng định vị hoặc quan hệ nhân quả. Các test truyền gradient và khớp hai nhánh không thay thế đánh giá accuracy hoặc phân tích overfit của các phần thực nghiệm còn lại.
 
----
 Kết quả so sánh và phân tích lỗi ở mục 5–7 áp dụng cho hai cấu hình và seed đã thử; chưa có thí nghiệm nhiều seed hoặc ablation để tách ảnh hưởng từng yếu tố.
 
 ## 8. Mã nguồn, hướng dẫn cài đặt, chạy và demo
@@ -382,15 +385,18 @@ Kết quả so sánh và phân tích lỗi ở mục 5–7 áp dụng cho hai c�
 | `src/attention.py` | CLS attention, rollout và CLI từ checkpoint | TV2 | Có code, 12 ảnh thật |
 | `app/demo.py` | Demo Gradio | TV5 | Có |
 
-**Cài đặt và chạy.**
-
-Chưa hoàn thiện phần bàn giao cuối. Hướng dẫn đang chạy được nằm ở [README](../README.md), gồm cài môi trường, chuẩn bị dữ liệu và kiểm thử. Có thể chạy riêng test ViT mà không tải bộ dữ liệu:
+**Cài đặt và chạy.** Cần Python 3.10 trở lên. Máy có GPU cài `torch`, `torchvision` bản CUDA theo pytorch.org trước. Chạy tại thư mục gốc repo:
 
 ```bash
-python -m pytest tests/test_models.py -q -W error
+pip install -r requirements.txt
+python -m pytest -q                         # 109 test, không cần dữ liệu hay checkpoint
+python scripts/prepare_data.py --download   # tải Tiny ImageNet, chia tập, tạo cache (cần cho train và đánh giá)
 ```
 
-Lệnh train/resume đã có trong README và docs/06_training.md; checkpoint best/last của hai mô hình đã lưu cục bộ. Checkpoint tải tại [Google Drive](https://drive.google.com/drive/folders/1tt17rM1VGNZwshr4-DTt4OMNHc0IA6BE?usp=drive_link), SHA-256 ghi trong README.
+Có hai cách dùng:
+
+- **Chỉ xem demo:** không cần tải dữ liệu. Tải hai checkpoint best từ [Google Drive](https://drive.google.com/drive/folders/1tt17rM1VGNZwshr4-DTt4OMNHc0IA6BE?usp=drive_link), đặt vào `outputs/checkpoints/`, đối chiếu SHA-256 ghi trong [README](../README.md), rồi chạy `python app/demo.py` (mục 8.2).
+- **Chạy lại toàn bộ:** chuẩn bị dữ liệu, train hai mô hình bằng `python -m src.train --config configs/vit_small.yaml` và `--config configs/cnn_baseline.yaml` (khoảng 27 và 19 phút trên RTX 5060 Laptop), rồi đánh giá theo mục 8.1. Lệnh resume và chạy thử nhanh ở [README](../README.md) và [docs/06_training.md](../docs/06_training.md).
 
 ### 8.1. Đánh giá và tạo bảng so sánh (TV5)
 
@@ -437,21 +443,35 @@ Demo đã được kiểm tra trên bản copy sạch với môi trường Pytho
 
 ## 9. Kết luận và hướng phát triển
 
-*Người viết: TV1.* Chưa có.
+*Người viết: TV1.*
 
-Cần có: trả lời hai câu hỏi của đồ án (ViT so với CNN cùng số tham số trong ngân sách 50 epoch; ViT nhìn vào vùng nào khi dự đoán), chỉ dựa trên số liệu ở mục 4–7; hướng phát triển.
+**ViT so với CNN cùng số tham số.** Hai mô hình có 6,44 và 6,48 triệu tham số, FLOPs gần bằng nhau (824 và 809 triệu/ảnh), cùng dữ liệu và 50 epoch. Trên 10.000 ảnh test, CNN đạt Top-1 59,03% so với 48,46% của ViT; Top-5 là 81,74% so với 72,76% (mục 5). Chênh lệch 10,57 điểm Top-1 lớn hơn nhiều ngưỡng 1–1,5 điểm ở mục 7.4, nên trong ngân sách này CNN tốt hơn rõ rệt. CNN tốt hơn ở 168 trên 200 lớp (mục 7.2), train nhanh hơn (22,36 so với 31,94 giây/epoch), dùng ít VRAM hơn và suy luận trên CPU nhanh hơn (159 so với 124 ảnh/giây).
+
+Kết quả phù hợp với nhận định ViT thiếu giả định cục bộ nên học kém hơn trên dữ liệu nhỏ, nhưng thí nghiệm không tách riêng nguyên nhân. Kết luận chỉ đúng cho hai cấu hình đã thử, một seed và 50 epoch. Validation Top-1 của cả hai mô hình đều cao nhất ở epoch cuối (mục 4.2), nên chưa biết khoảng cách sẽ thay đổi thế nào nếu train lâu hơn.
+
+**ViT nhìn vào đâu.** Trên 12 ảnh test minh họa, CLS attention và attention rollout thường có vùng nóng trên vật thể chính, ví dụ thân xe ở ảnh `police van`; rollout trải rộng hơn CLS map (mục 6.3). Ảnh bị đoán sai cũng có vùng nóng rõ, như `butcher shop` bị đoán thành `barbershop`. Attention cho thấy mô hình nhìn vào đâu nhưng không giải thích được vì sao dự đoán đúng hay sai. Đây là nhận xét định tính, chưa đo độ chính xác định vị.
+
+**Hướng phát triển**, theo thứ tự ưu tiên:
+
+1. Chạy 3 seed cho mỗi mô hình để biết mức dao động của kết quả.
+2. Train lâu hơn 50 epoch để xem khoảng cách giữa ViT và CNN có thu hẹp không.
+3. Ablation cho ViT: patch nhỏ hơn (4 × 4, nhiều token hơn), tắt từng loại augmentation.
+4. So sánh thêm với một CNN có FLOPs xấp xỉ ViT, và đo MACs riêng.
+5. Grad-CAM cho CNN để so vùng chú ý với rollout của ViT; kiểm chứng attention bằng cách che vùng ảnh.
 
 ## 10. Tài liệu tham khảo
 
 1. Alexey Dosovitskiy và cộng sự (2020). [An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale](https://arxiv.org/abs/2010.11929). arXiv:2010.11929. Cơ sở kiến trúc ViT; cấu hình trong đồ án được trình bày riêng tại mục 3.1.
 2. Samira Abnar và Willem Zuidema (2020). [Quantifying Attention Flow in Transformers](https://aclanthology.org/2020.acl-main.385/). ACL, trang 4190–4197. Cơ sở phương án attention rollout tại mục 6.2.
-
 3. Ya Le và Xuan Yang (2015). Tiny ImageNet Visual Recognition Challenge. Báo cáo môn CS231n, Đại học Stanford. Nguồn dữ liệu tại mục 2.
 4. Hongyi Zhang và cộng sự (2018). [mixup: Beyond Empirical Risk Minimization](https://arxiv.org/abs/1710.09412). ICLR. Dùng ở mục 3.3.
 5. Sangdoo Yun và cộng sự (2019). [CutMix: Regularization Strategy to Train Strong Classifiers with Localizable Features](https://arxiv.org/abs/1905.04899). ICCV. Dùng ở mục 3.3.
-6. Ramprasaath R. Selvaraju và cộng sự (2017). [Grad-CAM: Visual Explanations from Deep Networks via Gradient-based Localization](https://arxiv.org/abs/1610.02391). ICCV. Chỉ giữ nếu làm mục 6.4.
+6. Ramprasaath R. Selvaraju và cộng sự (2017). [Grad-CAM: Visual Explanations from Deep Networks via Gradient-based Localization](https://arxiv.org/abs/1610.02391). ICCV. Hướng phát triển ở mục 9; chưa thực hiện.
 
 ## 11. Nguồn ảnh demo
+
+Ảnh mẫu trong `app/examples/` lấy từ các trang web dưới đây, chỉ dùng minh họa demo; giấy phép chưa xác nhận.
+
 | File | Nội dung | Nguồn |
 |---|---|---|
 | goldfish.jpg | Cá vàng | [LiveAquaria — Fantail Goldfish Red](https://www.liveaquaria.com/products/fantail-goldfish-red) |
