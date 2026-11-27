@@ -13,7 +13,6 @@
 - **Extension bắt buộc:**
   1. So sánh ViT với CNN **có cùng số lượng tham số** (sai lệch cho phép <= 5%).
   2. **Trực quan hóa attention** của ViT.
-- **Lưu ý:** Đề KHÔNG liên quan đến deepfake (giáo viên đã xóa). Không làm phần deepfake.
 - **Nhóm:** 5 người. **Hạn nộp:** 25/11/2026 (giảng viên gia hạn từ 20/11), nhóm đặt mục tiêu nộp 24/11/2026. Không có vấn đáp.
 
 ### Mức ưu tiên
@@ -22,10 +21,7 @@
 |---|---|
 | **Đề gốc yêu cầu** | ViT, Tiny ImageNet hoặc CIFAR-100, so sánh với CNN cùng số tham số, trực quan hóa attention |
 | **Báo cáo cần có** | Vấn đề và phạm vi, dữ liệu mẫu và mô tả, mã nguồn, hướng dẫn cài đặt/chạy, demo, kết quả so với baseline, phân tích lỗi và giới hạn |
-| **Nhóm tự thêm, làm nếu còn thời gian** | Grad-CAM, đo FLOPs/MACs, 3 seed, ablation, CNN thứ hai có FLOPs xấp xỉ ViT, attention theo head và theo layer |
 | **Có thể bỏ** | EMA, ECE, TensorBoard, notebook khám phá dữ liệu |
-
-Khi thiếu thời gian, cắt phần nhóm tự thêm theo thứ tự ở mục 20 và giữ nguyên yêu cầu của đề gốc.
 
 ## 2. Mục tiêu đo lường
 

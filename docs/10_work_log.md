@@ -324,6 +324,12 @@ Copy project sang thư mục mới, bỏ `.git`, `.venv`, `data/` và `checkpoin
 - **Bằng chứng:** `python -m pytest -q -W error` → 109 passed khi tạm ẩn `data/cache` và `outputs/checkpoints`; số trong báo cáo mục 2–4 đối chiếu với `dataset_stats.json`, `task004/005/011` JSON, khớp.
 - **Chưa xác minh:** TV1 xác nhận link Drive đã công khai, kiểm tra máy sạch và nơi nộp; truy cập ẩn danh từ máy TV1 lúc ghi vẫn chuyển sang trang đăng nhập Google. Giấy phép ảnh mẫu chưa xác nhận.
 
+## 2026-11-27 (TV1, sửa phạm vi)
+
+- **Kết quả:** Bỏ các dòng nhắc tới phần không thuộc đề trong SPEC, `docs/01_define.md`, `Project_description.md`; bỏ hàng "Nhóm tự thêm" trong SPEC và dòng "Làm thêm nếu còn thời gian" trong `docs/01_define.md`. Bảng phạm vi báo cáo mục 1 còn hai hàng: phân tích lỗi, demo chuyển lên "Bắt buộc"; FLOPs gộp vào hàng mở rộng. Đã thử thêm TensorBoard rồi gỡ theo quyết định TV1: hình đường cong `outputs/figures/*_curves.png` đã đủ để theo dõi train.
+- **Bằng chứng:** tìm trong repo không còn dòng ngoài đề; `python -m pytest -q -W error` → 109 passed.
+- **Chưa xác minh:** các mục ablation, Grad-CAM, 3 seed trong thân SPEC (mục 8, 16, 20) và TASK-013 trong `docs/03_plan.md` giữ nguyên như lịch sử kế hoạch.
+
 ## Mẫu buổi làm
 
 - Ngày: [YYYY-MM-DD]

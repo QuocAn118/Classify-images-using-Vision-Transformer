@@ -27,10 +27,8 @@ Mọi con số trong báo cáo dẫn về file trong `outputs/results/` hoặc `
 
 | Nhóm | Nội dung |
 |---|---|
-| Bắt buộc theo đề | ViT gồm patch embedding và Transformer encoder, phân loại ảnh Tiny ImageNet |
-| Mở rộng theo đề, đã làm | CNN cùng số tham số (ResNet-small, lệch 0,63%, mục 3.2); trực quan hóa attention bằng CLS map và attention rollout (mục 6) |
-| Nhóm bổ sung, đã làm | Tự cài ViT, không dùng pretrained; đo FLOPs; phân tích lỗi; demo Gradio |
-| Không làm | Grad-CAM, ablation, nhiều seed, CNN thứ hai có FLOPs xấp xỉ ViT, đo MACs riêng (bị cắt theo thứ tự ưu tiên khi thiếu thời gian); ViT pretrained; độ phân giải cao |
+| Bắt buộc theo đề | ViT tự cài (patch embedding và Transformer encoder, không dùng pretrained), phân loại ảnh Tiny ImageNet; phân tích lỗi (mục 7) và demo Gradio (mục 8.2) |
+| Mở rộng theo đề, đã làm | CNN cùng số tham số (ResNet-small, lệch 0,63%, mục 3.2); đo FLOPs (mục 3.2); trực quan hóa attention bằng CLS map và attention rollout (mục 6) |
 
 **Chỉ số thành công** (đặt trước khi train, theo [docs/01_define.md](../docs/01_define.md)): số tham số hai mô hình chênh không quá 5%; có Top-1 và Top-5 trên test cho cả hai mô hình; có hình attention cho ít nhất 12 ảnh test. Cả ba đều đạt (mục 3.2, 5 và 6).
 

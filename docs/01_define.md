@@ -35,8 +35,7 @@
   - Trực quan hóa attention.
   - Demo.
   - Phân tích lỗi và giới hạn.
-- **Làm thêm nếu còn thời gian:** Grad-CAM, đo FLOPs/MACs, 3 seed, ablation, CNN thứ hai có FLOPs xấp xỉ ViT, attention theo head và theo layer.
-- **Ngoài phạm vi:** Deepfake (giáo viên đã xóa), ViT pretrained (nhóm quyết định bỏ), train ở độ phân giải cao, API công khai, triển khai production.
+- **Ngoài phạm vi:** ViT pretrained (nhóm quyết định bỏ), train ở độ phân giải cao, API công khai, triển khai production.
 - **Công nghệ, công cụ hoặc lựa chọn bắt buộc:** Đề bắt buộc ViT và dữ liệu Tiny ImageNet hoặc CIFAR-100. Nhóm tự chọn PyTorch và tự cài ViT.
 - **Ràng buộc thời gian, chi phí, dữ liệu:** Khoảng 10 ngày tính từ 15/11, chỉ có một máy GPU trong nhóm nên các lần train chạy lần lượt, không dùng test để chọn cấu hình, không bịa số liệu.
 - **Lưu ý:** đây là diễn giải đề xuất; đối chiếu nghĩa Which với hướng dẫn của cô.

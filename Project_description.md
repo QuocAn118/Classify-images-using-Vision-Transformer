@@ -15,7 +15,7 @@ Người mới đọc file này trước, rồi đọc `docs/` theo số:
 ## Define
 - **Bài toán:** Phân loại ảnh 64x64 vào 200 lớp Tiny ImageNet bằng Vision Transformer tự cài, so sánh với một CNN có số tham số chênh không quá 5%, và trực quan hóa attention.
 - **Người dùng:** Sinh viên, người nghiên cứu thị giác máy tính, giảng viên chấm bài.
-- **Phạm vi:** ViT, CNN cùng số tham số, attention, demo Gradio, phân tích lỗi. Ngoài phạm vi: ViT pretrained, deepfake, triển khai production.
+- **Phạm vi:** ViT, CNN cùng số tham số, attention, demo Gradio, phân tích lỗi. Ngoài phạm vi: ViT pretrained, triển khai production.
 - **Thành công khi:** Có Top-1, Top-5 trên test cho cả hai mô hình; tham số chênh không quá 5%; có hình attention cho ít nhất 12 ảnh.
 - **Ràng buộc:** khoảng 10 ngày tính từ 15/11, một máy GPU 6GB VRAM, không dùng test để chọn cấu hình, không bịa số liệu.
 
